@@ -97,7 +97,8 @@ export default function HeatmapLayer({ data, activeBand, farmBoundary }) {
                 pts.forEach(p => { maxR = Math.max(maxR, Math.hypot(p.x - center.x, p.y - center.y)); });
                 const radius = Math.max(maxR * 2.2, 12);
 
-                const color = ndviToColor(val);
+                const renderVal = activeBand === 'ndvi' ? Math.trunc(val * 100) / 100 : val;
+                const color = ndviToColor(renderVal);
                 const grad = ctx.createRadialGradient(center.x, center.y, 0, center.x, center.y, radius);
                 grad.addColorStop(0,    _rgba(color, 0.7));
                 grad.addColorStop(0.35, _rgba(color, 0.55));
@@ -126,7 +127,8 @@ export default function HeatmapLayer({ data, activeBand, farmBoundary }) {
                 pts.forEach(p => { maxR = Math.max(maxR, Math.hypot(p.x - center.x, p.y - center.y)); });
                 const radius = Math.max(maxR * 1.5, 8);
 
-                const color = ndviToColor(val);
+                const renderVal = activeBand === 'ndvi' ? Math.trunc(val * 100) / 100 : val;
+                const color = ndviToColor(renderVal);
                 const grad = ctx.createRadialGradient(center.x, center.y, 0, center.x, center.y, radius);
                 grad.addColorStop(0,    _rgba(color, 0.85));
                 grad.addColorStop(0.4,  _rgba(color, 0.6));
@@ -155,7 +157,8 @@ export default function HeatmapLayer({ data, activeBand, farmBoundary }) {
                 pts.forEach(p => { maxR = Math.max(maxR, Math.hypot(p.x - center.x, p.y - center.y)); });
                 const radius = Math.max(maxR * 0.9, 5);
 
-                const color = ndviToColor(val);
+                const renderVal = activeBand === 'ndvi' ? Math.trunc(val * 100) / 100 : val;
+                const color = ndviToColor(renderVal);
                 const grad = ctx.createRadialGradient(center.x, center.y, 0, center.x, center.y, radius);
                 grad.addColorStop(0,   _rgba(color, 0.6));
                 grad.addColorStop(0.5, _rgba(color, 0.3));

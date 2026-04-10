@@ -5,10 +5,10 @@
 
 // EOS-style diverging palette: Dark Red (bad) -> Yellow -> Dark Green (good)
 const EOS_PALETTE = [
-  '#ce1124', '#ea232a', '#f14a38', '#f57049', '#f89252', 
-  '#fca95e', '#fcbe6c', '#fcd380', '#fbe495', '#faf7ab', 
-  '#eff4a3', '#d6e996', '#b3d982', '#8dc86f', '#67b65d', 
-  '#43a64b', '#2a923a', '#137f2a', '#096b20', '#005716', '#003c00'
+    '#ad0028', '#c5142a', '#e02d2c', '#ef4c3a', '#fe6c4a', 
+    '#ff8d5a', '#ffab69', '#ffc67d', '#ffe093', '#ffefab', 
+    '#fdfec2', '#eaf7ac', '#d5ef94', '#b9e383', '#9bd873', 
+    '#77ca6f', '#53bd6b', '#14aa60', '#009755', '#007e47', '#007e47'
 ];
 
 /** Convert NDVI/CVI/EVI value (-1 to 1) to a hex color using EOS palette */
