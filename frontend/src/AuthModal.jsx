@@ -12,7 +12,7 @@ const AuthModal = ({ isOpen, onClose, onLoginSuccess }) => {
 
   useEffect(() => {
     // Initialize reCAPTCHA when the modal opens
-    if (isOpen && !window.recaptchaVerifier) {
+    if (isOpen && auth && !window.recaptchaVerifier) {
       window.recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
         size: 'invisible',
         callback: (response) => {
@@ -41,7 +41,15 @@ const AuthModal = ({ isOpen, onClose, onLoginSuccess }) => {
   const handleSendOtp = async (e) => {
     e.preventDefault();
     setError('');
-    
+    if (!auth) {
+      setError('Firebase is not configured. Add frontend/.env with VITE_FIREBASE_* and restart the dev server.');
+      return;
+    }
+    if (!window.recaptchaVerifier) {
+      setError('reCAPTCHA is not ready. Close this dialog and try again.');
+      return;
+    }
+
     let formattedPhone = phoneNumber.trim();
     if (!formattedPhone.startsWith('+')) {
       // Default to +91 (India) if no country code provided

@@ -1,13 +1,24 @@
 import { initializeApp, getApps } from 'firebase/app';
 import { getAuth } from 'firebase/auth';
 
+/** Strip accidental quotes from .env values (common when copying from console). */
+function envStr(key) {
+  const v = import.meta.env[key];
+  if (v == null || typeof v !== 'string') return '';
+  const t = v.trim();
+  if ((t.startsWith('"') && t.endsWith('"')) || (t.startsWith("'") && t.endsWith("'"))) {
+    return t.slice(1, -1);
+  }
+  return t;
+}
+
 const firebaseConfig = {
-  apiKey:            import.meta.env.VITE_FIREBASE_API_KEY,
-  authDomain:        import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
-  projectId:         import.meta.env.VITE_FIREBASE_PROJECT_ID,
-  storageBucket:     import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
-  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
-  appId:             import.meta.env.VITE_FIREBASE_APP_ID,
+  apiKey:            envStr('VITE_FIREBASE_API_KEY'),
+  authDomain:        envStr('VITE_FIREBASE_AUTH_DOMAIN'),
+  projectId:         envStr('VITE_FIREBASE_PROJECT_ID'),
+  storageBucket:     envStr('VITE_FIREBASE_STORAGE_BUCKET'),
+  messagingSenderId: envStr('VITE_FIREBASE_MESSAGING_SENDER_ID'),
+  appId:             envStr('VITE_FIREBASE_APP_ID'),
 };
 
 // Only initialize if a real apiKey exists — prevents crash when .env is not set

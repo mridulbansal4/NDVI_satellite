@@ -157,6 +157,11 @@ export default function PremiumAuthFlow({ onAuthSuccess }) {
     }
 
     try {
+      if (!auth) {
+        setIsError(true);
+        setErrorMsg('Firebase is not initialized. Ensure frontend/.env defines VITE_FIREBASE_* and restart the dev server.');
+        return;
+      }
       if (!window.recaptchaVerifier) {
         window.recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-anchor', {
           size: 'invisible',

@@ -26,7 +26,7 @@ def init_firebase():
                 logger.warning(f"serviceAccountKey.json not found at {key_path}")
             else:
                 cred = credentials.Certificate(key_path)
-                firebase_admin.initializeApp(cred)
+                firebase_admin.initialize_app(cred)
                 _db = firestore.client()
                 logger.info("Firebase Admin initialized successfully.")
         except Exception as e:
