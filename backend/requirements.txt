@@ -11,3 +11,4 @@ earthengine-api>=0.1.390
 
 # Utilities
 python-dotenv>=1.0.0
+firebase-admin>=6.4.0
