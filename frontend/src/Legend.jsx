@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useCallback, useEffect } from 'react';
+import { GripVertical } from 'lucide-react';
 
 const LEGEND_BINS = [
     { range: '0.95 – 1.00', label: 'Better to use NDRE', color: '#007e47' },
@@ -23,37 +24,131 @@ const LEGEND_BINS = [
     { range: '-1.00 – 0.05', label: 'Open soil', color: '#ad0028' },
 ];
 
+const STORAGE_KEY = 'mx-legend-pos';
+
+function readStoredPosition() {
+    try {
+        const raw = sessionStorage.getItem(STORAGE_KEY);
+        if (!raw) return null;
+        const p = JSON.parse(raw);
+        if (typeof p.left === 'number' && typeof p.top === 'number') return p;
+    } catch {}
+    return null;
+}
+
 /**
- * Legend — Collapsible sidebar panel showing the index color legend.
- * Rendered inside the sidebar, above the FarmSummary.
+ * Floating NDVI / index legend on the map — draggable so it stays clear of draw tools.
  */
 export default function Legend({ activeLayer }) {
   const [isOpen, setIsOpen] = useState(false);
+  const [pos, setPos] = useState(() => readStoredPosition() ?? { top: 16, left: 16 });
+  const panelRef = useRef(null);
+  const dragRef = useRef(null);
+
+  const layerLabel = typeof activeLayer === 'string' ? activeLayer.toUpperCase() : 'Index';
+
+  const clampToMap = useCallback((left, top) => {
+    const wrap = panelRef.current?.closest('.map-wrapper');
+    const el = panelRef.current;
+    if (!wrap || !el) return { left, top };
+    const m = 8;
+    const w = wrap.clientWidth;
+    const h = wrap.clientHeight;
+    const pw = el.offsetWidth;
+    const ph = el.offsetHeight;
+    return {
+      left: Math.max(m, Math.min(left, w - pw - m)),
+      top: Math.max(m, Math.min(top, h - ph - m)),
+    };
+  }, []);
+
+  useEffect(() => {
+    const onResize = () => {
+      setPos((p) => clampToMap(p.left, p.top));
+    };
+    window.addEventListener('resize', onResize);
+    return () => window.removeEventListener('resize', onResize);
+  }, [clampToMap]);
+
+  const onHandlePointerDown = useCallback((e) => {
+    if (e.button !== 0) return;
+    e.preventDefault();
+    const start = { x: e.clientX, y: e.clientY, left: pos.left, top: pos.top };
+    dragRef.current = start;
+
+    const onMove = (ev) => {
+      const d = dragRef.current;
+      if (!d) return;
+      const dx = ev.clientX - d.x;
+      const dy = ev.clientY - d.y;
+      const next = clampToMap(d.left + dx, d.top + dy);
+      setPos(next);
+    };
+
+    const onUp = () => {
+      dragRef.current = null;
+      window.removeEventListener('pointermove', onMove);
+      window.removeEventListener('pointerup', onUp);
+      window.removeEventListener('pointercancel', onUp);
+      setPos((p) => {
+        try {
+          sessionStorage.setItem(STORAGE_KEY, JSON.stringify(p));
+        } catch {}
+        return p;
+      });
+    };
+
+    window.addEventListener('pointermove', onMove);
+    window.addEventListener('pointerup', onUp);
+    window.addEventListener('pointercancel', onUp);
+  }, [pos.left, pos.top, clampToMap]);
 
   return (
-    <div className="map-legend-overlay">
+    <div
+      ref={panelRef}
+      className="map-legend-overlay"
+      style={{
+        top: pos.top,
+        left: pos.left,
+        right: 'auto',
+      }}
+    >
       <section className="card sidebar-legend" id="card-legend">
-        <button
-          className="sidebar-legend__toggle"
-          onClick={() => setIsOpen(!isOpen)}
-          aria-expanded={isOpen}
-          type="button"
-        >
-          <span className="sidebar-legend__title">Index Legend</span>
-          <span className={`sidebar-legend__chevron ${isOpen ? 'is-open' : ''}`}>▼</span>
-        </button>
+        <div className="sidebar-legend__header-row">
+          <button
+            type="button"
+            className="sidebar-legend__handle"
+            aria-label="Drag legend"
+            title="Drag to move"
+            onPointerDown={onHandlePointerDown}
+          >
+            <GripVertical size={14} strokeWidth={2} aria-hidden />
+          </button>
+          <button
+            type="button"
+            className="sidebar-legend__toggle"
+            onClick={() => setIsOpen(!isOpen)}
+            aria-expanded={isOpen}
+          >
+            <span className="sidebar-legend__title-wrap">
+              <span className="sidebar-legend__title">Legend</span>
+              <span className="sidebar-legend__subtitle">{layerLabel} scale</span>
+            </span>
+            <span className={`sidebar-legend__chevron ${isOpen ? 'is-open' : ''}`}>▼</span>
+          </button>
+        </div>
 
         {isOpen && (
-        <div className="sidebar-legend__body">
-          {LEGEND_BINS.map((bin, index) => (
-            <div key={index} className="sidebar-legend__row">
-              <div className="sidebar-legend__chip" style={{ backgroundColor: bin.color }} />
-              <div className="sidebar-legend__range">{bin.range}</div>
-              <div className="sidebar-legend__label">{bin.label}</div>
-            </div>
-          ))}
-        </div>
-      )}
+          <div className="sidebar-legend__body">
+            {LEGEND_BINS.map((bin, index) => (
+              <div key={index} className="sidebar-legend__row">
+                <div className="sidebar-legend__chip" style={{ backgroundColor: bin.color }} />
+                <div className="sidebar-legend__range">{bin.range}</div>
+                <div className="sidebar-legend__label">{bin.label}</div>
+              </div>
+            ))}
+          </div>
+        )}
       </section>
     </div>
   );

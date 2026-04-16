@@ -1,10 +1,8 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
+import { Sprout, MessageSquareText, Leaf } from 'lucide-react';
+import { apiUrl } from './api';
 
-// ─────────────────────────────────────────────────────────────────────────────
-// CONFIG — backend chatbot API
-// ─────────────────────────────────────────────────────────────────────────────
-const CHATBOT_API = 'http://localhost:5000/chatbot/chat';
-const RESET_API   = 'http://localhost:5000/chatbot/reset';
+const CHATBOT_API = apiUrl('/chatbot/chat');
 
 // ─────────────────────────────────────────────────────────────────────────────
 // TIMESTAMP HELPER
@@ -23,7 +21,9 @@ function formatTime(date) {
 function TypingIndicator() {
   return (
     <div className="km-message km-message--assistant">
-      <div className="km-avatar">KM</div>
+      <div className="km-avatar" aria-hidden="true">
+        <MessageSquareText size={12} strokeWidth={2.25} />
+      </div>
       <div className="km-bubble km-bubble--assistant">
         <div className="km-typing-dots">
           <span className="km-dot km-dot--1" />
@@ -57,8 +57,7 @@ function MessageBubble({ msg }) {
   const formatContent = (text) => {
     if (!text) return { __html: '' };
     let html = text
-      // Bold text using double asterisks
-      .replace(/\*\*(.*?)\*\*/g, '<strong style="font-weight: 700; color: #fff;">$1</strong>')
+      .replace(/\*\*(.*?)\*\*/g, '<strong class="km-strong">$1</strong>')
       // Map asterisk bullet points cleanly
       .replace(/\n\*\s(.*?)/g, '<br/>• $1')
       // Single newlines to line breaks
@@ -69,7 +68,11 @@ function MessageBubble({ msg }) {
 
   return (
     <div className={`km-message km-message--${msg.role}`}>
-      {isAssistant && <div className="km-avatar">KM</div>}
+      {isAssistant && (
+        <div className="km-avatar" aria-hidden="true">
+          <MessageSquareText size={12} strokeWidth={2.25} />
+        </div>
+      )}
       <div className={`km-bubble km-bubble--${msg.role}`}>
         <div 
             className="km-bubble__text" 
@@ -206,12 +209,12 @@ export default function KrishiMitraPanel({ analysisData, activeField }) {
         }]);
         setOllamaStatus('live');
       } catch (err) {
-        console.error('Krishi Mitra init error:', err);
+        console.error('AI advisor init error:', err);
         setOllamaStatus('error');
         setMessages([{
           id:        Date.now(),
           role:      'assistant',
-          content:   'Could not connect to the farm analysis engine. Please make sure the local AI service is running.',
+          content:   'Could not connect to Ollama (chat assistant). Start Ollama on this PC (default port 11434) and pull the model from chatbot settings. Drawing fields and NDVI analysis only need the Flask backend.',
           timestamp: new Date(),
         }]);
       } finally {
@@ -268,15 +271,17 @@ export default function KrishiMitraPanel({ analysisData, activeField }) {
   // RENDER
   // ─────────────────────────────────────────────────────────────────────────
   return (
-    <div className="km-panel" aria-label="Krishi Mitra Farm Assistant">
+    <div className="km-panel" aria-label="AI advisor — farm assistant">
 
       {/* ── Header ── */}
       <header className="km-header">
         <div className="km-header__left">
-          <span className="km-header__icon" aria-hidden="true">🌾</span>
+          <span className="km-header__icon" aria-hidden="true">
+            <Sprout size={20} strokeWidth={2} color="var(--c-accent-bright)" />
+          </span>
           <div className="km-header__titles">
-            <span className="km-header__name">Krishi Mitra</span>
-            <span className="km-header__sub">Your Farm Assistant</span>
+            <span className="km-header__name">AI advisor</span>
+            <span className="km-header__sub">Satellite farm insights</span>
           </div>
         </div>
         <div className={`km-status-badge km-status-badge--${ollamaStatus}`}>
@@ -289,12 +294,20 @@ export default function KrishiMitraPanel({ analysisData, activeField }) {
         </div>
       </header>
 
+      {analysisData && activeField && (
+        <p className="km-context-strip">
+          {activeField.name || 'Field'} · Sentinel-2 indices · advisory from your latest analysis
+        </p>
+      )}
+
       {/* ── Messages ── */}
       <section className="km-messages" aria-live="polite">
         {!analysisData || !activeField ? (
-          <div style={{ textAlign: 'center', padding: '24px 16px', color: '#a1a1aa', fontSize: '14px', lineHeight: 1.6 }}>
-            <span style={{ fontSize: '24px', display: 'block', marginBottom: '12px' }}>🌱</span>
-            Please select a field or draw a new polygon on the map to begin farm analysis.
+          <div className="km-empty">
+            <div className="km-empty__icon">
+              <Leaf size={20} strokeWidth={1.75} />
+            </div>
+            Select a field or draw a polygon on the map to load vegetation metrics and advisory.
           </div>
         ) : isInitializing ? (
           <SkeletonLoader />
@@ -316,7 +329,7 @@ export default function KrishiMitraPanel({ analysisData, activeField }) {
           onChange={e => setInputValue(e.target.value)}
           onKeyDown={handleKeyDown}
           disabled={isLoading || isInitializing || !analysisData}
-          aria-label="Ask Krishi Mitra a question"
+          aria-label="Ask the AI advisor a question"
           autoComplete="off"
         />
         <button

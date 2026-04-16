@@ -1,12 +1,20 @@
-import React, { useRef, useEffect, useState } from 'react';
-import { MapContainer, TileLayer, FeatureGroup, GeoJSON, Polygon, useMap } from 'react-leaflet';
+import React, { useRef, useEffect, useState, useCallback } from 'react';
+import { MapContainer, TileLayer, FeatureGroup, GeoJSON, Polygon, Marker, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet-draw';
+import { Pentagon } from 'lucide-react';
 import HeatmapLayer from './HeatmapLayer';
-import { samplePixel } from './api';
-
+import { ndviToColor } from './colorUtils';
 import 'leaflet/dist/leaflet.css';
 import 'leaflet-draw/dist/leaflet.draw.css';
+
+/** Same clamp as HeatmapLayer — palette is indexed on [-1, 1]. */
+function heatmapPaletteColor(rawValue) {
+    if (rawValue === null || rawValue === undefined) return '#94a3b8';
+    const n = Number(rawValue);
+    if (Number.isNaN(n)) return '#94a3b8';
+    return ndviToColor(Math.max(-1, Math.min(1, n)));
+}
 
 // Fix Leaflet icons
 delete L.Icon.Default.prototype._getIconUrl;
@@ -23,6 +31,27 @@ function FlyToHook({ center }) {
             map.flyTo(center, 15, { animate: true, duration: 1.5 });
         }
     }, [center, map]);
+    return null;
+}
+
+/**
+ * Dismiss the “map your farm” hint when the user activates the polygon tool.
+ * Uses capture on pointerdown without preventDefault so Leaflet Draw still receives the click.
+ */
+function DrawHintDismissOnPolygonClick({ onPolygonToolActivate }) {
+    const map = useMap();
+    useEffect(() => {
+        const root = map.getContainer();
+        const onPointerDownCapture = (e) => {
+            const t = e.target;
+            if (!(t instanceof Element)) return;
+            const a = t.closest('a.leaflet-draw-draw-polygon');
+            if (!a || !root.contains(a)) return;
+            onPolygonToolActivate();
+        };
+        document.addEventListener('pointerdown', onPointerDownCapture, true);
+        return () => document.removeEventListener('pointerdown', onPointerDownCapture, true);
+    }, [map, onPolygonToolActivate]);
     return null;
 }
 
@@ -67,53 +96,87 @@ function NativeDrawControl({ onCreated, onDeleted, featureGroupRef }) {
     return null;
 }
 
+const editVertexIcon = L.divIcon({
+    className: 'farm-edit-vertex',
+    html: '<div style="width:14px;height:14px;border-radius:50%;background:#22c55e;border:2px solid #ffffff;box-shadow:0 0 0 2px rgba(34,197,94,0.35)"></div>',
+    iconSize: [14, 14],
+    iconAnchor: [7, 7],
+});
+
+function _toFourVertexLatLng(boundary) {
+    if (!boundary?.coordinates) return [];
+    const ring = boundary.type === 'MultiPolygon'
+        ? boundary.coordinates?.[0]?.[0] || []
+        : boundary.coordinates?.[0] || [];
+
+    const pts = ring.map(([lng, lat]) => [lat, lng]);
+    if (!pts.length) return [];
+
+    const first = pts[0];
+    const last = pts[pts.length - 1];
+    const isClosed = first[0] === last[0] && first[1] === last[1];
+    const open = isClosed ? pts.slice(0, -1) : pts;
+    return open.slice(0, 4);
+}
+
+function _toPolygonGeometry(vertices) {
+    const open = vertices.slice(0, 4).map(([lat, lng]) => [lng, lat]);
+    if (!open.length) return null;
+    const closed = [...open, open[0]];
+    return { type: 'Polygon', coordinates: [closed] };
+}
+
 /**
- * Renders a thick white border around the farm polygon and enables editing when active.
+ * Fixed 4-vertex editable boundary:
+ * - only corner markers are draggable
+ * - no add/remove points
+ * - geometry is emitted via onEditUpdate while dragging
  */
 function FarmBoundaryLayer({ boundary, isActive, isEditing, onClick, onEditUpdate }) {
-    const polygonRef = useRef(null);
+    const [vertices, setVertices] = useState(() => _toFourVertexLatLng(boundary));
 
     useEffect(() => {
-        const layer = polygonRef.current;
-        if (!layer || !layer.editing) return;
+        setVertices(_toFourVertexLatLng(boundary));
+    }, [boundary, isEditing]);
 
-        if (isEditing) {
-            layer.editing.enable();
-            const onEdit = () => {
-                const geojson = layer.toGeoJSON();
-                if (onEditUpdate) onEditUpdate(geojson.geometry);
-            };
-            layer.on('edit', onEdit);
-            return () => {
-                layer.off('edit', onEdit);
-            };
-        } else {
-            layer.editing.disable();
-        }
-    }, [isEditing, onEditUpdate]);
+    if (!vertices?.length) return null;
 
-    if (!boundary || !boundary.coordinates) return null;
-    
-    // Convert GeoJSON coordinates [lng, lat] to Leaflet [lat, lng]
-    const rings = boundary.type === 'MultiPolygon'
-        ? boundary.coordinates.map(poly => poly[0].map(([lng, lat]) => [lat, lng]))
-        : [boundary.coordinates[0].map(([lng, lat]) => [lat, lng])];
-    
+    const polygonPositions = [vertices];
+
+    const updateVertex = (idx, latlng) => {
+        setVertices((prev) => {
+            const next = [...prev];
+            next[idx] = [latlng.lat, latlng.lng];
+            const geom = _toPolygonGeometry(next);
+            if (geom) onEditUpdate?.(geom);
+            return next;
+        });
+    };
+
     return (
         <>
-            {rings.map((positions, i) => (
-                <Polygon
-                    ref={polygonRef}
-                    key={i}
-                    positions={positions}
-                    eventHandlers={{ click: onClick }}
-                    pathOptions={{
-                        color: isActive ? '#ffffff' : '#a1a1aa', // Dimmer if not active
-                        weight: isActive ? 5 : 3,
-                        fillOpacity: 0.1,
-                        fillColor: isActive ? 'transparent' : '#a1a1aa',
-                        opacity: 1,
-                        dashArray: null,
+            <Polygon
+                positions={polygonPositions}
+                eventHandlers={{ click: onClick }}
+                pathOptions={{
+                    color: isActive ? '#ffffff' : '#a1a1aa',
+                    weight: isActive ? 5 : 3,
+                    fillOpacity: 0.1,
+                    fillColor: isActive ? 'transparent' : '#a1a1aa',
+                    opacity: 1,
+                    dashArray: null,
+                }}
+            />
+
+            {isEditing && vertices.map((pos, idx) => (
+                <Marker
+                    key={`v-${idx}`}
+                    position={pos}
+                    draggable
+                    icon={editVertexIcon}
+                    eventHandlers={{
+                        drag: (e) => updateVertex(idx, e.target.getLatLng()),
+                        dragend: (e) => updateVertex(idx, e.target.getLatLng()),
                     }}
                 />
             ))}
@@ -128,16 +191,31 @@ export default function MapView({
     analysisData,
     activeFieldId,
     editingFieldId,
+    editBoundarySnapshot = null,
     fields = [], 
     onDrawComplete, 
     onDrawDelete,
-    onGeometryEdit
+    onGeometryEdit,
+    showDrawHint = false,
 }) {
     const featureGroupRef = useRef();
     const [hoverData, setHoverData] = useState(null);
+    const [drawHintDismissed, setDrawHintDismissed] = useState(false);
+    const prevShowDrawHintRef = useRef(showDrawHint);
 
     // Extract farm boundary from analysisData
     const farmBoundary = analysisData?.farm_boundary || null;
+
+    useEffect(() => {
+        if (showDrawHint && !prevShowDrawHintRef.current) {
+            setDrawHintDismissed(false);
+        }
+        prevShowDrawHintRef.current = showDrawHint;
+    }, [showDrawHint]);
+
+    const dismissDrawHint = useCallback(() => {
+        setDrawHintDismissed(true);
+    }, []);
     
     // Resolve frontend map tile URL for the current active vegetation index
     const tileUrl = analysisData 
@@ -170,14 +248,16 @@ export default function MapView({
         layer.on({
             mouseover: async (e) => {
                 const props = feature.properties;
-                
-                // Set hover data directly from feature properties first
                 const bandKey = activeBand.toLowerCase();
+                const raw = props[bandKey];
+                const numeric = raw === null || raw === undefined || raw === '' ? NaN : Number(raw);
                 setHoverData({
                    ndvi: props.ndvi?.toFixed(4) || 'N/A',
                    cvi: props.cvi?.toFixed(4) || 'N/A',
                    evi: props.evi?.toFixed(4) || 'N/A',
-                   bandValue: props[bandKey]?.toFixed(4) || 'N/A',
+                   bandValue: Number.isFinite(numeric) ? numeric.toFixed(4) : 'N/A',
+                   bandNumeric: numeric,
+                   bandLabelColor: heatmapPaletteColor(numeric),
                    x: e.originalEvent.pageX,
                    y: e.originalEvent.pageY
                 });
@@ -188,13 +268,14 @@ export default function MapView({
                 setHoverData(null);
             },
             mousemove: (e) => {
-                if (hoverData) {
-                    setHoverData(prev => ({
+                setHoverData((prev) => {
+                    if (!prev) return null;
+                    return {
                         ...prev,
                         x: e.originalEvent.pageX,
-                        y: e.originalEvent.pageY
-                    }));
-                }
+                        y: e.originalEvent.pageY,
+                    };
+                });
             }
         });
     };
@@ -204,7 +285,7 @@ export default function MapView({
             <MapContainer 
                 center={center} 
                 zoom={14} 
-                style={{ width: '100%', height: '100%', background: '#0a0a0a' }}
+                style={{ width: '100%', height: '100%', background: 'var(--c-map-bg, #121920)' }}
                 zoomControl={false}
             >
                 <TileLayer
@@ -226,7 +307,11 @@ export default function MapView({
                 {fields.map(f => (
                     <FarmBoundaryLayer 
                         key={f.id} 
-                        boundary={f.geometry} 
+                        boundary={
+                            f.id === editingFieldId && editBoundarySnapshot
+                                ? editBoundarySnapshot
+                                : f.geometry
+                        } 
                         isActive={f.id === activeFieldId}
                         isEditing={f.id === editingFieldId}
                         onEditUpdate={(geo) => onGeometryEdit(f.id, geo)}
@@ -234,8 +319,8 @@ export default function MapView({
                     />
                 ))}
 
-                {/* Render heatmap AND grid ONLY for the active field */}
-                {analysisData && activeFieldId && (
+                {/* Heatmap / grid hidden while editing so vertices stay usable; analysis re-runs after Done */}
+                {analysisData && activeFieldId && !editingFieldId && (
                     <>
                         <HeatmapLayer
                             data={analysisData}
@@ -243,7 +328,7 @@ export default function MapView({
                             farmBoundary={fields.find(f => f.id === activeFieldId)?.geometry}
                         />
                         <GeoJSON 
-                            key={JSON.stringify(analysisData.farm_summary || analysisData.date)}
+                            key={`${JSON.stringify(analysisData.farm_summary || analysisData.date)}-${activeBand}`}
                             data={analysisData} 
                             style={cellStyle}
                             onEachFeature={onEachFeature}
@@ -252,7 +337,32 @@ export default function MapView({
                 )}
 
                 <FlyToHook center={center} />
+                <DrawHintDismissOnPolygonClick onPolygonToolActivate={dismissDrawHint} />
             </MapContainer>
+
+            {showDrawHint && !drawHintDismissed && (
+                <div className="map-draw-hint" role="note">
+                    <button
+                        type="button"
+                        className="map-draw-hint__dismiss"
+                        aria-label="Dismiss hint"
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            dismissDrawHint();
+                        }}
+                    >
+                        ×
+                    </button>
+                    <span className="map-draw-hint__arrow" aria-hidden>↓</span>
+                    <Pentagon className="map-draw-hint__icon" size={13} strokeWidth={2} aria-hidden />
+                    <p className="map-draw-hint__text">
+                        <span className="map-draw-hint__lead">Map your farm</span>
+                        <span className="map-draw-hint__sub">
+                            Click <strong>polygon</strong> above, then trace your field. Finish and cancel stay in the toolbar above while you draw.
+                        </span>
+                    </p>
+                </div>
+            )}
 
             {hoverData && (
                 <div 
@@ -260,10 +370,38 @@ export default function MapView({
                     style={{ left: hoverData.x + 15, top: hoverData.y + 15 }}
                 >
                     <div style={{ fontWeight: 500, fontSize: "15px", color: "#fff" }}>
-                        <span style={{ fontWeight: 600, color: '#22c55e' }}>{activeBand.toUpperCase()}: </span>{hoverData.bandValue}
+                        <span
+                            className="ndvi-tooltip__band-tag"
+                            style={{
+                                fontWeight: 600,
+                                color: hoverData.bandLabelColor,
+                                transition: 'color 0.14s ease-out',
+                            }}
+                        >
+                            {activeBand.toUpperCase()}:{' '}
+                        </span>
+                        <span style={{ color: '#e2e8f0' }}>{hoverData.bandValue}</span>
                     </div>
-                    <div style={{ fontSize: "13px", fontWeight: 400, color: "#a1a1aa", marginTop: "4px" }}>
-                        {hoverData.bandValue < 0.3 ? "Sparse vegetation" : hoverData.bandValue <= 0.6 ? "Moderate vegetation" : "Dense vegetation"}
+                    <div
+                        className="ndvi-tooltip__hint"
+                        style={{
+                            fontSize: '13px',
+                            fontWeight: 400,
+                            marginTop: '4px',
+                            color: Number.isFinite(hoverData.bandNumeric)
+                                ? hoverData.bandLabelColor
+                                : '#a1a1aa',
+                            opacity: Number.isFinite(hoverData.bandNumeric) ? 0.88 : 1,
+                            transition: 'color 0.14s ease-out, opacity 0.14s ease-out',
+                        }}
+                    >
+                        {Number.isFinite(hoverData.bandNumeric)
+                            ? (hoverData.bandNumeric < 0.3
+                                ? 'Sparse vegetation'
+                                : hoverData.bandNumeric <= 0.6
+                                  ? 'Moderate vegetation'
+                                  : 'Dense vegetation')
+                            : '—'}
                     </div>
                 </div>
             )}

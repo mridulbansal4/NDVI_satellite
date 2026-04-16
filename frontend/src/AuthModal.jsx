@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { RecaptchaVerifier, signInWithPhoneNumber } from 'firebase/auth';
 import { auth } from './firebase';
+import { apiUrl } from './api';
 
 const AuthModal = ({ isOpen, onClose, onLoginSuccess }) => {
   const [phoneNumber, setPhoneNumber] = useState('');
@@ -94,7 +95,7 @@ const AuthModal = ({ isOpen, onClose, onLoginSuccess }) => {
       const idToken = await user.getIdToken();
       
       // Send it to our Python Backend
-      const response = await fetch('http://localhost:5000/api/auth/verify-token', {
+      const response = await fetch(apiUrl('/api/auth/verify-token'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ idToken })

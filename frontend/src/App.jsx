@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useRef, useMemo } from 'react';
 import { signOut } from 'firebase/auth';
 import { auth } from './firebase';
 import MapView from './MapView';
@@ -10,6 +10,8 @@ import NavbarDropdown from './NavbarDropdown';
 import PremiumAuthFlow from './PremiumAuthFlow';
 import { analyzeFarm, fetchAvailableDates, fetchDayAnalysis } from './api';
 import * as turf from '@turf/turf';
+import { ChevronLeft, ChevronRight, Pencil } from 'lucide-react';
+import FieldNameModal from './FieldNameModal';
 import './index.css';
 
 export default function App() {
@@ -40,7 +42,15 @@ export default function App() {
   const [fields, setFields]             = useState([]);
   const [activeFieldId, setActiveFieldId] = useState(null);
   const [editingFieldId, setEditingFieldId] = useState(null);
-  
+  /** Snapshot when entering edit mode — Polygon positions stay stable while dragging (no React reset of handles). */
+  const [editBoundarySnapshot, setEditBoundarySnapshot] = useState(null);
+  /** Latest geometry while dragging vertices; committed on Done only. */
+  const editGeometryRef = useRef(null);
+  const [editNameDraft, setEditNameDraft] = useState('');
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  /** Ask for field name after draw (`new`) or from dropdown rename (`rename`). */
+  const [nameModal, setNameModal] = useState(null);
+
   // Loading state
   const [isLoading, setIsLoading]     = useState(false);
   const [currentStep, setCurrentStep] = useState(0);
@@ -71,61 +81,80 @@ export default function App() {
     setMapCenter(coords);
   };
 
-  const handleDrawComplete = async (geometry) => {
+  const handleDrawComplete = (geometry) => {
+    setNameModal({ type: 'new', geometry });
+  };
+
+  const runNewFieldAnalysis = async (fieldName, geometry) => {
     setIsLoading(true);
     const progressTimer = simulateProgress();
 
-    // 1. Setup new field object and calculate area
     const areaSqMeters = turf.area(geometry);
     const areaHectares = (areaSqMeters / 10000).toFixed(2);
-    
-    // Auto-generate name based on number of fields
     const newFieldId = Date.now().toString();
-    const newFieldName = `Field ${fields.length + 1}`;
 
     const newField = {
-        id: newFieldId,
-        name: newFieldName,
-        areaHectares: areaHectares,
-        geometry: geometry,
-        analysisData: null,
-        availableDates: [],
-        selectedDate: null
+      id: newFieldId,
+      name: fieldName.trim(),
+      areaHectares,
+      geometry,
+      analysisData: null,
+      availableDates: [],
+      selectedDate: null,
     };
 
     try {
-        // 2. Run main analysis (90-day composite — initial view)
-        const data = await analyzeFarm(geometry);
-        if (data.error) {
-            alert(`Error: ${data.error}`);
-        } else {
-            newField.analysisData = data;
-        }
+      const data = await analyzeFarm(geometry);
+      if (data.error) {
+        alert(`Error: ${data.error}`);
+      } else {
+        newField.analysisData = data;
+      }
 
-        // 3. Fetch available dates for timeline
-        try {
-            const dateResult = await fetchAvailableDates(geometry);
-            if (dateResult.dates && dateResult.dates.length > 0) {
-                newField.availableDates = dateResult.dates;
-                newField.selectedDate = dateResult.dates[dateResult.dates.length - 1]; // Select most recent
-            }
-        } catch (dateErr) {
-            console.warn('Could not fetch available dates:', dateErr);
+      try {
+        const dateResult = await fetchAvailableDates(geometry);
+        if (dateResult.dates && dateResult.dates.length > 0) {
+          newField.availableDates = dateResult.dates;
+          newField.selectedDate = dateResult.dates[dateResult.dates.length - 1];
         }
+      } catch (dateErr) {
+        console.warn('Could not fetch available dates:', dateErr);
+      }
 
-        // Add the new field and set it as active
-        setFields(prev => [...prev, newField]);
-        setActiveFieldId(newFieldId);
-        
+      setFields((prev) => [...prev, newField]);
+      setActiveFieldId(newFieldId);
     } catch (err) {
-        console.error(err);
-        alert(err.message || 'Analysis failed.');
+      console.error(err);
+      alert(err.message || 'Analysis failed.');
     } finally {
-        clearInterval(progressTimer);
-        setIsLoading(false);
-        setCurrentStep(0);
+      clearInterval(progressTimer);
+      setIsLoading(false);
+      setCurrentStep(0);
     }
   };
+
+  const handleConfirmFieldName = (name) => {
+    const m = nameModal;
+    if (!m) return;
+    if (m.type === 'new') {
+      const geometry = m.geometry;
+      setNameModal(null);
+      void runNewFieldAnalysis(name, geometry);
+    } else {
+      handleRenameField(m.fieldId, name);
+      setNameModal(null);
+    }
+  };
+
+  const fieldDropdownOptions = useMemo(() => {
+    if (fields.length === 0) {
+      return [{ value: 'empty', label: 'Draw to add field', disabled: true }];
+    }
+    return [
+      ...fields.map((f) => ({ value: f.id, label: f.name })),
+      { value: 'add_new', label: '+ Add new field' },
+    ];
+  }, [fields]);
 
   const handleDrawDelete = () => {
     // We handle delete per-field now if needed, but for native draw delete:
@@ -161,60 +190,79 @@ export default function App() {
       setFields(prev => prev.map(f => f.id === id ? { ...f, name: newName } : f));
   };
 
-  const handleGeometryEdit = (id, newGeometry) => {
-      setFields(prev => prev.map(f => {
-          if (f.id === id) {
-              const areaSqMeters = turf.area(newGeometry);
-              const areaHectares = (areaSqMeters / 10000).toFixed(2);
-              return { ...f, geometry: newGeometry, areaHectares };
-          }
-          return f;
-      }));
+  /** While editing: only update ref so Leaflet handles stay mounted; no field state update per drag. */
+  const handleGeometryEditLive = (id, newGeometry) => {
+    if (id !== editingFieldId) return;
+    editGeometryRef.current = newGeometry;
+  };
+
+  const handleCancelEditing = () => {
+    setEditingFieldId(null);
+    setEditBoundarySnapshot(null);
+    editGeometryRef.current = null;
   };
 
   const handleFinishEditing = async () => {
-      const id = editingFieldId;
-      setEditingFieldId(null);
-      if (!id) return;
-      
-      const updatedField = fields.find(f => f.id === id);
-      if (!updatedField) return;
+    const id = editingFieldId;
+    if (!id) return;
 
-      setIsLoading(true);
-      const progressTimer = simulateProgress();
-      
-      // Clear old dates and analysis initially
-      setFields(prev => prev.map(f => f.id === id ? { ...f, analysisData: null, availableDates: [], selectedDate: null } : f));
-      
-      try {
-          const data = await analyzeFarm(updatedField.geometry);
-          let newAvailableDates = [];
-          let newSelectedDate = null;
-          
-          if (!data.error) {
-              try {
-                  const dateResult = await fetchAvailableDates(updatedField.geometry);
-                  if (dateResult.dates && dateResult.dates.length > 0) {
-                      newAvailableDates = dateResult.dates;
-                      newSelectedDate = dateResult.dates[dateResult.dates.length - 1]; 
-                  }
-              } catch (err) { console.warn(err); }
+    const geom = editGeometryRef.current;
+    setEditingFieldId(null);
+    setEditBoundarySnapshot(null);
+    editGeometryRef.current = null;
+
+    if (!geom) return;
+
+    const areaSqMeters = turf.area(geom);
+    const areaHectares = (areaSqMeters / 10000).toFixed(2);
+
+    setIsLoading(true);
+    const progressTimer = simulateProgress();
+
+    setFields((prev) =>
+      prev.map((f) =>
+        f.id === id
+          ? { ...f, geometry: geom, areaHectares, analysisData: null, availableDates: [], selectedDate: null }
+          : f
+      )
+    );
+
+    try {
+      const data = await analyzeFarm(geom);
+      let newAvailableDates = [];
+      let newSelectedDate = null;
+
+      if (!data.error) {
+        try {
+          const dateResult = await fetchAvailableDates(geom);
+          if (dateResult.dates && dateResult.dates.length > 0) {
+            newAvailableDates = dateResult.dates;
+            newSelectedDate = dateResult.dates[dateResult.dates.length - 1];
           }
-          
-          setFields(prev => prev.map(f => f.id === id ? {
-              ...f,
-              analysisData: data.error ? null : data,
-              availableDates: newAvailableDates,
-              selectedDate: newSelectedDate
-          } : f));
-          
-      } catch (e) {
-          console.error(e);
-      } finally {
-          clearInterval(progressTimer);
-          setIsLoading(false);
-          setCurrentStep(0);
+        } catch (err) {
+          console.warn(err);
+        }
       }
+
+      setFields((prev) =>
+        prev.map((f) =>
+          f.id === id
+            ? {
+                ...f,
+                analysisData: data.error ? null : data,
+                availableDates: newAvailableDates,
+                selectedDate: newSelectedDate,
+              }
+            : f
+        )
+      );
+    } catch (e) {
+      console.error(e);
+    } finally {
+      clearInterval(progressTimer);
+      setIsLoading(false);
+      setCurrentStep(0);
+    }
   };
 
   // ── Auth gate: show PremiumAuthFlow when not authenticated ──
@@ -227,67 +275,104 @@ export default function App() {
       <nav className="navbar">
         <div className="navbar__brand">
           <div className="navbar__text">
-            <span className="navbar__title">MindstriX</span>
-            <span className="navbar__tagline">Farm Analysis</span>
+            <span className="navbar__title navbar__title--monitor">Satellite farm monitoring</span>
           </div>
         </div>
 
-        <div className="navbar__controls" style={{ flex: 1, display: 'flex', justifyContent: 'flex-end', alignItems: 'center' }}>
-          {/* Field Manager Dropdown & Naming */}
-          <div className="navbar__selectors" style={{marginRight: '8px'}}>
+        <div className="navbar__controls navbar__controls--end">
+          <div className="navbar__group">
+            <div className="navbar__selectors">
             {editingFieldId === activeFieldId && activeField ? (
-                <input 
-                    className="navbar__select" 
+                <>
+                  <input
+                    className="navbar__select navbar__select--field-name"
                     autoFocus
-                    defaultValue={activeField.name}
-                    onBlur={(e) => {
-                        if (e.target.value.trim() !== '') {
-                            handleRenameField(activeFieldId, e.target.value);
-                        }
-                        handleFinishEditing();
+                    value={editNameDraft}
+                    onChange={(e) => setEditNameDraft(e.target.value)}
+                    placeholder="Field name"
+                    aria-label="Field name"
+                  />
+                  <button
+                    type="button"
+                    className="btn btn--primary btn--sm"
+                    onClick={() => {
+                      const name = editNameDraft.trim();
+                      if (name) handleRenameField(activeFieldId, name);
+                      handleFinishEditing();
                     }}
-                    onKeyDown={(e) => {
-                        if (e.key === 'Enter') {
-                            if (e.target.value.trim() !== '') {
-                                handleRenameField(activeFieldId, e.target.value);
-                            }
-                            handleFinishEditing();
-                        }
-                    }}
-                    style={{width: '140px'}}
-                />
+                  >
+                    Done
+                  </button>
+                  <button
+                    type="button"
+                    className="btn btn--ghost btn--sm"
+                    onClick={handleCancelEditing}
+                  >
+                    Cancel
+                  </button>
+                </>
             ) : (
-                <NavbarDropdown 
-                    value={activeFieldId || "empty"}
+                <div className="navbar__field-wrap">
+                  <NavbarDropdown
+                    value={activeFieldId || 'empty'}
                     onChange={(val) => {
-                        if (val === "add_new") {
-                            setActiveFieldId(null);
-                        } else {
-                            setActiveFieldId(val);
-                        }
+                      if (val === 'add_new') {
+                        setActiveFieldId(null);
+                      } else {
+                        setActiveFieldId(val);
+                      }
                     }}
-                    options={[
-                        ...(fields.length === 0 ? [{ value: "empty", label: "Draw to add Field", disabled: true }] : []),
-                        ...fields.map(f => ({ value: f.id, label: f.name })),
-                        ...(fields.length > 0 ? [{ value: "add_new", label: "+ Add New Field" }] : [])
-                    ]}
-                />
+                    options={fieldDropdownOptions}
+                  />
+                  {activeFieldId && activeField && (
+                    <button
+                      type="button"
+                      className="navbar__rename-field-btn"
+                      title="Rename field"
+                      aria-label="Rename field"
+                      onClick={() =>
+                        setNameModal({
+                          type: 'rename',
+                          fieldId: activeFieldId,
+                          currentName: activeField.name,
+                        })
+                      }
+                    >
+                      <Pencil size={15} strokeWidth={2} aria-hidden />
+                    </button>
+                  )}
+                </div>
             )}
             
-            {activeFieldId && editingFieldId !== activeFieldId && (
-                <button 
-                  className="navbar__action-btn"
-                  onClick={() => setEditingFieldId(activeFieldId)}
-                  title="Rename Field"
-                  style={{ background: 'transparent', border: 'none', color: '#a1a1aa', cursor: 'pointer', padding: '0 8px', fontSize: '13px', fontWeight: '500' }}
+            {activeFieldId && editingFieldId !== activeFieldId && activeField && (
+                <button
+                  type="button"
+                  className="navbar__link-btn"
+                  onClick={() => {
+                    const g = activeField.geometry;
+                    try {
+                      editGeometryRef.current = structuredClone(g);
+                    } catch {
+                      editGeometryRef.current = JSON.parse(JSON.stringify(g));
+                    }
+                    try {
+                      setEditBoundarySnapshot(structuredClone(g));
+                    } catch {
+                      setEditBoundarySnapshot(JSON.parse(JSON.stringify(g)));
+                    }
+                    setEditNameDraft(activeField.name || '');
+                    setEditingFieldId(activeFieldId);
+                  }}
+                  title="Edit field boundary"
                 >
-                  Edit
+                  Edit boundary
                 </button>
             )}
-            <div className="navbar__select-divider"></div>
+            <div className="navbar__select-divider" aria-hidden="true" />
+          </div>
           </div>
 
-          {/* Satellite / Index Dropdowns */}
+          <div className="navbar__group">
           <div className="navbar__selectors">
             <NavbarDropdown 
                 value="sentinel2"
@@ -310,46 +395,48 @@ export default function App() {
                 ]}
             />
           </div>
+          </div>
 
           <div className={`navbar__status ${isLoading ? 'is-loading' : analysisData ? 'is-success' : 'is-idle'}`}>
             <div className="status-dot"></div>
-            <span>{isLoading ? 'Analyzing...' : analysisData ? 'Ready' : 'Draw a polygon to start'}</span>
+            <span>{isLoading ? 'Analyzing…' : analysisData ? 'Ready' : 'Awaiting field'}</span>
           </div>
 
-          <div className="navbar__select-divider"></div>
-
-          {/* User info + Logout */}
-          <div style={{ display:'flex', alignItems:'center', gap:8, marginLeft:8 }}>
+          <div className="navbar__user-bar">
             {user?.phone_number && (
-              <span style={{ fontSize:12, color:'#22c55e', fontWeight:600 }}>
-                {user.phone_number}
-              </span>
+              <span className="navbar__user-phone">{user.phone_number}</span>
             )}
-            <button
-              onClick={handleLogout}
-              style={{
-                background:'rgba(239,68,68,0.12)', color:'#ef4444', padding:'5px 12px',
-                borderRadius:8, border:'1px solid rgba(239,68,68,0.25)', cursor:'pointer',
-                fontSize:12, fontWeight:600, transition:'all 0.2s',
-              }}
-              onMouseEnter={e => e.currentTarget.style.background='rgba(239,68,68,0.22)'}
-              onMouseLeave={e => e.currentTarget.style.background='rgba(239,68,68,0.12)'}
-            >
-              Logout
+            <button type="button" className="btn btn--danger-outline btn--sm" onClick={handleLogout}>
+              Log out
             </button>
           </div>
         </div>
       </nav>
 
-      <div className="app-layout">
-        <Sidebar 
-            onFlyTo={handleFlyTo} 
-            analysisData={analysisData}
-            activeBand={activeBand}
-            activeFieldId={activeFieldId}
-            activeField={activeField}
+      <div className={`app-layout${sidebarCollapsed ? ' app-layout--sidebar-collapsed' : ''}`}>
+        <Sidebar
+          collapsed={sidebarCollapsed}
+          onFlyTo={handleFlyTo}
+          analysisData={analysisData}
+          activeBand={activeBand}
+          activeFieldId={activeFieldId}
+          activeField={activeField}
         />
-        
+        <button
+          type="button"
+          className="sidebar-edge-toggle"
+          onClick={() => setSidebarCollapsed((c) => !c)}
+          aria-expanded={!sidebarCollapsed}
+          aria-controls="farm-assistant-sidebar"
+          title={sidebarCollapsed ? 'Show assistant panel' : 'Hide assistant panel'}
+        >
+          {sidebarCollapsed ? (
+            <ChevronRight size={15} strokeWidth={2} aria-hidden />
+          ) : (
+            <ChevronLeft size={15} strokeWidth={2} aria-hidden />
+          )}
+        </button>
+
         <main className="map-wrapper">
           <MapView 
               center={mapCenter}
@@ -357,10 +444,12 @@ export default function App() {
               analysisData={analysisData}
               activeFieldId={activeFieldId}
               editingFieldId={editingFieldId}
+              editBoundarySnapshot={editBoundarySnapshot}
               fields={fields}
               onDrawComplete={handleDrawComplete}
               onDrawDelete={handleDrawDelete}
-              onGeometryEdit={handleGeometryEdit}
+              onGeometryEdit={handleGeometryEditLive}
+              showDrawHint={fields.length === 0 && !editingFieldId}
           />
 
           {analysisData && activeFieldId && (
@@ -390,6 +479,24 @@ export default function App() {
           )}
         </main>
       </div>
+
+      <FieldNameModal
+        open={nameModal !== null}
+        title={nameModal?.type === 'rename' ? 'Rename field' : 'Name this field'}
+        description={
+          nameModal?.type === 'new'
+            ? 'Satellite analysis runs after you confirm the name.'
+            : undefined
+        }
+        initialName={
+          nameModal?.type === 'rename'
+            ? nameModal.currentName || ''
+            : `Field ${fields.length + 1}`
+        }
+        confirmLabel={nameModal?.type === 'rename' ? 'Save' : 'Run analysis'}
+        onConfirm={handleConfirmFieldName}
+        onCancel={() => setNameModal(null)}
+      />
     </>
   );
 }

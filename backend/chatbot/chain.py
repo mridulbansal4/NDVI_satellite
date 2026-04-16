@@ -150,8 +150,9 @@ def invoke_chain(
     except Exception as exc:
         logger.error("Ollama invocation failed: %s", exc, exc_info=True)
         raise RuntimeError(
-            "Could not connect to the farm analysis engine. "
-            "Please make sure the local AI service is running."
+            "Could not reach Ollama (local LLM for Krishi Mitra). "
+            "Start Ollama (e.g. `ollama serve`) and ensure the configured model is pulled. "
+            "Map and satellite analysis use the Flask API only and do not need Ollama."
         ) from exc
 
     if not reply or not reply.strip():

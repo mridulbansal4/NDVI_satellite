@@ -260,6 +260,444 @@ html, body {
   pointer-events: none;
 }
 
+.navbar__custom-option.is-action {
+  border-top: 1px solid var(--c-border);
+  margin-top: 2px;
+  padding-top: 10px;
+  color: var(--c-text-muted);
+  font-size: 12px;
+}
+
+.navbar__custom-option.is-action:hover {
+  color: var(--c-text);
+}
+
+.navbar__option-with-icon {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Field name modal (after draw / rename from menu) */
+.field-name-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 2000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: rgba(0, 0, 0, 0.55);
+  backdrop-filter: blur(4px);
+}
+
+.field-name-modal {
+  width: 100%;
+  max-width: 400px;
+  padding: 22px 24px;
+  background: var(--c-surface-2);
+  border: 1px solid var(--c-border);
+  border-radius: var(--r-lg);
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.45);
+}
+
+.field-name-modal__title {
+  font-family: var(--font-heading);
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--c-text);
+  margin: 0 0 8px;
+}
+
+.field-name-modal__desc {
+  font-size: 13px;
+  color: var(--c-text-muted);
+  margin: 0 0 16px;
+  line-height: 1.45;
+}
+
+.field-name-modal__label {
+  display: block;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--c-text-muted);
+  margin-bottom: 6px;
+}
+
+.field-name-modal__input {
+  width: 100%;
+  padding: 10px 12px;
+  margin-bottom: 18px;
+  font-family: var(--font-body);
+  font-size: 14px;
+  color: var(--c-text);
+  background: var(--c-surface);
+  border: 1px solid var(--c-border);
+  border-radius: var(--r-md);
+  outline: none;
+}
+
+.field-name-modal__input:focus {
+  border-color: var(--c-accent);
+  box-shadow: 0 0 0 2px var(--c-accent-glow);
+}
+
+.field-name-modal__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+/* ── Phone login (PremiumAuthFlow) ───────────────────────────── */
+.auth-flow {
+  min-height: 100dvh;
+  background: var(--c-bg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-body);
+  position: relative;
+  overflow: hidden;
+  padding: 28px 20px;
+}
+
+.auth-flow__blob {
+  position: absolute;
+  pointer-events: none;
+  border-radius: 50%;
+}
+
+.auth-flow__blob--tr {
+  top: -18%;
+  right: -12%;
+  width: min(52vw, 420px);
+  height: min(52vw, 420px);
+  background: radial-gradient(circle, rgba(34, 197, 94, 0.06) 0%, transparent 68%);
+}
+
+.auth-flow__blob--bl {
+  bottom: -12%;
+  left: -14%;
+  width: min(44vw, 360px);
+  height: min(44vw, 360px);
+  background: radial-gradient(circle, rgba(59, 130, 246, 0.05) 0%, transparent 68%);
+}
+
+.auth-flow__demo {
+  position: fixed;
+  top: 16px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 14px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 600;
+  font-family: var(--font-body);
+  color: var(--c-amber);
+  background: var(--c-surface-3);
+  border: 1px solid rgba(245, 158, 11, 0.28);
+}
+
+.auth-flow__shell {
+  width: 100%;
+  max-width: 400px;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+}
+
+.auth-flow__brand {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 26px;
+}
+
+.auth-flow__logo {
+  flex-shrink: 0;
+  width: 42px;
+  height: 42px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 11px;
+  background: var(--c-surface-2);
+  border: 1px solid var(--c-border);
+}
+
+.auth-flow__brand-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.auth-flow__brand-title {
+  font-family: var(--font-heading);
+  font-size: 1.125rem;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  color: var(--c-text);
+  line-height: 1.25;
+}
+
+.auth-flow__brand-sub {
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: var(--c-text-muted);
+  line-height: 1.4;
+}
+
+.auth-flow__card {
+  background: var(--c-surface-2);
+  border-radius: 16px;
+  border: 1px solid var(--c-border);
+  padding: 26px 24px 24px;
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.45);
+}
+
+.auth-flow__h1 {
+  font-family: var(--font-heading);
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--c-text);
+  margin: 0 0 8px;
+  letter-spacing: -0.02em;
+}
+
+.auth-flow__lead {
+  font-size: 0.875rem;
+  line-height: 1.55;
+  color: var(--c-text-muted);
+  margin: 0 0 22px;
+}
+
+.auth-flow__phone-row {
+  display: flex;
+  align-items: stretch;
+  gap: 10px;
+  margin-bottom: 18px;
+}
+
+.auth-flow__cc {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 52px;
+  min-height: 48px;
+  border-radius: 9px;
+  background: var(--c-surface-3);
+  border: 1px solid var(--c-border);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--c-text-muted);
+}
+
+.auth-flow__tel {
+  flex: 1;
+  min-width: 0;
+  height: 48px;
+  padding: 0 14px;
+  border-radius: 9px;
+  border: 1px solid var(--c-border);
+  background: var(--c-surface-3);
+  font-family: var(--font-body);
+  font-size: 0.9375rem;
+  font-weight: 500;
+  color: var(--c-text);
+  letter-spacing: 0.04em;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.auth-flow__tel::placeholder {
+  color: var(--c-text-faint);
+}
+
+.auth-flow__tel:focus {
+  outline: none;
+  border-color: var(--c-accent);
+  box-shadow: 0 0 0 1px var(--c-accent-glow);
+}
+
+.auth-flow__err {
+  font-size: 0.75rem;
+  color: var(--c-red);
+  margin: 0 0 14px;
+}
+
+.auth-flow__btn {
+  width: 100%;
+  height: 46px;
+  border: none;
+  border-radius: 9px;
+  font-family: var(--font-body);
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.auth-flow__btn--primary {
+  background: var(--c-accent);
+  color: var(--c-bg);
+}
+
+.auth-flow__btn--primary:hover:not(:disabled) {
+  filter: brightness(1.05);
+}
+
+.auth-flow__btn--muted {
+  background: var(--c-surface-3);
+  color: var(--c-text-faint);
+  cursor: not-allowed;
+}
+
+.auth-flow__otp-top {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 18px;
+}
+
+.auth-flow__back {
+  width: 36px;
+  height: 36px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 9px;
+  border: 1px solid var(--c-border);
+  background: var(--c-surface-3);
+  color: var(--c-text-muted);
+  cursor: pointer;
+  transition: color 0.15s ease, border-color 0.15s ease;
+}
+
+.auth-flow__back:hover {
+  color: var(--c-text);
+  border-color: var(--c-border-hover);
+}
+
+.auth-flow__h2 {
+  font-family: var(--font-heading);
+  font-size: 1.0625rem;
+  font-weight: 600;
+  color: var(--c-text);
+  margin: 0;
+  letter-spacing: -0.02em;
+}
+
+.auth-flow__sent-to {
+  font-size: 0.8125rem;
+  color: var(--c-text-muted);
+  margin: 0 0 20px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+}
+
+.auth-flow__sent-to strong {
+  font-weight: 600;
+  color: var(--c-text);
+}
+
+.auth-flow__otp-grid {
+  display: flex;
+  gap: 8px;
+  justify-content: space-between;
+  margin-bottom: 18px;
+}
+
+.auth-flow__otp-digit {
+  width: 100%;
+  max-width: 46px;
+  height: 52px;
+  text-align: center;
+  font-family: var(--font-heading);
+  font-size: 1.125rem;
+  font-weight: 600;
+  border-radius: 9px;
+  border: 1px solid var(--c-border);
+  background: var(--c-surface-3);
+  color: var(--c-text);
+  transition: border-color 0.15s ease;
+  padding: 0;
+}
+
+.auth-flow__otp-digit:focus {
+  outline: none;
+  border-color: var(--c-accent);
+}
+
+.auth-flow__otp-digit.is-error {
+  border-color: var(--c-red);
+  color: var(--c-red);
+}
+
+.auth-flow__resend {
+  text-align: center;
+  font-size: 0.75rem;
+  color: var(--c-text-muted);
+}
+
+.auth-flow__resend button {
+  background: none;
+  border: none;
+  color: var(--c-accent);
+  font-weight: 600;
+  font-family: inherit;
+  font-size: inherit;
+  cursor: pointer;
+}
+
+.auth-flow__success {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 12px 0 4px;
+}
+
+.auth-flow__success h2 {
+  font-family: var(--font-heading);
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--c-text);
+  margin: 20px 0 8px;
+}
+
+.auth-flow__success p {
+  font-size: 0.8125rem;
+  color: var(--c-text-muted);
+  margin: 0;
+}
+
+.auth-flow__foot {
+  text-align: center;
+  margin-top: 22px;
+  font-size: 0.6875rem;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--c-text-faint);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  font-family: var(--font-body);
+}
+
 /* Status Badge */
 .navbar__status {
   display: flex;
@@ -1010,11 +1448,108 @@ html, body {
   opacity: 1;
 }
 
-/* ── Map Legend Overlay ───────────────────────────────────────────────────── */
+.ndvi-tooltip__band-tag {
+  text-shadow: 0 0 12px rgba(0, 0, 0, 0.35);
+}
+
+/* ── Draw-tool hint: top-right, stacked *below* Leaflet Draw (not beside it) ─ */
+.map-draw-hint {
+  position: absolute;
+  top: 54px;
+  right: 10px;
+  left: auto;
+  bottom: auto;
+  z-index: 850;
+  pointer-events: none;
+  display: flex;
+  align-items: flex-start;
+  gap: 7px;
+  max-width: min(220px, 42vw);
+  padding: 7px 28px 8px 8px;
+  border-radius: 10px;
+  background: rgba(12, 18, 26, 0.9);
+  border: 1px solid var(--c-border);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.35);
+}
+
+.map-draw-hint__dismiss {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  z-index: 2;
+  width: 22px;
+  height: 22px;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--c-text-muted);
+  font-size: 16px;
+  line-height: 1;
+  cursor: pointer;
+  pointer-events: auto;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.map-draw-hint__dismiss:hover {
+  background: rgba(255, 255, 255, 0.14);
+  color: var(--c-text);
+}
+
+.map-draw-hint__arrow {
+  flex-shrink: 0;
+  margin-top: 2px;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--c-accent);
+  line-height: 1;
+  opacity: 0.95;
+}
+
+.map-draw-hint__icon {
+  flex-shrink: 0;
+  margin-top: 2px;
+  color: var(--c-accent);
+  opacity: 0.85;
+}
+
+.map-draw-hint__text {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  margin: 0;
+  min-width: 0;
+}
+
+.map-draw-hint__lead {
+  font-family: var(--font-heading);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: var(--c-text);
+  line-height: 1.25;
+}
+
+.map-draw-hint__sub {
+  font-size: 10px;
+  font-weight: 500;
+  line-height: 1.35;
+  color: var(--c-text-muted);
+}
+
+.map-draw-hint__sub strong {
+  color: var(--c-text);
+  font-weight: 600;
+}
+
+/* ── Map Legend Overlay (position set inline — draggable) ─────────────────── */
 .map-legend-overlay {
   position: absolute;
-  top: 70px;
-  right: 12px;
   z-index: 1000;
   width: 280px;
 }
@@ -1028,6 +1563,42 @@ html, body {
 /* ── Sidebar Legend (Collapsible dropdown style) ────────────────────────── */
 .sidebar-legend {
   margin-bottom: 8px;
+}
+
+.sidebar-legend__header-row {
+  display: flex;
+  align-items: stretch;
+  gap: 2px;
+  width: 100%;
+}
+
+.sidebar-legend__handle {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  padding: 0;
+  border: none;
+  border-radius: var(--r-sm);
+  background: transparent;
+  color: var(--c-text-muted);
+  cursor: grab;
+  touch-action: none;
+}
+
+.sidebar-legend__handle:hover {
+  color: var(--c-text);
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.sidebar-legend__handle:active {
+  cursor: grabbing;
+}
+
+.sidebar-legend__header-row .sidebar-legend__toggle {
+  flex: 1;
+  min-width: 0;
 }
 
 .sidebar-legend__toggle {
@@ -1230,12 +1801,12 @@ html, body {
 /* ── Timeline Bar ────────────────────────────────────────────────────────── */
 .timeline-bar {
   position: absolute;
-  bottom: 16px;
+  bottom: 14px;
   left: 50%;
   transform: translateX(-50%);
   width: max-content;
   max-width: 90%;
-  height: 48px;
+  height: 54px;
   border-radius: 12px;
   background: rgba(10, 14, 20, 0.94);
   backdrop-filter: blur(12px);
@@ -1244,15 +1815,15 @@ html, body {
   display: flex;
   align-items: center;
   z-index: 900;
-  padding: 0 4px;
+  padding: 0 6px;
   gap: 0;
   box-shadow: 0 8px 32px rgba(0,0,0,0.6);
 }
 
 .timeline-bar__arrow {
   flex-shrink: 0;
-  width: 32px;
-  height: 32px;
+  width: 34px;
+  height: 34px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1288,7 +1859,7 @@ html, body {
   gap: 0;
   position: relative;
   min-width: max-content;
-  padding: 0 8px;
+  padding: 0 10px;
 }
 
 .timeline-bar__line {
@@ -1297,7 +1868,7 @@ html, body {
   left: 0;
   right: 0;
   height: 2px;
-  background: rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.12);
   transform: translateY(-50%);
   pointer-events: none;
 }
@@ -1306,8 +1877,8 @@ html, body {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 2px;
-  padding: 4px 10px;
+  gap: 4px;
+  padding: 6px 12px;
   background: transparent;
   border: none;
   color: #6b7a8d;
@@ -1316,7 +1887,7 @@ html, body {
   position: relative;
   font-family: var(--font-body);
   white-space: nowrap;
-  min-width: 72px;
+  min-width: 78px;
 }
 
 .timeline-bar__date:hover {
@@ -1334,7 +1905,7 @@ html, body {
 
 .timeline-bar__tick {
   width: 2px;
-  height: 8px;
+  height: 10px;
   background: rgba(255, 255, 255, 0.15);
   border-radius: 1px;
   transition: all 0.2s ease;
@@ -1342,18 +1913,18 @@ html, body {
 
 .timeline-bar__date:hover .timeline-bar__tick {
   background: rgba(255, 255, 255, 0.4);
-  height: 10px;
+  height: 12px;
 }
 
 .timeline-bar__date.is-active .timeline-bar__tick {
   background: #22c55e;
-  height: 12px;
+  height: 14px;
   width: 3px;
   box-shadow: 0 0 8px rgba(34, 197, 94, 0.5);
 }
 
 .timeline-bar__label {
-  font-size: 10px;
+  font-size: 11px;
   font-weight: 600;
   letter-spacing: 0.02em;
   line-height: 1.2;
@@ -1361,13 +1932,13 @@ html, body {
 
 .timeline-bar__date.is-active .timeline-bar__label {
   font-weight: 700;
-  font-size: 11px;
+  font-size: 12px;
   text-shadow: 0 0 8px rgba(34, 197, 94, 0.4);
 }
 
 .timeline-bar__info {
   flex-shrink: 0;
-  padding: 4px 12px;
+  padding: 6px 12px;
   margin-left: 4px;
   background: rgba(255, 255, 255, 0.05);
   border: 1px solid rgba(255, 255, 255, 0.08);
@@ -1375,7 +1946,7 @@ html, body {
 }
 
 .timeline-bar__info-label {
-  font-size: 10px;
+  font-size: 11px;
   font-weight: 500;
   color: #8b9bb4;
   white-space: nowrap;
@@ -1420,7 +1991,7 @@ html, body {
 /* ── Adjust bottom elements when timeline is present ─────────────────────── */
 /* Move layer toggle up when timeline bar is present */
 .map-wrapper:has(.timeline-bar) .layer-toggle {
-  bottom: 80px;
+  bottom: 86px;
 }
 
 /* ============================================================================
