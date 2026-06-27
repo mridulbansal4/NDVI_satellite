@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { RecaptchaVerifier, signInWithPhoneNumber } from 'firebase/auth';
 import { auth } from './firebase';
-import { apiUrl } from './api';
 
 const AuthModal = ({ isOpen, onClose, onLoginSuccess }) => {
   const [phoneNumber, setPhoneNumber] = useState('');
@@ -13,7 +12,7 @@ const AuthModal = ({ isOpen, onClose, onLoginSuccess }) => {
 
   useEffect(() => {
     // Initialize reCAPTCHA when the modal opens
-    if (isOpen && auth && !window.recaptchaVerifier) {
+    if (isOpen && !window.recaptchaVerifier) {
       window.recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
         size: 'invisible',
         callback: (response) => {
@@ -42,15 +41,7 @@ const AuthModal = ({ isOpen, onClose, onLoginSuccess }) => {
   const handleSendOtp = async (e) => {
     e.preventDefault();
     setError('');
-    if (!auth) {
-      setError('Firebase is not configured. Add frontend/.env with VITE_FIREBASE_* and restart the dev server.');
-      return;
-    }
-    if (!window.recaptchaVerifier) {
-      setError('reCAPTCHA is not ready. Close this dialog and try again.');
-      return;
-    }
-
+    
     let formattedPhone = phoneNumber.trim();
     if (!formattedPhone.startsWith('+')) {
       // Default to +91 (India) if no country code provided
@@ -95,7 +86,7 @@ const AuthModal = ({ isOpen, onClose, onLoginSuccess }) => {
       const idToken = await user.getIdToken();
       
       // Send it to our Python Backend
-      const response = await fetch(apiUrl('/api/auth/verify-token'), {
+      const response = await fetch('http://localhost:5000/api/auth/verify-token', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ idToken })
@@ -132,7 +123,7 @@ const AuthModal = ({ isOpen, onClose, onLoginSuccess }) => {
         {step === 1 ? (
           <form onSubmit={handleSendOtp}>
             <div className="mb-4">
-              <label className="block text-gray-400 mb-2 text-sm">Mobile Number</label>
+              <label className="block text-[#4a5568] mb-2 text-sm">Mobile Number</label>
               <input
                 type="tel"
                 placeholder="+91 9876543210"
@@ -159,7 +150,7 @@ const AuthModal = ({ isOpen, onClose, onLoginSuccess }) => {
         ) : (
           <form onSubmit={handleVerifyOtp}>
             <div className="mb-6">
-              <label className="block text-gray-400 mb-2 text-sm">Enter 6-digit OTP</label>
+              <label className="block text-[#4a5568] mb-2 text-sm">Enter 6-digit OTP</label>
               <input
                 type="text"
                 placeholder="123456"
@@ -185,7 +176,7 @@ const AuthModal = ({ isOpen, onClose, onLoginSuccess }) => {
               type="button"
               onClick={() => setStep(1)}
               disabled={loading}
-              className="w-full p-2 text-gray-400 hover:text-white text-sm"
+              className="w-full p-2 text-[#4a5568] hover:text-white text-sm"
             >
               Change phone number
             </button>
@@ -194,7 +185,7 @@ const AuthModal = ({ isOpen, onClose, onLoginSuccess }) => {
         
         <button 
           onClick={onClose} 
-          className="absolute top-4 right-4 text-gray-500 hover:text-white"
+          className="absolute top-4 right-4 text-[#7a90a8] hover:text-white"
         >
           ✕
         </button>

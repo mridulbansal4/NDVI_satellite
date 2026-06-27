@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Leaf, ArrowLeft, Shield } from 'lucide-react';
-import { sendOtp, verifyOtp } from './api';
+import { Satellite, Leaf, ArrowLeft, Edit2, Shield, AlertTriangle, CloudSun } from 'lucide-react';
+import { RecaptchaVerifier, signInWithPhoneNumber, onAuthStateChanged, signOut } from 'firebase/auth';
+import { auth } from './firebase';
 
 /* ─────────────────────────────────────────────────
    Inline animation styles injected into <head>
@@ -46,8 +47,8 @@ const AUTH_STYLES = `
 
   .dark-input:focus {
     outline: none;
-    border-color: #22c55e;
-    box-shadow: 0 0 0 1px #22c55e;
+    border-color: #1A6B3C;
+    box-shadow: 0 0 0 1px #1A6B3C;
   }
   
   /* Remove default arrows from number inputs in some browsers */
@@ -69,12 +70,12 @@ function AnimatedCheck() {
     <div className="relative auth-fade-in" style={{ width: 80, height: 80 }}>
       <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg"
         className="w-full h-full drop-shadow-md">
-        <circle cx="50" cy="50" r="45" stroke="#22c55e" strokeWidth="4"
-          className="auth-check-circle" fill="rgba(34,197,94,0.05)" />
-        <path d="M30 52 L44 66 L70 36" stroke="#22c55e" strokeWidth="5"
+        <circle cx="50" cy="50" r="45" stroke="#1A6B3C" strokeWidth="4"
+          className="auth-check-circle" fill="rgba(26,107,60,0.05)" />
+        <path d="M30 52 L44 66 L70 36" stroke="#1A6B3C" strokeWidth="5"
           strokeLinecap="round" strokeLinejoin="round" className="auth-check-path" />
       </svg>
-      <div className="absolute inset-0 bg-green-500 opacity-5 rounded-full filter blur-xl" />
+      <div className="absolute inset-0 bg-[#1A6B3C]/100 opacity-5 rounded-full filter blur-xl" />
     </div>
   );
 }
@@ -91,7 +92,8 @@ export default function PremiumAuthFlow({ onAuthSuccess }) {
   const [isError, setIsError]       = useState(false);
   const [errorMsg, setErrorMsg]     = useState('');
   const [isLoading, setIsLoading]   = useState(false);
-  const [confirmedPhone, setConfirmedPhone] = useState('');
+  const [confirmRes, setConfirmRes] = useState(null);  
+  const [useDemo, setUseDemo]       = useState(false);
 
   const otpRefs = useRef([]);
 
@@ -103,6 +105,13 @@ export default function PremiumAuthFlow({ onAuthSuccess }) {
     return () => document.head.removeChild(el);
   }, []);
 
+  /* Check if Firebase is configured */
+  useEffect(() => {
+    try {
+      const cfg = auth?.app?.options;
+      if (!cfg?.apiKey || cfg.apiKey === 'undefined') setUseDemo(true);
+    } catch { setUseDemo(true); }
+  }, []);
 
   /* OTP countdown timer */
   useEffect(() => {
@@ -135,15 +144,33 @@ export default function PremiumAuthFlow({ onAuthSuccess }) {
     if (rawPhone.length !== 10 || isLoading) return;
     setIsLoading(true);
     setIsError(false);
+
+    if (useDemo) {
+      setTimeout(() => {
+        setIsLoading(false);
+        setOtp(['','','','','','']);
+        setCountdown(60);
+        setIsError(false);
+        goTo('otp');
+      }, 900);
+      return;
+    }
+
     try {
-      await sendOtp(rawPhone);
-      setConfirmedPhone(rawPhone);
+      if (!window.recaptchaVerifier) {
+        window.recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-anchor', {
+          size: 'invisible',
+        });
+      }
+      const result = await signInWithPhoneNumber(auth, `+91${rawPhone}`, window.recaptchaVerifier);
+      setConfirmRes(result);
       setOtp(['','','','','','']);
       setCountdown(60);
       goTo('otp');
     } catch (err) {
       setIsError(true);
-      setErrorMsg(err.message || 'Failed to send OTP. Please try again.');
+      setErrorMsg(err.message || 'Failed to send OTP.');
+      window.recaptchaVerifier?.render().then(id => window.grecaptcha?.reset(id)).catch(() => {});
     } finally {
       setIsLoading(false);
     }
@@ -153,13 +180,37 @@ export default function PremiumAuthFlow({ onAuthSuccess }) {
     if (otpFull.length !== 6 || isLoading) return;
     setIsLoading(true);
     setIsError(false);
+
+    if (useDemo) {
+      setTimeout(() => {
+        setIsLoading(false);
+        goTo('success');
+        setTimeout(() => onAuthSuccess?.({ uid: 'demo', phone_number: `+91${rawPhone}` }), 1800);
+      }, 1500);
+      return;
+    }
+
     try {
-      const result = await verifyOtp(confirmedPhone, otpFull);
+      const result = await confirmRes.confirm(otpFull);
+      const user = result.user;
+      const idToken = await user.getIdToken();
+
+      try {
+        await fetch('http://localhost:5000/api/auth/verify-token', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ idToken }),
+        });
+      } catch {}
+
       goTo('success');
-      setTimeout(() => onAuthSuccess?.({ phone_number: result.phone }), 1800);
+      setTimeout(() => onAuthSuccess?.({
+        uid: user.uid,
+        phone_number: user.phoneNumber,
+      }), 1800);
     } catch (err) {
       setIsError(true);
-      setErrorMsg('Incorrect or expired OTP. Please try again.');
+      setErrorMsg('Incorrect OTP.');
     } finally {
       setIsLoading(false);
     }
@@ -192,165 +243,179 @@ export default function PremiumAuthFlow({ onAuthSuccess }) {
     otpRefs.current[ni]?.focus(); setActiveIdx(ni);
   };
 
-  const phoneReady = rawPhone.length === 10 && !isLoading;
-  const otpReady = otpFull.length === 6 && !isLoading;
-
   return (
-    <div className="auth-flow">
-      <div className="auth-flow__blob auth-flow__blob--tr" aria-hidden />
-      <div className="auth-flow__blob auth-flow__blob--bl" aria-hidden />
+    <div style={{
+      minHeight: '100dvh', background: '#0a0f14',
+      display: 'flex', alignItems: 'center', justifyContent: 'center',
+      fontFamily: '"Inter", system-ui, sans-serif', position: 'relative', overflow: 'hidden',
+    }}>
+      {/* Abstract dark tech map vibe */}
+      <div style={{ position:'absolute', top:'-20%', right:'-10%', width:'50vw', height:'50vw',
+        background:'radial-gradient(circle, rgba(26,107,60,0.03) 0%, rgba(10,15,20,0) 70%)', pointerEvents:'none' }} />
+      <div style={{ position:'absolute', bottom:'-10%', left:'-10%', width:'40vw', height:'40vw',
+        background:'radial-gradient(circle, rgba(59,130,246,0.03) 0%, rgba(10,15,20,0) 70%)', pointerEvents:'none' }} />
 
-      <div className="auth-flow__shell">
-        <header className="auth-flow__brand">
-          <div className="auth-flow__logo" aria-hidden>
-            <Leaf style={{ color: 'var(--c-accent)', width: 20, height: 20 }} strokeWidth={2} />
-          </div>
-          <div className="auth-flow__brand-copy">
-            <span className="auth-flow__brand-title">Satellite farm monitoring</span>
-            <span className="auth-flow__brand-sub">Vegetation maps and field health analytics</span>
-          </div>
-        </header>
+      {useDemo && (
+        <div style={{
+          position:'fixed', top:16, background:'#1e2d3d', border:'1px solid rgba(245,158,11,0.3)',
+          color:'#f59e0b', fontSize:11, fontWeight:600, padding:'6px 12px', borderRadius:20,
+          zIndex:9999, display:'flex', alignItems:'center', gap:6
+        }}>
+          <AlertTriangle size={12} /> DEMO MODE
+        </div>
+      )}
 
-        <div className="auth-flow__card">
+      {/* Main Container */}
+      <div style={{
+        width:'100%', maxWidth:380, padding:'24px', zIndex:10,
+        display:'flex', flexDirection:'column',
+      }}>
+        
+        {/* Logo minimal */}
+        <div style={{ display:'flex', alignItems:'center', gap:10, marginBottom:40, justifyContent:'center' }}>
+          <div style={{ position:'relative', display:'flex', alignItems:'center', justifyContent:'center', width:36, height:36, borderRadius:10, background:'#111820', border:'1px solid rgba(255,255,255,0.05)' }}>
+             <Leaf style={{ color:'#1A6B3C', width:18, height:18 }} />
+          </div>
+          <span style={{ color:'#e2e8f0', fontWeight:600, fontSize:18, letterSpacing:'0.02em', fontFamily:'"Space Grotesk", system-ui' }}>MindstriX</span>
+        </div>
+
+        <div style={{ background:'#111820', borderRadius:16, border:'1px solid rgba(255,255,255,0.05)', padding:24, boxShadow:'0 10px 40px rgba(0,0,0,0.5)' }}>
+          
+          {/* ══════ SCREEN 1: PHONE ══════ */}
           {screen === 'phone' && (
             <div className="auth-screen">
-              <h1 className="auth-flow__h1">Sign in</h1>
-              <p className="auth-flow__lead">
-                Enter your mobile number. We will send a one-time code to verify it.
+              <h1 style={{ color:'#e2e8f0', fontSize:20, fontWeight:600, marginBottom:8, fontFamily:'"Space Grotesk"' }}>Access Dashboard</h1>
+              <p style={{ color:'#7a90a8', fontSize:13, marginBottom:24, lineHeight:1.5 }}>
+                Enter your registered mobile number for satellite monitoring access.
               </p>
 
-              <div className="auth-flow__phone-row">
-                <div className="auth-flow__cc" aria-hidden>+91</div>
+              <div style={{ display:'flex', gap:8, marginBottom:20 }}>
+                <div style={{
+                  display:'flex', alignItems:'center', justifyContent:'center', background:'#1a2432',
+                  borderRadius:8, width:52, height:46, border:'1px solid rgba(255,255,255,0.05)',
+                  color:'#a0aec0', fontSize:13, fontWeight:500,
+                }}>
+                  +91
+                </div>
                 <input
-                  className="auth-flow__tel"
+                  className="dark-input"
                   type="tel"
                   inputMode="numeric"
-                  autoComplete="tel-national"
-                  placeholder="98765 43210"
+                  placeholder="987 654 3210"
                   value={phone}
-                  onChange={(e) => setPhone(formatPhone(e.target.value))}
-                  onKeyDown={(e) => e.key === 'Enter' && phoneReady && handleSendOtp()}
-                  aria-label="Mobile number"
+                  onChange={e => setPhone(formatPhone(e.target.value))}
+                  onKeyDown={e => e.key === 'Enter' && handleSendOtp()}
+                  style={{
+                    flex:1, height:46, background:'#1a2432', border:'1px solid rgba(255,255,255,0.05)',
+                    borderRadius:8, padding:'0 16px', fontSize:15, color:'#e2e8f0',
+                    transition:'all 0.2s', fontFamily:'inherit', width:'100%',
+                    letterSpacing:'0.05em'
+                  }}
                 />
               </div>
 
-              {isError && <p className="auth-flow__err">{errorMsg}</p>}
+              {isError && <p style={{ color:'#ef4444', fontSize:12, marginBottom:16 }}>{errorMsg}</p>}
 
               <button
-                type="button"
-                className={`auth-flow__btn ${phoneReady ? 'auth-flow__btn--primary' : 'auth-flow__btn--muted'}`}
                 onClick={handleSendOtp}
-                disabled={!phoneReady}
+                disabled={rawPhone.length !== 10 || isLoading}
+                style={{
+                  width:'100%', height:44, background: rawPhone.length === 10 && !isLoading ? '#1A6B3C' : '#1e2d3d',
+                  color: rawPhone.length === 10 && !isLoading ? '#0a0f14' : '#4a5568',
+                  border:'none', borderRadius:8, fontSize:14, fontWeight:600, cursor: rawPhone.length === 10 ? 'pointer' : 'not-allowed',
+                  display:'flex', alignItems:'center', justifyContent:'center', transition:'all 0.2s',
+                }}
               >
-                {isLoading ? (
-                  <div
-                    className="auth-spin"
-                    style={{
-                      width: 18,
-                      height: 18,
-                      border: '2px solid rgba(10,15,20,0.2)',
-                      borderTopColor: 'var(--c-bg)',
-                      borderRadius: '50%',
-                    }}
-                  />
-                ) : (
-                  'Continue'
-                )}
+                {isLoading
+                  ? <div className="auth-spin" style={{ width:18, height:18, border:'2px solid rgba(10,15,20,0.2)', borderTopColor:'#0a0f14', borderRadius:'50%' }} />
+                  : 'Continue'}
               </button>
             </div>
           )}
 
+          {/* ══════ SCREEN 2: OTP ══════ */}
           {screen === 'otp' && (
             <div className="auth-screen">
-              <div className="auth-flow__otp-top">
-                <button type="button" className="auth-flow__back" onClick={() => goTo('phone')} aria-label="Back">
-                  <ArrowLeft size={18} />
+              <div style={{ display:'flex', alignItems:'center', marginBottom:20, gap:12 }}>
+                <button onClick={() => goTo('phone')} style={{
+                  width:32, height:32, background:'#1a2432', border:'1px solid rgba(255,255,255,0.05)',
+                  borderRadius:8, display:'flex', alignItems:'center', justifyContent:'center',
+                  cursor:'pointer', color:'#a0aec0', transition:'all 0.2s',
+                }}>
+                  <ArrowLeft size={16} />
                 </button>
-                <h2 className="auth-flow__h2">Enter verification code</h2>
+                <h2 style={{ color:'#e2e8f0', fontSize:18, fontWeight:600, margin:0, fontFamily:'"Space Grotesk"' }}>Verify OTP</h2>
               </div>
-
-              <p className="auth-flow__sent-to">
-                Code sent to <strong>+91 {phone}</strong>
+              
+              <p style={{ color:'#7a90a8', fontSize:13, marginBottom:24, display:'flex', alignItems:'center', gap:6 }}>
+                Sent to <span style={{ color:'#e2e8f0' }}>+91 {phone}</span>
               </p>
 
-              <div className={`auth-flow__otp-grid ${isError ? 'auth-shake' : ''}`}>
+              <div className={isError ? 'auth-shake' : ''} style={{ display:'flex', gap:8, justifyContent:'space-between', marginBottom:20 }}>
                 {otp.map((d, i) => (
                   <input
                     key={i}
-                    className={`auth-flow__otp-digit ${isError ? 'is-error' : ''}`}
-                    ref={(el) => {
-                      otpRefs.current[i] = el;
-                    }}
+                    className="dark-input auth-otp-input"
+                    ref={el => otpRefs.current[i] = el}
                     type="tel"
                     inputMode="numeric"
                     maxLength={1}
                     value={d}
-                    onChange={(e) => handleOtpChange(e, i)}
-                    onKeyDown={(e) => handleOtpKey(e, i)}
+                    onChange={e => handleOtpChange(e, i)}
+                    onKeyDown={e => handleOtpKey(e, i)}
                     onPaste={handlePaste}
                     onFocus={() => setActiveIdx(i)}
-                    aria-label={`Digit ${i + 1}`}
+                    style={{
+                      width:42, height:50, textAlign:'center', fontSize:18, fontWeight:500,
+                      borderRadius:8, border:`1px solid ${isError ? '#ef4444' : d || i === activeIdx ? '#1A6B3C' : 'rgba(255,255,255,0.05)'}`,
+                      background:'#1a2432', color: isError ? '#ef4444' : '#e2e8f0',
+                      transition:'all 0.15s', cursor:'text', padding:0
+                    }}
                   />
                 ))}
               </div>
 
-              {isError && <p className="auth-flow__err">{errorMsg}</p>}
+              {isError && <p style={{ color:'#ef4444', fontSize:12, marginBottom:16 }}>{errorMsg}</p>}
 
               <button
-                type="button"
-                className={`auth-flow__btn ${otpReady ? 'auth-flow__btn--primary' : 'auth-flow__btn--muted'}`}
                 onClick={handleVerify}
-                disabled={!otpReady}
+                disabled={otpFull.length !== 6 || isLoading}
+                style={{
+                  width:'100%', height:44, background: otpFull.length === 6 && !isLoading ? '#1A6B3C' : '#1e2d3d',
+                  color: otpFull.length === 6 && !isLoading ? '#0a0f14' : '#4a5568',
+                  border:'none', borderRadius:8, fontSize:14, fontWeight:600, cursor: otpFull.length === 6 ? 'pointer' : 'not-allowed',
+                  display:'flex', alignItems:'center', justifyContent:'center', transition:'all 0.2s', marginBottom:16
+                }}
               >
-                {isLoading ? (
-                  <div
-                    className="auth-spin"
-                    style={{
-                      width: 18,
-                      height: 18,
-                      border: '2px solid rgba(10,15,20,0.2)',
-                      borderTopColor: 'var(--c-bg)',
-                      borderRadius: '50%',
-                    }}
-                  />
-                ) : (
-                  'Verify'
-                )}
+                {isLoading
+                  ? <div className="auth-spin" style={{ width:18, height:18, border:'2px solid rgba(10,15,20,0.2)', borderTopColor:'#0a0f14', borderRadius:'50%' }} />
+                  : 'Verify'}
               </button>
 
-              <div className="auth-flow__resend" style={{ marginTop: 16 }}>
-                {countdown > 0 ? (
-                  <span>Resend code in {String(countdown).padStart(2, '0')}s</span>
-                ) : (
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setCountdown(60);
-                      setOtp(['', '', '', '', '', '']);
-                      setIsError(false);
-                      handleSendOtp();
-                    }}
-                  >
-                    Resend code
-                  </button>
-                )}
+              <div style={{ textAlign:'center', fontSize:12, color:'#7a90a8' }}>
+                {countdown > 0
+                  ? <span>Resend in {String(countdown).padStart(2,'0')}s</span>
+                  : <button onClick={() => { setCountdown(60); setOtp(['','','','','','']); setIsError(false); handleSendOtp(); }} style={{ background:'none', border:'none', color:'#1A6B3C', cursor:'pointer' }}>Resend Now</button>
+                }
               </div>
             </div>
           )}
 
+          {/* ══════ SCREEN 3: SUCCESS ══════ */}
           {screen === 'success' && (
-            <div className="auth-flow__success auth-screen">
+            <div className="auth-screen" style={{ display:'flex', flexDirection:'column', alignItems:'center', padding:'20px 0 10px' }}>
               <AnimatedCheck />
-              <h2>Signed in</h2>
-              <p>Opening your dashboard…</p>
+              <h2 style={{ color:'#e2e8f0', fontSize:20, fontWeight:600, margin:'20px 0 8px', fontFamily:'"Space Grotesk"' }}>Authenticated</h2>
+              <p style={{ color:'#7a90a8', fontSize:13, margin:0, marginBottom:24 }}>Connecting to environment...</p>
             </div>
           )}
         </div>
 
-        <footer className="auth-flow__foot">
-          <Shield size={12} aria-hidden /> Phone verification · secure session
-        </footer>
+        <div style={{ textAlign:'center', marginTop:24, color:'#4a5568', fontSize:10, letterSpacing:'0.05em', display:'flex', alignItems:'center', justifyContent:'center', gap:4 }}>
+          <Shield size={10} /> MINDSTRIX SECURE AUTH
+        </div>
       </div>
+      <div id="recaptcha-anchor" />
     </div>
   );
 }

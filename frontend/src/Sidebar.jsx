@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import KrishiMitraPanel from './KrishiMitraPanel';
 
-export default function Sidebar({ analysisData, activeField, collapsed = false }) {
+export default function Sidebar({ analysisData, activeField }) {
     const [width, setWidth] = useState(400); 
     const isResizing = useRef(false);
 
@@ -30,35 +30,34 @@ export default function Sidebar({ analysisData, activeField, collapsed = false }
     }, [handleMouseMove, handleMouseUp]);
 
     return (
-        <aside
-            id="farm-assistant-sidebar"
-            className={`sidebar${collapsed ? ' sidebar--collapsed' : ''}`}
-            role="complementary"
-            aria-label="Farm Assistant Panel"
-            aria-hidden={collapsed}
-            style={{
-                width: collapsed ? 0 : `${width}px`,
-                minWidth: collapsed ? 0 : undefined,
-                flexShrink: 0,
-                position: 'relative',
-                overflow: 'hidden',
-                transition: 'width 0.22s ease, min-width 0.22s ease, opacity 0.18s ease',
-                opacity: collapsed ? 0 : 1,
-                pointerEvents: collapsed ? 'none' : 'auto',
-            }}
+        <aside 
+           className="sidebar" 
+           role="complementary" 
+           aria-label="Farm Assistant Panel"
+           style={{ width: `${width}px`, flexShrink: 0, position: 'relative' }}
         >
             <KrishiMitraPanel analysisData={analysisData} activeField={activeField} />
-            {!collapsed && (
-                <div
-                    onMouseDown={(e) => {
-                        e.preventDefault();
-                        isResizing.current = true;
-                        document.body.style.cursor = 'col-resize';
-                    }}
-                    title="Drag to resize panel"
-                    className="sidebar-resize-handle"
-                />
-            )}
+            <div 
+               onMouseDown={(e) => {
+                   e.preventDefault(); // Prevent text selection
+                   isResizing.current = true;
+                   document.body.style.cursor = 'col-resize';
+               }}
+               title="Drag to resize panel"
+               style={{
+                   position: 'absolute',
+                   right: 0,
+                   top: 0,
+                   bottom: 0,
+                   width: '4px',
+                   cursor: 'col-resize',
+                   backgroundColor: 'transparent',
+                   zIndex: 9999,
+                   transition: 'background-color 0.2s',
+               }}
+               onMouseEnter={(e) => { if (!isResizing.current) e.target.style.backgroundColor = 'var(--c-brand)'; }}
+               onMouseLeave={(e) => { if (!isResizing.current) e.target.style.backgroundColor = 'transparent'; }}
+            />
         </aside>
     );
 }

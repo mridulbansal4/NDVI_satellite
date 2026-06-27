@@ -31,16 +31,12 @@ export default function NavbarDropdown({ value, options, onChange, style }) {
                     {options.map((opt, idx) => (
                         <div 
                             key={opt.value + '-' + idx}
-                            className={`navbar__custom-option ${opt.value === value ? 'is-selected' : ''} ${opt.disabled ? 'is-disabled' : ''} ${opt.action ? 'is-action' : ''}`}
+                            className={`navbar__custom-option ${opt.value === value ? 'is-selected' : ''} ${opt.disabled ? 'is-disabled' : ''}`}
                             onClick={() => {
-                                if (opt.disabled) return;
-                                if (typeof opt.action === 'function') {
-                                    opt.action();
+                                if (!opt.disabled) {
+                                    if(onChange) onChange(opt.value);
                                     setIsOpen(false);
-                                    return;
                                 }
-                                if (onChange) onChange(opt.value);
-                                setIsOpen(false);
                             }}
                         >
                             {opt.label}

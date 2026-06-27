@@ -1,21 +1,32 @@
 # ──────────────────────────────────────────────────────────────────────────────
-# MindstriX CVI Engine — Web API Dependencies
+# Satellite Agronomy Intelligence Platform — Backend Dependencies
 # ──────────────────────────────────────────────────────────────────────────────
 # Install into the backend venv:
-#   cd d:\Projects\MindStrix\backend
-#   .\venv\Scripts\activate
+#   cd backend
 #   pip install -r requirements.txt
 
 # ── Web framework ─────────────────────────────────────────────────────────────
 Flask>=3.0.0
 flask-cors>=4.0.0
+Flask-JWT-Extended>=4.6.0
+
+# ── PostgreSQL ────────────────────────────────────────────────────────────────
+psycopg2-binary>=2.9.9
+
+# ── Input validation ──────────────────────────────────────────────────────────
+marshmallow>=3.21.0
+
+# ── HTTP client (India Post PIN API) ─────────────────────────────────────────
+requests>=2.31.0
 
 # ── Google Earth Engine Python API ───────────────────────────────────────────
 earthengine-api>=0.1.390
 
+# ── Firebase / Firestore ──────────────────────────────────────────────────────
+firebase-admin>=6.4.0
+
 # ── Utilities ─────────────────────────────────────────────────────────────────
 python-dotenv>=1.0.0
-firebase-admin>=6.4.0
 
 # ── Krishi Mitra Chatbot (chatbot/ module) ────────────────────────────────────
 langchain>=0.3.0

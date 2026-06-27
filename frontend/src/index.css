@@ -1,14 +1,21 @@
+/* Google Fonts — Inter (used by new onboarding pages) */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+
+/* Tailwind CSS — required for onboarding pages (Welcome, Login, Signup, Steps) */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 /* ============================================================================
-   style.css — CVI Engine · MindstriX Farm Visualization Interface
+   style.css ΓÇö CVI Engine ┬╖ MindstriX Farm Visualization Interface
    ============================================================================
    Design System:
      - Dark-first, satellite-map aesthetic
      - Accent: #22c55e (green) / #eab308 (amber) / #ef4444 (red)
-     - Typography: Space Grotesk (headings) · Inter (body)
+     - Typography: Space Grotesk (headings) ┬╖ Inter (body)
      - Motion: subtle transitions, no layout-shifting animations
    ============================================================================ */
 
-/* ── Reset & Tokens ─────────────────────────────────────────────────────── */
+/* ΓöÇΓöÇ Reset & Tokens ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ */
 *, *::before, *::after {
   box-sizing: border-box;
   margin: 0;
@@ -76,7 +83,7 @@ html, body {
   -webkit-font-smoothing: antialiased;
 }
 
-/* ── Navbar ─────────────────────────────────────────────────────────────── */
+/* ΓöÇΓöÇ Navbar ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ */
 .navbar {
   position: fixed;
   top: 0; left: 0; right: 0;
@@ -348,7 +355,7 @@ html, body {
   gap: 10px;
 }
 
-/* ── Phone login (PremiumAuthFlow) ───────────────────────────── */
+/* ΓöÇΓöÇ Phone login (PremiumAuthFlow) ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ */
 .auth-flow {
   min-height: 100dvh;
   background: var(--c-bg);
@@ -750,7 +757,7 @@ html, body {
   50%       { opacity: 0.5; transform: scale(0.7); }
 }
 
-/* ── App Layout ─────────────────────────────────────────────────────────── */
+/* ΓöÇΓöÇ App Layout ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ */
 .app-layout {
   display: flex;
   height: 100vh;
@@ -758,7 +765,7 @@ html, body {
   overflow: hidden;  /* dashboard never scrolls */
 }
 
-/* ── Sidebar ────────────────────────────────────────────────────────────── */
+/* ΓöÇΓöÇ Sidebar ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ */
 .sidebar {
   width: var(--sidebar-w);
   flex-shrink: 0;
@@ -778,7 +785,7 @@ html, body {
 .sidebar::-webkit-scrollbar-track  { background: transparent; }
 .sidebar::-webkit-scrollbar-thumb  { background: var(--c-surface-3); border-radius: 2px; }
 
-/* ── Cards ──────────────────────────────────────────────────────────────── */
+/* ΓöÇΓöÇ Cards ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ */
 .card {
   background: var(--c-surface-2);
   border: 1px solid var(--c-border);
@@ -817,7 +824,7 @@ html, body {
   font-size: 15px;
 }
 
-/* ── Location Form ──────────────────────────────────────────────────────── */
+/* ΓöÇΓöÇ Location Form ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ */
 .location-form {
   display: flex;
   flex-direction: column;
@@ -851,7 +858,7 @@ html, body {
   color: var(--c-text-faint);
 }
 
-/* ── Address Search ────────────────────────────────────────────────────── */
+/* ΓöÇΓöÇ Address Search ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ */
 .address-search {
   position: relative;
   margin-bottom: 4px;
@@ -957,7 +964,7 @@ html, body {
   -webkit-box-orient: vertical;
 }
 
-/* ── Location Divider ──────────────────────────────────────────────────── */
+/* ΓöÇΓöÇ Location Divider ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ */
 .location-divider {
   display: flex;
   align-items: center;
@@ -980,7 +987,7 @@ html, body {
   white-space: nowrap;
 }
 
-/* ── Steps List ─────────────────────────────────────────────────────────── */
+/* ΓöÇΓöÇ Steps List ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ */
 .steps-list {
   list-style: none;
   display: flex;
@@ -1022,7 +1029,7 @@ html, body {
   font-weight: 500;
 }
 
-/* ── Legend ─────────────────────────────────────────────────────────────── */
+/* ΓöÇΓöÇ Legend ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ */
 .legend-list {
   list-style: none;
   display: flex;
@@ -1067,7 +1074,7 @@ html, body {
   font-variant-numeric: tabular-nums;
 }
 
-/* ── Summary Grid ───────────────────────────────────────────────────────── */
+/* ΓöÇΓöÇ Summary Grid ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ */
 .summary-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -1116,7 +1123,7 @@ html, body {
   color: var(--c-text-muted);
 }
 
-/* ── Error ───────────────────────────────────────────────────────────────── */
+/* ΓöÇΓöÇ Error ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ */
 .error-message {
   font-size: 13px;
   color: var(--c-red);
@@ -1124,7 +1131,7 @@ html, body {
   margin-bottom: 12px;
 }
 
-/* ── Buttons ─────────────────────────────────────────────────────────────── */
+/* ΓöÇΓöÇ Buttons ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ */
 .btn {
   display: inline-flex;
   align-items: center;
@@ -1159,7 +1166,7 @@ html, body {
   padding: 7px 12px;
 }
 
-/* ── Map Wrapper ──────────────────────────────────────────────────────────── */
+/* ΓöÇΓöÇ Map Wrapper ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ */
 .map-wrapper {
   flex: 1;
   position: relative;
@@ -1231,7 +1238,7 @@ html, body {
   background: transparent !important;
 }
 
-/* ── Custom Popup ─────────────────────────────────────────────────────────── */
+/* ΓöÇΓöÇ Custom Popup ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ */
 .cell-popup {
   min-width: 220px;
   padding: 16px;
@@ -1301,7 +1308,7 @@ html, body {
 .metric-row:first-child .metric-row__label { color: var(--c-accent); }
 .metric-row:first-child .metric-row__value { color: var(--c-accent); font-size: 15px; }
 
-/* ── Loading Overlay ─────────────────────────────────────────────────────── */
+/* ΓöÇΓöÇ Loading Overlay ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ */
 .loading-overlay {
   position: absolute;
   inset: 0;
@@ -1400,7 +1407,7 @@ html, body {
 }
 
 .progress-step::before {
-  content: '○';
+  content: 'Γùï';
   font-size: 10px;
   flex-shrink: 0;
 }
@@ -1411,24 +1418,24 @@ html, body {
   color: var(--c-accent);
 }
 
-.progress-step--active::before { content: '◉'; }
+.progress-step--active::before { content: 'Γùë'; }
 
 .progress-step--done {
   background: var(--c-surface-3);
   color: var(--c-text-muted);
 }
 
-.progress-step--done::before { content: '✓'; color: var(--c-accent); }
+.progress-step--done::before { content: 'Γ£ô'; color: var(--c-accent); }
 
-/* ── Smooth GEE Tile Rendering ───────────────────────────────────────────── */
-/* Force bilinear interpolation on tile images — removes pixelated edges    */
+/* ΓöÇΓöÇ Smooth GEE Tile Rendering ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ */
+/* Force bilinear interpolation on tile images ΓÇö removes pixelated edges    */
 .tile-smooth img {
   image-rendering: auto !important;
   image-rendering: optimizeQuality !important;
   -ms-interpolation-mode: bicubic !important;
 }
 
-/* ── NDVI Hover Tooltip ──────────────────────────────────────────────────── */
+/* ΓöÇΓöÇ NDVI Hover Tooltip ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ */
 .ndvi-tooltip {
   position: fixed;
   z-index: 1100;
@@ -1452,7 +1459,7 @@ html, body {
   text-shadow: 0 0 12px rgba(0, 0, 0, 0.35);
 }
 
-/* ── Draw-tool hint: top-right, stacked *below* Leaflet Draw (not beside it) ─ */
+/* ΓöÇΓöÇ Draw-tool hint: top-right, stacked *below* Leaflet Draw (not beside it) ΓöÇ */
 .map-draw-hint {
   position: absolute;
   top: 54px;
@@ -1547,7 +1554,7 @@ html, body {
   font-weight: 600;
 }
 
-/* ── Map Legend Overlay (position set inline — draggable) ─────────────────── */
+/* ΓöÇΓöÇ Map Legend Overlay (position set inline ΓÇö draggable) ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ */
 .map-legend-overlay {
   position: absolute;
   z-index: 1000;
@@ -1560,7 +1567,7 @@ html, body {
   box-shadow: 0 4px 20px rgba(0,0,0,0.5);
 }
 
-/* ── Sidebar Legend (Collapsible dropdown style) ────────────────────────── */
+/* ΓöÇΓöÇ Sidebar Legend (Collapsible dropdown style) ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ */
 .sidebar-legend {
   margin-bottom: 8px;
 }
@@ -1711,7 +1718,7 @@ html, body {
   font-variant-numeric: tabular-nums;
 }
 
-/* ── Layer Toggle Controls ───────────────────────────────────────────────── */
+/* ΓöÇΓöÇ Layer Toggle Controls ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ */
 .layer-toggle {
   position: absolute;
   bottom: 24px;
@@ -1769,7 +1776,7 @@ html, body {
   background: #2ad964;
 }
 
-/* ── Leaflet Popup Override — EOS Dark Theme ───────────────────────────── */
+/* ΓöÇΓöÇ Leaflet Popup Override ΓÇö EOS Dark Theme ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ */
 .cvi-popup .leaflet-popup-content-wrapper {
   background: #1c1c1c;
   color: #fff;
@@ -1798,7 +1805,7 @@ html, body {
 }
 [hidden] { display: none !important; }
 
-/* ── Timeline Bar ────────────────────────────────────────────────────────── */
+/* ΓöÇΓöÇ Timeline Bar ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ */
 .timeline-bar {
   position: absolute;
   bottom: 14px;
@@ -1952,7 +1959,7 @@ html, body {
   white-space: nowrap;
 }
 
-/* ── Day Loading Indicator ────────────────────────────────────────────────── */
+/* ΓöÇΓöÇ Day Loading Indicator ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ */
 .day-loading-indicator {
   position: absolute;
   top: 12px;
@@ -1988,7 +1995,7 @@ html, body {
   to   { opacity: 1; transform: translateX(-50%) translateY(0); }
 }
 
-/* ── Adjust bottom elements when timeline is present ─────────────────────── */
+/* ΓöÇΓöÇ Adjust bottom elements when timeline is present ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ */
 /* Move layer toggle up when timeline bar is present */
 .map-wrapper:has(.timeline-bar) .layer-toggle {
   bottom: 86px;
@@ -1998,7 +2005,7 @@ html, body {
    KRISHI MITRA CHATBOT PANEL
    ============================================================================ */
 
-/* Override sidebar styles — panel uses its own layout */
+/* Override sidebar styles ΓÇö panel uses its own layout */
 .sidebar {
   padding: 0 !important;
   gap: 0 !important;
@@ -2007,7 +2014,7 @@ html, body {
   border-right: 1px solid #1e2433 !important;
 }
 
-/* ── Panel shell ─────────────────────────────────────────────────────────── */
+/* ΓöÇΓöÇ Panel shell ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ */
 .km-panel {
   display: flex;
   flex-direction: column;
@@ -2017,7 +2024,7 @@ html, body {
   overflow: hidden;
 }
 
-/* ── Header (48px) ───────────────────────────────────────────────────────── */
+/* ΓöÇΓöÇ Header (48px) ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ */
 .km-header {
   display: flex;
   align-items: center;
@@ -2062,7 +2069,7 @@ html, body {
   line-height: 1.2;
 }
 
-/* ── Status Badge ────────────────────────────────────────────────────────── */
+/* ΓöÇΓöÇ Status Badge ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ */
 .km-status-badge {
   display: flex;
   align-items: center;
@@ -2120,7 +2127,7 @@ html, body {
   50% { opacity: 0.6; transform: scale(0.85); }
 }
 
-/* ── Messages area ───────────────────────────────────────────────────────── */
+/* ΓöÇΓöÇ Messages area ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ */
 .km-messages {
   flex: 1;
   overflow-y: auto;
@@ -2137,7 +2144,7 @@ html, body {
 .km-messages::-webkit-scrollbar-track { background: transparent; }
 .km-messages::-webkit-scrollbar-thumb { background: #2d3748; border-radius: 2px; }
 
-/* ── Message rows ────────────────────────────────────────────────────────── */
+/* ΓöÇΓöÇ Message rows ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ */
 .km-message {
   display: flex;
   gap: 8px;
@@ -2155,7 +2162,7 @@ html, body {
   max-width: 85%;
 }
 
-/* ── Avatar ──────────────────────────────────────────────────────────────── */
+/* ΓöÇΓöÇ Avatar ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ */
 .km-avatar {
   width: 24px;
   height: 24px;
@@ -2173,7 +2180,7 @@ html, body {
   box-shadow: 0 0 0 1px rgba(45, 90, 39, 0.4);
 }
 
-/* ── Bubbles ─────────────────────────────────────────────────────────────── */
+/* ΓöÇΓöÇ Bubbles ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ */
 .km-bubble {
   display: flex;
   flex-direction: column;
@@ -2211,7 +2218,7 @@ html, body {
   margin-top: 2px;
 }
 
-/* ── Typing indicator ────────────────────────────────────────────────────── */
+/* ΓöÇΓöÇ Typing indicator ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ */
 .km-typing-dots {
   display: flex;
   align-items: center;
@@ -2237,7 +2244,7 @@ html, body {
   40% { transform: scale(1.1); opacity: 1; }
 }
 
-/* ── Skeleton loader ─────────────────────────────────────────────────────── */
+/* ΓöÇΓöÇ Skeleton loader ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ */
 .km-skeleton-wrap {
   display: flex;
   flex-direction: column;
@@ -2262,7 +2269,7 @@ html, body {
   100% { background-position: -200% center; }
 }
 
-/* ── Input row (64px) ────────────────────────────────────────────────────── */
+/* ΓöÇΓöÇ Input row (64px) ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ */
 .km-input-row {
   display: flex;
   align-items: center;
