@@ -10,7 +10,7 @@ import NavbarDropdown from './NavbarDropdown';
 import PremiumAuthFlow from './PremiumAuthFlow';
 import { analyzeFarm, fetchAvailableDates, fetchDayAnalysis } from './api';
 import * as turf from '@turf/turf';
-import { ChevronLeft, ChevronRight, Pencil } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Pencil, LocateFixed } from 'lucide-react';
 import FieldNameModal from './FieldNameModal';
 import './index.css';
 
@@ -50,6 +50,7 @@ export default function App() {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   /** Ask for field name after draw (`new`) or from dropdown rename (`rename`). */
   const [nameModal, setNameModal] = useState(null);
+  const [locating, setLocating]   = useState(false);
 
   // Loading state
   const [isLoading, setIsLoading]     = useState(false);
@@ -79,6 +80,25 @@ export default function App() {
 
   const handleFlyTo = (coords) => {
     setMapCenter(coords);
+  };
+
+  const handleLocate = () => {
+    if (!navigator.geolocation) {
+      alert('Geolocation is not supported by your browser.');
+      return;
+    }
+    setLocating(true);
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        setLocating(false);
+        handleFlyTo([pos.coords.latitude, pos.coords.longitude]);
+      },
+      () => {
+        setLocating(false);
+        alert('Could not get your location. Please allow location access and try again.');
+      },
+      { enableHighAccuracy: true, timeout: 10000 }
+    );
   };
 
   const handleDrawComplete = (geometry) => {
@@ -324,6 +344,18 @@ export default function App() {
                     }}
                     options={fieldDropdownOptions}
                   />
+                  <button
+                    type="button"
+                    className="navbar__locate-btn"
+                    title="Go to my location"
+                    aria-label="Go to my location"
+                    onClick={handleLocate}
+                    disabled={locating}
+                  >
+                    <LocateFixed size={15} strokeWidth={2} className={locating ? 'locate-spin' : ''} aria-hidden />
+                    {locating ? 'Locating…' : 'My location'}
+                  </button>
+
                   {activeFieldId && activeField && (
                     <button
                       type="button"

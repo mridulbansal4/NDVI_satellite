@@ -70,3 +70,18 @@ export async function fetchDayAnalysis(geoJsonGeometry, date) {
 
     return await response.json();
 }
+
+export async function sendChatMessage({ sessionId, message, farmData, heatmapData }) {
+    const response = await fetch(apiUrl('/chatbot/chat'), {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ session_id: sessionId, message, farmData, heatmapData }),
+    });
+
+    if (!response.ok) {
+        const err = await response.json().catch(() => ({}));
+        throw new Error(err.error || `Server error: ${response.status}`);
+    }
+
+    return await response.json();
+}

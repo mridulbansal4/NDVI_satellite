@@ -1,8 +1,6 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { Sprout, MessageSquareText, Leaf } from 'lucide-react';
-import { apiUrl } from './api';
-
-const CHATBOT_API = apiUrl('/chatbot/chat');
+import { sendChatMessage } from './api';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // TIMESTAMP HELPER
@@ -106,27 +104,12 @@ export default function KrishiMitraPanel({ analysisData, activeField }) {
 
   // ── Core fetch helper ───────────────────────────────────────────────────────
   const callChatAPI = useCallback(async (message, context = null) => {
-    const reqBody = {
-      session_id: sessionIdRef.current,
+    const data = await sendChatMessage({
+      sessionId:   sessionIdRef.current,
       message,
-    };
-    if (context) {
-      reqBody.farmData = context.farmContext;
-      reqBody.heatmapData = context.heatmapContext;
-    }
-
-    const res = await fetch(CHATBOT_API, {
-      method:  'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body:    JSON.stringify(reqBody),
+      farmData:    context?.farmContext    ?? undefined,
+      heatmapData: context?.heatmapContext ?? undefined,
     });
-
-    if (!res.ok) {
-      const err = await res.json().catch(() => ({}));
-      throw new Error(err.error || `HTTP ${res.status}`);
-    }
-
-    const data = await res.json();
     if (!data.reply) throw new Error('Empty reply from server.');
     return data.reply;
   }, []);
