@@ -117,7 +117,6 @@ def reset():
 # ── GET /chatbot/health ───────────────────────────────────────────────────────
 @chatbot_bp.route("/health", methods=["GET"])
 def health():
-    """Quick liveness check — does not ping Ollama."""
     return jsonify({
         "status":   "ok",
         "model":    OLLAMA_MODEL,
