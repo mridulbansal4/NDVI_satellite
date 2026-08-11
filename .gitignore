@@ -26,6 +26,7 @@ gee-service-account.json
 
 # Go build output
 bin/
+*.exe
 
 # Node modules / NPM (Ignore accidental root installs)
 node_modules/
