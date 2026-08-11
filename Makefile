@@ -11,8 +11,6 @@ BIN         ?= bin/server
 # would otherwise be built, vetted and tested. frontend/ must not be modified
 # (PRD §0.2), so the package set is scoped here instead.
 PKG         := ./cmd/... ./internal/... ./tools/...
-PY          ?= legacy-python/venv/Scripts/python.exe
-PY_BASE     ?= http://127.0.0.1:5000
 GO_BASE     ?= http://127.0.0.1:5001
 
 .PHONY: help build run test test-race vet staticcheck lint contract verify \
@@ -28,7 +26,6 @@ help:
 	@echo "staticcheck      staticcheck ./..."
 	@echo "contract         diff Go responses against the captured Python goldens"
 	@echo "verify           vet + staticcheck + test-race + contract  (the phase gate)"
-	@echo "fixtures         regenerate every golden from the Python backend"
 	@echo "docker           build the container image"
 
 build:
@@ -59,32 +56,26 @@ lint: vet staticcheck
 contract:
 	$(GO) run ./tools/contract -go-base=$(GO_BASE)
 
-# Same, but live-diffs Go against a running Python backend instead of the
-# committed goldens. Useful while the Python reference is still around.
-contract-live:
-	$(GO) run ./tools/contract -go-base=$(GO_BASE) -python-base=$(PY_BASE)
-
 verify: vet staticcheck test-race contract
 
-# ── Golden fixture regeneration (requires the Python backend + venv) ─────────
-# These MUST be run against the reference implementation, never against Go.
-fixtures: fixtures-graphs fixtures-crypto fixtures-prompt fixtures-contract fixtures-numeric
-
-fixtures-graphs:
-	cd legacy-python && $(PY) tools/dump_graphs.py
-
-fixtures-crypto:
-	cd legacy-python && $(PY) tools/dump_crypto.py
-
-fixtures-prompt:
-	cd legacy-python && $(PY) tools/dump_prompt.py
-
-# Needs the Flask app listening on $(PY_BASE).
-fixtures-contract:
-	cd legacy-python && $(PY) tools/dump_contract.py --base=$(PY_BASE)
-
-fixtures-numeric:
-	cd legacy-python && $(PY) tools/dump_numeric.py --base=$(PY_BASE)
+# ── Golden fixture regeneration ─────────────────────────────────────────────
+#
+# The Python reference implementation was deleted at the v2.0.0-go cutover, so
+# the fixtures can no longer be regenerated in place. Every fixture under
+# testdata/ and internal/*/testdata/ is committed and is what the Go tests
+# assert against.
+#
+# To regenerate (e.g. after an Earth Engine API change), restore the reference
+# implementation from history and re-run its capture tools:
+#
+#     git checkout v2.0.0-go~1 -- legacy-python
+#     cd legacy-python && venv/Scripts/python.exe tools/dump_graphs.py
+#     ...  dump_contract.py / dump_numeric.py / dump_crypto.py / gen_prompt.py
+#     git rm -r --cached legacy-python && rm -rf legacy-python
+fixtures:
+	@echo "The Python reference was removed at v2.0.0-go."
+	@echo "See the comment above this target for how to restore it and recapture."
+	@exit 1
 
 docker:
 	docker build -t pragya-backend:dev .

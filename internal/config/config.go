@@ -302,13 +302,17 @@ func Load(envFiles ...string) (*Config, error) {
 // defaultEnvFiles lists the .env candidates, relative to the working directory
 // AND to the repository root.
 //
+// Only the repo root is searched now. Before the v2.0.0-go cutover the file
+// lived at legacy-python/.env; it was moved to the root when that directory was
+// deleted.
+//
 // The root walk matters because `go test ./internal/gee/` runs with the working
 // directory set to that package, and because the server binary may be started
 // from anywhere. Without it, a test that needs real credentials fails with a
 // confusing "GEE_PROJECT_ID is not set" rather than finding the .env two
 // directories up.
 func defaultEnvFiles() []string {
-	rel := []string{".env", "backend/.env", "legacy-python/.env"}
+	rel := []string{".env"}
 	out := append([]string{}, rel...)
 	if root, ok := repoRoot(); ok {
 		for _, r := range rel {

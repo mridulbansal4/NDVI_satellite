@@ -62,13 +62,15 @@ func installedAppCredentials() (clientID, clientSecret string, err error) {
 // eeOAuthSearchPaths lists the places an installed earthengine-api may live,
 // resolved against both the working directory and the repository root.
 //
-// The root walk matters because `go test ./internal/gee/` runs with the working
-// directory set to that package.
+// After the v2.0.0-go cutover there is normally no Python environment here at
+// all, so this returns nothing useful and GEE_OAUTH_CLIENT_ID /
+// GEE_OAUTH_CLIENT_SECRET (written into .env at cutover) are the real source.
+// The search is kept for a developer who still has a venv lying around.
 func eeOAuthSearchPaths() []string {
 	rel := []string{
 		filepath.Join("legacy-python", "venv", "Lib", "site-packages", "ee", "oauth.py"),
-		filepath.Join("legacy-python", "venv", "lib", "site-packages", "ee", "oauth.py"),
-		filepath.Join("backend", "venv", "Lib", "site-packages", "ee", "oauth.py"),
+		filepath.Join("venv", "Lib", "site-packages", "ee", "oauth.py"),
+		filepath.Join(".venv", "Lib", "site-packages", "ee", "oauth.py"),
 	}
 	out := append([]string{}, rel...)
 	if root, ok := repoRoot(); ok {

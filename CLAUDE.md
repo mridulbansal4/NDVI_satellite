@@ -2,99 +2,99 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-> **⚠️ MIGRATION IN PROGRESS — this file is stale below this banner.**
->
-> The backend is being ported from Python/Flask to Go per
-> `PRAGYA_GO_MIGRATION_PRD.md`. **`backend/` has moved to `legacy-python/`**, so
-> every path in the Commands and Architecture sections below is wrong until the
-> Phase 7 rewrite. The Python backend remains the reference implementation and
-> the source of all golden fixtures until then.
->
-> Current state, phase log, and the full known-issues register:
-> [`docs/CHANGELOG.md`](docs/CHANGELOG.md) and
-> [`docs/KNOWN_ISSUES.md`](docs/KNOWN_ISSUES.md).
->
-> Go: `make build`, `make test`, `make verify`. Python reference:
-> `legacy-python/venv/Scripts/python.exe app.py` (run from `legacy-python/`).
-
 ## What this is
 
-A Satellite Agronomy Intelligence Platform ("MindstriX"). Users draw farm-field polygons on a Leaflet map; the backend pulls Sentinel-2 imagery from Google Earth Engine (GEE), computes vegetation indices, and returns a smoothed per-cell heatmap grid plus farm statistics. A LangChain/Ollama chatbot ("Krishi Mitra") answers questions grounded in the current field's stats.
+A Satellite Agronomy Intelligence Platform ("MindstriX"). Users draw farm-field polygons on a Leaflet map; the backend pulls Sentinel-2 imagery from Google Earth Engine (GEE), computes vegetation indices, and returns a smoothed per-cell heatmap grid plus farm statistics. A chatbot ("Krishi Mitra") answers questions grounded in the current field's stats.
+
+The backend is **Go**. It was ported from Python/Flask under `PRAGYA_GO_MIGRATION_PRD.md`; the Python implementation was deleted at tag `v2.0.0-go` and can be recovered with `git checkout v2.0.0-go~1 -- legacy-python`.
 
 ## Commands
 
-This machine uses `py` (not `python`) and the venv lives at `backend/venv`.
-
 ```powershell
-# One-time backend setup
-cd C:\Projects\NDVI_satellite\backend
-py -m venv venv
-.\venv\Scripts\pip.exe install -r requirements.txt -r chatbot\requirements.txt
-.\venv\Scripts\earthengine.exe authenticate   # opens browser for GEE OAuth
-
-# Run backend (Flask, port 5000)
-.\venv\Scripts\python.exe app.py
+# Backend (Go, port 5000)
+go build -o bin/server ./cmd/server
+./bin/server                       # or: go run ./cmd/server
 # Health check: GET http://127.0.0.1:5000/health → {"gee_ready": true, ...}
 
-# Run frontend (Vite dev server, port 5173)
-cd C:\Projects\NDVI_satellite\frontend
-npm install        # first time only
+make build        # build the binary
+make test         # go test
+make test-race    # go test -race
+make verify       # vet + staticcheck + race tests + contract suite  ← the gate
+make contract     # replay the frozen HTTP corpus against a running server
+make docker       # multi-stage distroless image
+
+# Frontend (Vite dev server, port 5173) — unchanged by the migration
+cd frontend
+npm install       # first time only
 npm run dev
-npm run build      # production build → frontend/dist (Firebase hosting target)
-npm run lint       # ESLint
+npm run build     # production build → frontend/dist (Firebase hosting target)
+npm run lint
 ```
 
-There is no automated test suite. The GEE pipeline is validated by hitting the live endpoints with a polygon.
+`make verify` must be green before any change is considered done. It needs a server running on `:5001` for the contract stage (`make contract GO_BASE=...` to point elsewhere).
 
 ## Architecture
 
-### Backend (`backend/`) — Flask + Google Earth Engine
+### `cmd/server` — entrypoint
 
-`app.py` is the Flask entrypoint. It is a **pure REST API** (no HTML) with CORS open only to the Vite dev origins. GEE and Firebase are initialized lazily, exactly once, in a `@app.before_request` hook (`app._gee_ready` / `app._firebase_ready` flags).
+Wiring only: config → dependencies → router → `ListenAndServe`. Startup probes for GEE and Firebase run **once, in goroutines** — neither may prevent startup, because `/health`, `/auth/*` and `/dashboard` must work without them. `WriteTimeout` is 300 s (a cold `/api/analyze` on a large polygon can exceed 60 s, and Vite proxies `/api` with a 300 s timeout); shutdown drains for 30 s.
 
-Request flow for the core `/api/analyze` endpoint, with each stage owned by one service module — this layering is the key thing to understand:
+### `internal/gee` — the only package that talks to Earth Engine
 
-1. `utils/geo_utils.py` — validate the GeoJSON polygon and convert it to an `ee.Geometry`.
-2. `services/gee_service.py` — **the only module that talks to GEE directly.** Filters the Sentinel-2 collection (`COPERNICUS/S2_SR_HARMONIZED`) by bounds/date/cloud-cover, applies per-pixel SCL cloud+shadow masking, scales DN→reflectance (÷10000), and reduces to a median composite. Also produces bicubic-resampled tile URLs and single-pixel hover samples.
-3. `services/index_service.py` — computes NDVI, EVI, SAVI, NDMI, NDWI, GNDVI on the composite, then a weighted **Composite Vegetation Index (CVI)** = weighted sum of those bands. Returns one multi-band `ee.Image`.
-4. `services/grid_service.py` — tiles the polygon into a metre-based grid (`coveringGrid().atScale()`), auto-coarsening the scale to stay under `MAX_GRID_CELLS`, reduces each cell's index values, applies Gaussian spatial smoothing, attaches interpretation labels, and emits a GeoJSON FeatureCollection.
-5. `services/stats_service.py` — computes the farm-wide summary + a 0–100 confidence score.
+There is **no Go Earth Engine SDK**; Google ships JavaScript and Python clients only. The Python `ee` package is a lazy computation-graph builder, so this package reimplements that:
 
-Everything operates lazily on GEE servers until `.getInfo()` / `.getMapId()` is called. The most recent indexed image + geometry are cached on the `app` object (`app._last_indexed_image`) so the `/api/sample` hover endpoint can sample without re-running the pipeline.
+- `eeexpr/` builds Earth Engine expression-graph JSON by hand. `Compile` interns shared subtrees and hoists function-definition bodies (the wire format stores a body as a *string reference*). `Canonicalise` inlines a graph and alpha-renames mapping variables so two graphs can be compared for meaning rather than byte layout.
+- `session.go` resolves credentials: a service-account key (`GEE_SERVICE_ACCOUNT_KEY`, the production path) or the `earthengine authenticate` refresh token plus `GEE_OAUTH_CLIENT_ID`/`SECRET` (developer fallback).
+- `client.go` performs `value:compute`, `table:computeFeatures` (with `nextPageToken` paging) and `maps`. Retries **only** 429 and 5xx — a 400 means the expression graph is malformed and retrying just delays the real error.
 
-**Endpoints:** `/api/analyze` (median composite over last 90 days), `/api/analyze-dates` (list available S2 acquisition dates), `/api/analyze-day` (single-date NDVI), `/api/sample` (hover pixel value), `/api/auth/verify-token` (Firebase JWT verify), `/health`.
+**`X-Goog-User-Project` is required** with user credentials, or Earth Engine answers 403 "Not signed up for Earth Engine" even for a properly registered project.
 
-**`config.py` is the single tuning surface.** All GEE settings, band aliases, `CVI_WEIGHTS` (must sum to 1.0), grid resolution, cloud thresholds, and the index→interpretation threshold tables live here. Business logic reads from it — change behavior here, not in the service modules. Note: `config.py` weights/thresholds and the values quoted in `README.md` have drifted apart; trust `config.py`.
+### `internal/pipeline` — the analytics core
 
-### Chatbot (`backend/chatbot/`) — Flask Blueprint + LangChain/Ollama
+Never imports `net/http` or Gin; it deals in expression graphs and plain data, behind an `EEClient` interface. That layering is what makes the parity tests possible.
 
-Registered as a blueprint under `/chatbot`. Layered so HTTP, prompt, and LLM concerns stay separate:
-- `routes.py` — HTTP only (`/chat`, `/reset`, `/health`). Receives `farmData` + `heatmapData` from the frontend on every message.
-- `prompts/` — `build_system_prompt(farm_data, heatmap_data)` injects the **current field's live stats** into the system prompt, so the prompt is rebuilt per request.
-- `memory.py` — in-process per-`session_id` chat history (capped by `CHATBOT_MAX_HISTORY`).
-- `chain.py` — builds the `ChatOllama` chain. The LLM is a **local Ollama server** (`OLLAMA_BASE_URL` / `OLLAMA_MODEL`); it must be running (`ollama serve`) with the model pulled, or `/chat` returns 502.
+`sentinel2.go` → `indices.go` → `grid.go` → `smooth.go` → `stats.go`, plus the independent `sentinel1.go` / `radar_indices.go` / `radar_grid.go` radar path. `cache.go` is a TTL'd, bounded expression cache replacing the old process-global `app._last_indexed_image`.
 
-### Frontend (`frontend/`) — React 19 + Vite + Leaflet
+`smooth.go` is a deliberately literal port: the centroid counts the duplicated closing vertex, `j == i` is included in the weighted sum, and iteration runs in slice order because float addition is not associative. Those quirks are load-bearing for numeric parity.
 
-- `App.jsx` — top-level state. Holds a **multi-field** model (`fields[]`, `activeFieldId`); each field carries its own geometry, analysis data, available dates, and selected date. An auth gate (`PremiumAuthFlow`) wraps the dashboard.
-- `api.js` — the single backend client. All calls go same-origin and rely on Vite's proxy; set `VITE_API_BASE_URL` to target a non-proxied backend.
-- `MapView.jsx` / `HeatmapLayer.jsx` — Leaflet map, polygon draw/edit (leaflet-draw, @turf/turf), and heatmap rendering of the returned grid.
-- `firebase.js` + `PremiumAuthFlow.jsx` / `AuthModal.jsx` — Firebase phone-auth client. The client gets a JWT and the backend verifies it via Firebase Admin.
+### `internal/httpapi` — the HTTP layer
 
-`vite.config.js` proxies `/api` (300s timeout — GEE calls are slow) and `/chatbot` to `http://127.0.0.1:5000`.
+Never builds expression graphs. All 24 routes, global CORS, three distinct error envelope shapes (`{"error":…}`, `{"errors":{field:[msg]}}`, `{"msg":…}`), and marshmallow-compatible validation.
 
-### Data / external services
+### Other packages
 
-- **GEE**: requires `GEE_PROJECT_ID` in `backend/.env` and stored OAuth creds (`earthengine authenticate`). Without a project ID the server logs an actionable error and `gee_ready` stays false.
-- **Firebase**: `serviceAccountKey.json` (project root, gitignored) enables Firebase Admin. It's absent in dev, so `firebase_ready: false` is normal and only disables auth features.
-- **PostgreSQL + PostGIS**: schema in `mindstrix_setup.sql`, setup walkthrough in `DATABASE_SETUP.md`. (Relational data store; not yet wired into the Flask request path.)
+`internal/config` (the single tuning surface), `internal/geo` (polygon validation), `internal/repo` + `internal/db` (hand-written SQL over pgx — no ORM, because the queries use PostGIS functions, `DISTINCT ON`, `ON CONFLICT … RETURNING` and `= ANY($1::uuid[])`), `internal/service` (onboarding, SMS, PIN lookup), `internal/crypto` (Werkzeug hash compatibility), `internal/jwtutil`, `internal/firebase`, `internal/firestore`, `internal/chatbot`, `internal/ollama`, `internal/logging`.
 
-### `backend/legacy/`
+**Endpoints:** `/api/analyze`, `/api/analyze-dates`, `/api/analyze-day`, `/api/analyze-radar`, `/api/analyze-radar-dates`, `/api/sample`, `/api/auth/*`, `/auth/signup`, `/auth/login`, the 9-step onboarding (`/farmer/*`, `/farm`, `/crop`, `/irrigation`, `/soil`, `/consent`), `/dashboard`, `/chatbot/*`, `/health`. Full matrix with verified responses in [docs/ENDPOINT_VERIFICATION.md](docs/ENDPOINT_VERIFICATION.md).
 
-The original interactive CLI version of the engine (`main.py`, `gee_engine.py`). Superseded by the `services/` + `app.py` web architecture — reference only, not imported by the running app.
+**`internal/config/config.go` is the single tuning surface.** All GEE settings, band aliases, `CVIWeights` (must sum to 1.0), grid resolution, cloud thresholds, palettes, and the index→interpretation threshold tables live there. Change behaviour there, not in the service packages. Thresholds are **descending ordered slices**, not maps — the ordering is load-bearing.
+
+Note: `config.go` weights/thresholds and the values quoted in `README.md` have drifted apart; **trust `config.go`** (see K2).
+
+## Testing strategy
+
+Four independent layers, all gated on fixtures captured from the original Python implementation before it was deleted:
+
+| Layer | What | Where |
+|---|---|---|
+| 1 | EE expression graphs — every builder compared for structural equality | `internal/gee/eeexpr/testdata/`, asserted in `internal/pipeline/graph_test.go` |
+| 2 | HTTP contract — 73 cases replayed against a running server | `testdata/golden/`, run by `tools/contract` |
+| 3 | Numeric parity — full responses for five fixture polygons | `testdata/golden/numeric/` |
+| 4 | Cross-runtime — Werkzeug hashes and prompt renders | `internal/crypto/testdata/`, `internal/chatbot/testdata/` |
+
+Live Earth Engine tests are gated behind `GEE_LIVE_TEST=1` so the default suite is offline and deterministic.
+
+**The fixtures beat any documentation, including the PRD.** Twelve of the PRD's stated Earth Engine function/argument names were wrong in ways that produce a runtime 400 from Google rather than a compile error. If you add an EE call, capture a fixture for it.
 
 ## Conventions
 
-- Config over code: tune `backend/config.py` and `.env`; avoid hardcoding thresholds/weights in service modules.
-- Keep GEE calls confined to `gee_service.py`; other modules pass `ee.Image` / `ee.Geometry` objects around.
-- `.env` files (both `backend/` and `frontend/`) and `serviceAccountKey.json` are gitignored — never commit secrets.
+- Config over code: tune `internal/config/config.go` and `.env`.
+- Keep Earth Engine calls confined to `internal/gee`; other packages pass `eeexpr.Image` / `eeexpr.Geometry` values around.
+- **Never modify `frontend/`.** The HTTP contract is frozen: if a Go response breaks the UI, the Go response is wrong.
+- Index values, means and samples are `*float64`. A masked cell must serialise as JSON `null`, never `0` — a `0` renders dark red on the heatmap and is a visible bug.
+- `.env` and `serviceAccountKey.json` are gitignored — never commit secrets.
+- Error strings are user-facing contract text, so they are capitalised and end with periods. `ST1005` is disabled repo-wide for this reason; see `staticcheck.conf`.
+
+## Known issues
+
+[docs/KNOWN_ISSUES.md](docs/KNOWN_ISSUES.md) lists 15 behaviours (K1–K15) that are **deliberately preserved** from the Python implementation, including two field-type asymmetries where the same database column serialises differently on different endpoints. Do not "fix" them without checking the frontend first. [docs/CHANGELOG.md](docs/CHANGELOG.md) records the migration.
