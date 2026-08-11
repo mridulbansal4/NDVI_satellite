@@ -1,6 +1,9 @@
 # Changelog
 
-## Unreleased — Project Pragya: Python → Go backend migration
+## v2.0.0-go — Project Pragya: Python → Go backend migration
+
+**Released.** `legacy-python/` deleted; the Go backend is the implementation.
+Recover the reference with `git checkout v2.0.0-go~1 -- legacy-python`.
 
 Tracking `PRAGYA_GO_MIGRATION_PRD.md`. Each phase below lands as its own
 reviewable commit range and must leave `make verify` green.

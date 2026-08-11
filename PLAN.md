@@ -110,20 +110,21 @@ Go-created user logs into Python and Python accepts Go-issued JWTs.
 - [x] `internal/ollama/client.go` — direct `/api/chat`, LangChain dropped — §10.11
 - [x] Wire E22–E24
 
-## Phase 7 — Cutover & cleanup  PARTIAL
+## Phase 7 — Cutover & cleanup  DONE
 
 - [x] Endpoint-by-endpoint verification, actual status + body recorded
       -> docs/ENDPOINT_VERIFICATION.md, 64/64 pass
-- [x] Live Go-vs-Python numeric parity on the analysis endpoints
+- [x] Live Go-vs-Python numeric parity on the analysis endpoints, 10/10
 - [x] Full 9-step onboarding walked on BOTH backends and diffed, 0 failing
-      -> legacy-python/tools/verify_onboarding.py
+- [x] Contract suite green in both modes: live Go-vs-Python (59 pass, 0 fail)
+      and goldens-only (69 pass, 0 fail — needs no Python, and is the
+      regression net that survives the deletion)
+- [x] Docs rewritten — `CLAUDE.md` for the Go architecture, `README.md`
+      install/usage/architecture, and its CVI weight table corrected (K2)
+- [x] **`legacy-python/` deleted** in its own commit, with `.env` and the Earth
+      Engine OAuth client preserved to the repo root first
+- [x] Tagged `v2.0.0-go`
 - [x] `REPORT.md`
-- [ ] Docs rewritten (`CLAUDE.md`, `README.md`) — §16; a stale-state banner plus
-      docs/CHANGELOG.md and docs/KNOWN_ISSUES.md are in place instead
-- [ ] Delete `legacy-python/` — **deliberately NOT done.** §0.7 keeps it until
-      Phase 7 sign-off, and it is still the source of every golden fixture and
-      the reference for the live comparison harnesses. Deleting it is a
-      one-line change once you have signed off.
 
 ---
 

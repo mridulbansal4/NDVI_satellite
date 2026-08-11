@@ -116,10 +116,29 @@ drift; it renders identically to the Python for both fixture cases. Plus
 mutex-guarded session memory and a direct Ollama `/api/chat` client — LangChain
 dropped entirely (O5).
 
-### Phase 7 — Cutover ⚠️ PARTIAL
+### Phase 7 — Cutover ✅
 
-Endpoint verification done and recorded (64/64). `legacy-python/` deliberately
-**not** deleted — see §4.1.
+Parity re-proven with both backends live, then `legacy-python/` deleted in its
+own commit and the work tagged `v2.0.0-go`.
+
+| Gate | Result |
+|---|---|
+| Analysis endpoints, live numeric diff | 10/10, 0 failing |
+| 9-step onboarding + cross-runtime tokens | 0 failing |
+| Every endpoint exercised against Go | 64/64 |
+| Contract suite, live Go vs Python | 59 pass, 0 fail |
+| Contract suite, goldens only (no Python) | 69 pass, 0 fail |
+
+Two things were preserved before deleting, because both would have broken
+silently: `legacy-python/.env` (every credential) moved to the repo root, and
+the Earth Engine OAuth client — previously read at runtime from the installed
+`ee/oauth.py` — written into `.env` as `GEE_OAUTH_CLIENT_ID` /
+`GEE_OAUTH_CLIENT_SECRET`. Without the second, the developer auth fallback
+loses Earth Engine access entirely, since no service account exists yet.
+
+Verified after deletion by hiding the directory and running the full suite: the
+server starts with GEE, PostgreSQL and Firebase all initialising, and vet,
+staticcheck, race tests and the contract suite are green.
 
 ---
 
@@ -203,19 +222,30 @@ Small errors found and fixed without stopping:
 
 ## 4. UNRESOLVED / COMPLEX ISSUES
 
-### 4.1 `legacy-python/` is still present — deliberately
+### 4.1 The comparison harnesses went with `legacy-python`
 
-**What:** the Python backend has not been deleted.
+**What:** `verify_endpoints.py`, `verify_onboarding.py`, `exercise_endpoints.py`
+and the `dump_*.py` capture tools lived inside `legacy-python/` and were deleted
+with it. Live Go-vs-Python diffing is no longer possible from the working tree.
 
-**Why:** PRD §0.7 keeps it until Phase 7 sign-off, and it is currently load
-bearing for verification, not just sentiment. Three harnesses run the two
-backends side by side (`verify_endpoints.py`, `verify_onboarding.py`,
-`dump_*.py`), and the date-relative goldens (§4.5) mean live comparison is the
-only reliable parity check. Deleting it removes the ability to re-prove parity.
+**Why this is acceptable:** the committed fixtures are what the tests assert
+against, and `tools/contract` (Go) replays all 73 contract cases with no Python
+at all — 69 pass, 0 fail. That plus `go test -race` is the surviving regression
+net, and it is green.
 
-**Recommendation:** delete it in its own commit **after** you have run the
-frontend against Go (§6 item 3) and are satisfied. That is what §14 Phase 7
-prescribes, and it stays trivially revertable.
+**What you lose:** the ability to re-derive parity against the original. If an
+Earth Engine API change ever invalidates a fixture, you cannot recapture without
+restoring the reference:
+
+```bash
+git checkout v2.0.0-go~1 -- legacy-python
+```
+
+The `fixtures` Make target now prints that instruction rather than failing
+obscurely.
+
+**Recommendation:** none needed — this is the expected consequence of the
+cutover, recorded so it is not a surprise later.
 
 ### 4.2 No Earth Engine service account exists (objective O7 unmet)
 
@@ -329,16 +359,41 @@ and should wait until after cutover.
 
 ## 6. What you need to do next
 
-1. **Review the branch.** `git log --oneline main..feat/pragya-go-migration` — eight commits, each independently verified.
-2. **Provision the Earth Engine service account** (§4.2). Console-only task, blocks objective O7 and any deploy. This is the single largest remaining risk.
-3. **Run the frontend against the Go backend** for the §12.4 visual check: draw a polygon, analyse, toggle all seven layers, switch dates, hover, then the radar layers, then walk the onboarding flow. Every JSON response is proven identical, but tile *rendering* is the one thing a JSON diff cannot catch.
+The migration is complete and tagged `v2.0.0-go`. What remains is deployment and
+two verifications only you can perform.
+
+1. **Provision the Earth Engine service account.** This is the last unmet
+   objective (O7) and the only thing blocking a real deploy. Console-only task:
+   create a service account in the `GEE_PROJECT_ID` project, register it at
+   `signup.earthengine.google.com/#!/service_accounts`, download the key, and
+   point `GEE_SERVICE_ACCOUNT_KEY` at it. Until then the server runs on the
+   developer OAuth fallback, which depends on a token a human created.
+2. **Run the frontend against the Go backend.** Every JSON response is proven
+   identical, but tile *rendering* is the one thing a JSON diff cannot catch.
+   Draw a polygon, analyse, toggle all seven layers, switch dates, hover for the
+   sample tooltip, then the radar layers, then walk the onboarding flow.
    ```bash
    go build -o bin/server ./cmd/server && ./bin/server
    ```
-4. **Start Ollama and exercise the chatbot round trip** (§4.6) — the only untested path in an otherwise complete Phase 6.
+3. **Start Ollama and exercise the chatbot round trip** — the only untested path
+   in an otherwise complete Phase 6. The prompt render, memory and client are
+   unit-tested; the round trip is not.
    ```bash
    ollama serve
    ```
-5. **Decide on K14/K15** (the `total_area` string and RFC-1123 `sowing_date` asymmetries). They are faithfully reproduced, but they are almost certainly unintended in the original. Fixing them is a frontend-visible change and belongs in Phase 8, not here.
-6. **Pin the golden capture window** (§4.5) so the numeric goldens stop drifting, or accept live side-by-side as the parity method.
-7. **Delete `legacy-python/`** in its own commit once items 3 and 4 pass (§4.1), then tag `v2.0.0-go`.
+4. **Back up `.env`.** It now lives at the repo root, is gitignored, and is the
+   only copy of your credentials plus the Earth Engine OAuth client that was
+   rescued from the deleted venv. If it is lost, the developer auth path cannot
+   be reconstructed without reinstalling `earthengine-api`.
+5. **Decide on K14/K15** (the `total_area` string and RFC-1123 `sowing_date`
+   asymmetries, §4.7). They are faithfully reproduced but almost certainly
+   unintended. Fixing them is frontend-visible and belongs in a Phase 8 with a
+   frontend audit.
+6. **Consider the Phase 8 backlog** in PRD §14: async job queue, result caching,
+   persisting `vi_reports` rows, and fixing K1–K15.
+
+If anything looks wrong, the Python implementation is one commit back:
+
+```bash
+git checkout v2.0.0-go~1 -- legacy-python
+```
