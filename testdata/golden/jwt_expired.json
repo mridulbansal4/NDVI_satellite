@@ -1,0 +1,13 @@
+{
+  "auth": "expired",
+  "body": null,
+  "id": "jwt_expired",
+  "method": "GET",
+  "note": "",
+  "path": "/dashboard",
+  "query": null,
+  "response": {
+    "msg": "Token has expired"
+  },
+  "status": 401
+}

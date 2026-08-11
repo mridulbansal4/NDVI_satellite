@@ -1,0 +1,17 @@
+{
+  "auth": null,
+  "body": null,
+  "id": "e7_sample_bad_band",
+  "method": "GET",
+  "note": "§6.2 error text embeds the Python list repr",
+  "path": "/api/sample",
+  "query": {
+    "band": "NOPE",
+    "lat": "20.0116",
+    "lng": "73.7908"
+  },
+  "response": {
+    "error": "Invalid band. Must be one of: ['NDVI', 'EVI', 'SAVI', 'NDMI', 'NDWI', 'GNDVI', 'CVI']"
+  },
+  "status": 400
+}

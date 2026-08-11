@@ -1,0 +1,22 @@
+{
+  "auth": "valid",
+  "body": {
+    "age": 40,
+    "gender": "male",
+    "name": "Contract Test",
+    "preferred_language": "marathi"
+  },
+  "id": "e13_basic_details_success",
+  "method": "POST",
+  "note": "",
+  "path": "/farmer/basic-details",
+  "query": null,
+  "response": {
+    "age": 40,
+    "gender": "male",
+    "id": "4f1f5eb6-daf8-4cdd-9b96-26c8feee7cfc",
+    "name": "Contract Test",
+    "preferred_language": "marathi"
+  },
+  "status": 200
+}

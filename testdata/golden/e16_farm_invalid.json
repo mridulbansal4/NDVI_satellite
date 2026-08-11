@@ -1,0 +1,39 @@
+{
+  "auth": "valid",
+  "body": {
+    "area_unit": "bushels",
+    "farm_name": "",
+    "land_ownership": "nope",
+    "latitude": 200,
+    "longitude": 400,
+    "total_area": 0
+  },
+  "id": "e16_farm_invalid",
+  "method": "POST",
+  "note": "",
+  "path": "/farm",
+  "query": null,
+  "response": {
+    "errors": {
+      "area_unit": [
+        "Must be one of: acres, hectares."
+      ],
+      "farm_name": [
+        "Length must be between 1 and 255."
+      ],
+      "land_ownership": [
+        "Must be one of: own_land, leased_land, contract_farming."
+      ],
+      "latitude": [
+        "Must be greater than or equal to -90 and less than or equal to 90."
+      ],
+      "longitude": [
+        "Must be greater than or equal to -180 and less than or equal to 180."
+      ],
+      "total_area": [
+        "Must be greater than or equal to 0.01."
+      ]
+    }
+  },
+  "status": 400
+}

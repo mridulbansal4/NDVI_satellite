@@ -1,0 +1,13 @@
+{
+  "auth": null,
+  "body": {},
+  "id": "e2_analyze_no_body",
+  "method": "POST",
+  "note": "§10.3 missing geometry — long wording",
+  "path": "/api/analyze",
+  "query": null,
+  "response": {
+    "error": "Request body must contain a 'geometry' key with a GeoJSON Polygon."
+  },
+  "status": 400
+}

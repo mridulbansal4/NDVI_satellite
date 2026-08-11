@@ -1,0 +1,20 @@
+{
+  "auth": "valid",
+  "body": {
+    "farm_id": "011b1c73-2215-4b4a-83c5-45d35385b054",
+    "irrigation_type": "drip_irrigation",
+    "water_source": "borewell"
+  },
+  "id": "e18_irrigation_success",
+  "method": "POST",
+  "note": "",
+  "path": "/irrigation",
+  "query": null,
+  "response": {
+    "farm_id": "011b1c73-2215-4b4a-83c5-45d35385b054",
+    "id": "04ada246-39a3-4f27-9c92-3e16cd01112a",
+    "irrigation_type": "drip_irrigation",
+    "water_source": "borewell"
+  },
+  "status": 201
+}

@@ -1,0 +1,20 @@
+{
+  "auth": null,
+  "body": {
+    "mobile_number": "123",
+    "password": "secret1"
+  },
+  "id": "e11_signup_bad_mobile",
+  "method": "POST",
+  "note": "§6.2 — 422, not 400. Inconsistency is preserved.",
+  "path": "/auth/signup",
+  "query": null,
+  "response": {
+    "errors": {
+      "mobile_number": [
+        "Mobile number must be exactly 10 digits."
+      ]
+    }
+  },
+  "status": 422
+}

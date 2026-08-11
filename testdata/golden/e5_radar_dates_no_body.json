@@ -1,0 +1,13 @@
+{
+  "auth": null,
+  "body": {},
+  "id": "e5_radar_dates_no_body",
+  "method": "POST",
+  "note": "",
+  "path": "/api/analyze-radar-dates",
+  "query": null,
+  "response": {
+    "error": "Missing geometry"
+  },
+  "status": 400
+}

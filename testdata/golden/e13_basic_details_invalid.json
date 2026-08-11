@@ -1,0 +1,23 @@
+{
+  "auth": "valid",
+  "body": {
+    "name": "",
+    "preferred_language": "klingon"
+  },
+  "id": "e13_basic_details_invalid",
+  "method": "POST",
+  "note": "§7.11 — pins the marshmallow OneOf wording",
+  "path": "/farmer/basic-details",
+  "query": null,
+  "response": {
+    "errors": {
+      "name": [
+        "Length must be between 1 and 255."
+      ],
+      "preferred_language": [
+        "Must be one of: english, hindi, marathi, others."
+      ]
+    }
+  },
+  "status": 400
+}

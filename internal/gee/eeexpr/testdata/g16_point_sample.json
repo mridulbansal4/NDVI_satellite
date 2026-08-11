@@ -1,0 +1,954 @@
+{
+  "result": "0",
+  "values": {
+    "0": {
+      "functionInvocationValue": {
+        "arguments": {
+          "geometry": {
+            "functionInvocationValue": {
+              "arguments": {
+                "coordinates": {
+                  "constantValue": [
+                    73.7908,
+                    20.0116
+                  ]
+                }
+              },
+              "functionName": "GeometryConstructors.Point"
+            }
+          },
+          "image": {
+            "functionInvocationValue": {
+              "arguments": {
+                "bandSelectors": {
+                  "valueReference": "1"
+                },
+                "input": {
+                  "functionInvocationValue": {
+                    "arguments": {
+                      "dstImg": {
+                        "valueReference": "2"
+                      },
+                      "srcImg": {
+                        "functionInvocationValue": {
+                          "arguments": {
+                            "input": {
+                              "functionInvocationValue": {
+                                "arguments": {
+                                  "image1": {
+                                    "functionInvocationValue": {
+                                      "arguments": {
+                                        "image1": {
+                                          "functionInvocationValue": {
+                                            "arguments": {
+                                              "image1": {
+                                                "functionInvocationValue": {
+                                                  "arguments": {
+                                                    "image1": {
+                                                      "functionInvocationValue": {
+                                                        "arguments": {
+                                                          "image1": {
+                                                            "functionInvocationValue": {
+                                                              "arguments": {
+                                                                "bandSelectors": {
+                                                                  "valueReference": "1"
+                                                                },
+                                                                "input": {
+                                                                  "valueReference": "2"
+                                                                }
+                                                              },
+                                                              "functionName": "Image.select"
+                                                            }
+                                                          },
+                                                          "image2": {
+                                                            "functionInvocationValue": {
+                                                              "arguments": {
+                                                                "value": {
+                                                                  "constantValue": 0.7
+                                                                }
+                                                              },
+                                                              "functionName": "Image.constant"
+                                                            }
+                                                          }
+                                                        },
+                                                        "functionName": "Image.multiply"
+                                                      }
+                                                    },
+                                                    "image2": {
+                                                      "functionInvocationValue": {
+                                                        "arguments": {
+                                                          "image1": {
+                                                            "functionInvocationValue": {
+                                                              "arguments": {
+                                                                "bandSelectors": {
+                                                                  "valueReference": "16"
+                                                                },
+                                                                "input": {
+                                                                  "valueReference": "2"
+                                                                }
+                                                              },
+                                                              "functionName": "Image.select"
+                                                            }
+                                                          },
+                                                          "image2": {
+                                                            "valueReference": "22"
+                                                          }
+                                                        },
+                                                        "functionName": "Image.multiply"
+                                                      }
+                                                    }
+                                                  },
+                                                  "functionName": "Image.add"
+                                                }
+                                              },
+                                              "image2": {
+                                                "functionInvocationValue": {
+                                                  "arguments": {
+                                                    "image1": {
+                                                      "functionInvocationValue": {
+                                                        "arguments": {
+                                                          "bandSelectors": {
+                                                            "valueReference": "18"
+                                                          },
+                                                          "input": {
+                                                            "valueReference": "2"
+                                                          }
+                                                        },
+                                                        "functionName": "Image.select"
+                                                      }
+                                                    },
+                                                    "image2": {
+                                                      "valueReference": "23"
+                                                    }
+                                                  },
+                                                  "functionName": "Image.multiply"
+                                                }
+                                              }
+                                            },
+                                            "functionName": "Image.add"
+                                          }
+                                        },
+                                        "image2": {
+                                          "functionInvocationValue": {
+                                            "arguments": {
+                                              "image1": {
+                                                "functionInvocationValue": {
+                                                  "arguments": {
+                                                    "bandSelectors": {
+                                                      "valueReference": "19"
+                                                    },
+                                                    "input": {
+                                                      "valueReference": "2"
+                                                    }
+                                                  },
+                                                  "functionName": "Image.select"
+                                                }
+                                              },
+                                              "image2": {
+                                                "valueReference": "22"
+                                              }
+                                            },
+                                            "functionName": "Image.multiply"
+                                          }
+                                        }
+                                      },
+                                      "functionName": "Image.add"
+                                    }
+                                  },
+                                  "image2": {
+                                    "functionInvocationValue": {
+                                      "arguments": {
+                                        "image1": {
+                                          "functionInvocationValue": {
+                                            "arguments": {
+                                              "bandSelectors": {
+                                                "valueReference": "21"
+                                              },
+                                              "input": {
+                                                "valueReference": "2"
+                                              }
+                                            },
+                                            "functionName": "Image.select"
+                                          }
+                                        },
+                                        "image2": {
+                                          "valueReference": "23"
+                                        }
+                                      },
+                                      "functionName": "Image.multiply"
+                                    }
+                                  }
+                                },
+                                "functionName": "Image.add"
+                              }
+                            },
+                            "names": {
+                              "constantValue": [
+                                "CVI"
+                              ]
+                            }
+                          },
+                          "functionName": "Image.rename"
+                        }
+                      }
+                    },
+                    "functionName": "Image.addBands"
+                  }
+                }
+              },
+              "functionName": "Image.select"
+            }
+          },
+          "maxPixels": {
+            "constantValue": 1
+          },
+          "reducer": {
+            "functionInvocationValue": {
+              "arguments": {},
+              "functionName": "Reducer.first"
+            }
+          },
+          "scale": {
+            "constantValue": 10
+          }
+        },
+        "functionName": "Image.reduceRegion"
+      }
+    },
+    "1": {
+      "constantValue": [
+        "NDVI"
+      ]
+    },
+    "10": {
+      "functionInvocationValue": {
+        "arguments": {
+          "argName": {
+            "valueReference": "11"
+          },
+          "expression": {
+            "constantValue": "2.5 * (NIR - RED) / (NIR + 6.0 * RED - 7.5 * BLUE + 1.0)"
+          },
+          "vars": {
+            "arrayValue": {
+              "values": [
+                {
+                  "valueReference": "11"
+                },
+                {
+                  "valueReference": "12"
+                },
+                {
+                  "valueReference": "13"
+                },
+                {
+                  "constantValue": "BLUE"
+                }
+              ]
+            }
+          }
+        },
+        "functionName": "Image.parseExpression"
+      }
+    },
+    "11": {
+      "constantValue": "DEFAULT_EXPRESSION_IMAGE"
+    },
+    "12": {
+      "constantValue": "NIR"
+    },
+    "13": {
+      "constantValue": "RED"
+    },
+    "14": {
+      "functionInvocationValue": {
+        "arguments": {
+          "bandSelectors": {
+            "arrayValue": {
+              "values": [
+                {
+                  "valueReference": "8"
+                }
+              ]
+            }
+          },
+          "input": {
+            "valueReference": "3"
+          }
+        },
+        "functionName": "Image.select"
+      }
+    },
+    "15": {
+      "functionInvocationValue": {
+        "arguments": {
+          "bandSelectors": {
+            "arrayValue": {
+              "values": [
+                {
+                  "valueReference": "9"
+                }
+              ]
+            }
+          },
+          "input": {
+            "valueReference": "3"
+          }
+        },
+        "functionName": "Image.select"
+      }
+    },
+    "16": {
+      "constantValue": [
+        "EVI"
+      ]
+    },
+    "17": {
+      "functionInvocationValue": {
+        "arguments": {
+          "argName": {
+            "valueReference": "11"
+          },
+          "expression": {
+            "constantValue": "((NIR - RED) / (NIR + RED + 0.5)) * 1.5"
+          },
+          "vars": {
+            "arrayValue": {
+              "values": [
+                {
+                  "valueReference": "11"
+                },
+                {
+                  "valueReference": "12"
+                },
+                {
+                  "valueReference": "13"
+                }
+              ]
+            }
+          }
+        },
+        "functionName": "Image.parseExpression"
+      }
+    },
+    "18": {
+      "constantValue": [
+        "SAVI"
+      ]
+    },
+    "19": {
+      "constantValue": [
+        "NDMI"
+      ]
+    },
+    "2": {
+      "functionInvocationValue": {
+        "arguments": {
+          "dstImg": {
+            "valueReference": "3"
+          },
+          "srcImg": {
+            "functionInvocationValue": {
+              "arguments": {
+                "dstImg": {
+                  "functionInvocationValue": {
+                    "arguments": {
+                      "dstImg": {
+                        "functionInvocationValue": {
+                          "arguments": {
+                            "dstImg": {
+                              "functionInvocationValue": {
+                                "arguments": {
+                                  "dstImg": {
+                                    "functionInvocationValue": {
+                                      "arguments": {
+                                        "dstImg": {
+                                          "functionInvocationValue": {
+                                            "arguments": {
+                                              "input": {
+                                                "functionInvocationValue": {
+                                                  "arguments": {
+                                                    "bandNames": {
+                                                      "arrayValue": {
+                                                        "values": [
+                                                          {
+                                                            "valueReference": "8"
+                                                          },
+                                                          {
+                                                            "valueReference": "9"
+                                                          }
+                                                        ]
+                                                      }
+                                                    },
+                                                    "input": {
+                                                      "valueReference": "3"
+                                                    }
+                                                  },
+                                                  "functionName": "Image.normalizedDifference"
+                                                }
+                                              },
+                                              "names": {
+                                                "valueReference": "1"
+                                              }
+                                            },
+                                            "functionName": "Image.rename"
+                                          }
+                                        },
+                                        "srcImg": {
+                                          "functionInvocationValue": {
+                                            "arguments": {
+                                              "input": {
+                                                "functionInvocationValue": {
+                                                  "arguments": {
+                                                    "BLUE": {
+                                                      "functionInvocationValue": {
+                                                        "arguments": {
+                                                          "bandSelectors": {
+                                                            "constantValue": [
+                                                              "B2"
+                                                            ]
+                                                          },
+                                                          "input": {
+                                                            "valueReference": "3"
+                                                          }
+                                                        },
+                                                        "functionName": "Image.select"
+                                                      }
+                                                    },
+                                                    "DEFAULT_EXPRESSION_IMAGE": {
+                                                      "valueReference": "3"
+                                                    },
+                                                    "NIR": {
+                                                      "valueReference": "14"
+                                                    },
+                                                    "RED": {
+                                                      "valueReference": "15"
+                                                    }
+                                                  },
+                                                  "functionReference": "10"
+                                                }
+                                              },
+                                              "names": {
+                                                "valueReference": "16"
+                                              }
+                                            },
+                                            "functionName": "Image.rename"
+                                          }
+                                        }
+                                      },
+                                      "functionName": "Image.addBands"
+                                    }
+                                  },
+                                  "srcImg": {
+                                    "functionInvocationValue": {
+                                      "arguments": {
+                                        "input": {
+                                          "functionInvocationValue": {
+                                            "arguments": {
+                                              "DEFAULT_EXPRESSION_IMAGE": {
+                                                "valueReference": "3"
+                                              },
+                                              "NIR": {
+                                                "valueReference": "14"
+                                              },
+                                              "RED": {
+                                                "valueReference": "15"
+                                              }
+                                            },
+                                            "functionReference": "17"
+                                          }
+                                        },
+                                        "names": {
+                                          "valueReference": "18"
+                                        }
+                                      },
+                                      "functionName": "Image.rename"
+                                    }
+                                  }
+                                },
+                                "functionName": "Image.addBands"
+                              }
+                            },
+                            "srcImg": {
+                              "functionInvocationValue": {
+                                "arguments": {
+                                  "input": {
+                                    "functionInvocationValue": {
+                                      "arguments": {
+                                        "bandNames": {
+                                          "arrayValue": {
+                                            "values": [
+                                              {
+                                                "valueReference": "8"
+                                              },
+                                              {
+                                                "constantValue": "B11"
+                                              }
+                                            ]
+                                          }
+                                        },
+                                        "input": {
+                                          "valueReference": "3"
+                                        }
+                                      },
+                                      "functionName": "Image.normalizedDifference"
+                                    }
+                                  },
+                                  "names": {
+                                    "valueReference": "19"
+                                  }
+                                },
+                                "functionName": "Image.rename"
+                              }
+                            }
+                          },
+                          "functionName": "Image.addBands"
+                        }
+                      },
+                      "srcImg": {
+                        "functionInvocationValue": {
+                          "arguments": {
+                            "input": {
+                              "functionInvocationValue": {
+                                "arguments": {
+                                  "bandNames": {
+                                    "arrayValue": {
+                                      "values": [
+                                        {
+                                          "valueReference": "20"
+                                        },
+                                        {
+                                          "valueReference": "8"
+                                        }
+                                      ]
+                                    }
+                                  },
+                                  "input": {
+                                    "valueReference": "3"
+                                  }
+                                },
+                                "functionName": "Image.normalizedDifference"
+                              }
+                            },
+                            "names": {
+                              "constantValue": [
+                                "NDWI"
+                              ]
+                            }
+                          },
+                          "functionName": "Image.rename"
+                        }
+                      }
+                    },
+                    "functionName": "Image.addBands"
+                  }
+                },
+                "srcImg": {
+                  "functionInvocationValue": {
+                    "arguments": {
+                      "input": {
+                        "functionInvocationValue": {
+                          "arguments": {
+                            "bandNames": {
+                              "arrayValue": {
+                                "values": [
+                                  {
+                                    "valueReference": "8"
+                                  },
+                                  {
+                                    "valueReference": "20"
+                                  }
+                                ]
+                              }
+                            },
+                            "input": {
+                              "valueReference": "3"
+                            }
+                          },
+                          "functionName": "Image.normalizedDifference"
+                        }
+                      },
+                      "names": {
+                        "valueReference": "21"
+                      }
+                    },
+                    "functionName": "Image.rename"
+                  }
+                }
+              },
+              "functionName": "Image.addBands"
+            }
+          }
+        },
+        "functionName": "Image.addBands"
+      }
+    },
+    "20": {
+      "constantValue": "B3"
+    },
+    "21": {
+      "constantValue": [
+        "GNDVI"
+      ]
+    },
+    "22": {
+      "functionInvocationValue": {
+        "arguments": {
+          "value": {
+            "constantValue": 0.1
+          }
+        },
+        "functionName": "Image.constant"
+      }
+    },
+    "23": {
+      "functionInvocationValue": {
+        "arguments": {
+          "value": {
+            "constantValue": 0.05
+          }
+        },
+        "functionName": "Image.constant"
+      }
+    },
+    "3": {
+      "functionInvocationValue": {
+        "arguments": {
+          "collection": {
+            "functionInvocationValue": {
+              "arguments": {
+                "baseAlgorithm": {
+                  "functionDefinitionValue": {
+                    "argumentNames": [
+                      "_MAPPING_VAR_0_0"
+                    ],
+                    "body": "4"
+                  }
+                },
+                "collection": {
+                  "functionInvocationValue": {
+                    "arguments": {
+                      "baseAlgorithm": {
+                        "functionDefinitionValue": {
+                          "argumentNames": [
+                            "_MAPPING_VAR_0_0"
+                          ],
+                          "body": "5"
+                        }
+                      },
+                      "collection": {
+                        "functionInvocationValue": {
+                          "arguments": {
+                            "collection": {
+                              "functionInvocationValue": {
+                                "arguments": {
+                                  "collection": {
+                                    "functionInvocationValue": {
+                                      "arguments": {
+                                        "collection": {
+                                          "functionInvocationValue": {
+                                            "arguments": {
+                                              "id": {
+                                                "constantValue": "COPERNICUS/S2_SR_HARMONIZED"
+                                              }
+                                            },
+                                            "functionName": "ImageCollection.load"
+                                          }
+                                        },
+                                        "filter": {
+                                          "functionInvocationValue": {
+                                            "arguments": {
+                                              "leftField": {
+                                                "constantValue": ".all"
+                                              },
+                                              "rightValue": {
+                                                "functionInvocationValue": {
+                                                  "arguments": {
+                                                    "geometry": {
+                                                      "functionInvocationValue": {
+                                                        "arguments": {
+                                                          "coordinates": {
+                                                            "arrayValue": {
+                                                              "values": [
+                                                                {
+                                                                  "arrayValue": {
+                                                                    "values": [
+                                                                      {
+                                                                        "valueReference": "7"
+                                                                      },
+                                                                      {
+                                                                        "constantValue": [
+                                                                          73.7916,
+                                                                          20.011
+                                                                        ]
+                                                                      },
+                                                                      {
+                                                                        "constantValue": [
+                                                                          73.7916,
+                                                                          20.0122
+                                                                        ]
+                                                                      },
+                                                                      {
+                                                                        "constantValue": [
+                                                                          73.79,
+                                                                          20.0122
+                                                                        ]
+                                                                      },
+                                                                      {
+                                                                        "valueReference": "7"
+                                                                      }
+                                                                    ]
+                                                                  }
+                                                                }
+                                                              ]
+                                                            }
+                                                          }
+                                                        },
+                                                        "functionName": "GeometryConstructors.Polygon"
+                                                      }
+                                                    }
+                                                  },
+                                                  "functionName": "Feature"
+                                                }
+                                              }
+                                            },
+                                            "functionName": "Filter.intersects"
+                                          }
+                                        }
+                                      },
+                                      "functionName": "Collection.filter"
+                                    }
+                                  },
+                                  "filter": {
+                                    "functionInvocationValue": {
+                                      "arguments": {
+                                        "leftValue": {
+                                          "functionInvocationValue": {
+                                            "arguments": {
+                                              "end": {
+                                                "constantValue": "2025-04-01"
+                                              },
+                                              "start": {
+                                                "constantValue": "2025-01-01"
+                                              }
+                                            },
+                                            "functionName": "DateRange"
+                                          }
+                                        },
+                                        "rightField": {
+                                          "constantValue": "system:time_start"
+                                        }
+                                      },
+                                      "functionName": "Filter.dateRangeContains"
+                                    }
+                                  }
+                                },
+                                "functionName": "Collection.filter"
+                              }
+                            },
+                            "filter": {
+                              "functionInvocationValue": {
+                                "arguments": {
+                                  "leftField": {
+                                    "constantValue": "CLOUDY_PIXEL_PERCENTAGE"
+                                  },
+                                  "rightValue": {
+                                    "constantValue": 20
+                                  }
+                                },
+                                "functionName": "Filter.lessThan"
+                              }
+                            }
+                          },
+                          "functionName": "Collection.filter"
+                        }
+                      }
+                    },
+                    "functionName": "Collection.map"
+                  }
+                }
+              },
+              "functionName": "Collection.map"
+            }
+          }
+        },
+        "functionName": "reduce.median"
+      }
+    },
+    "4": {
+      "functionInvocationValue": {
+        "arguments": {
+          "image1": {
+            "argumentReference": "_MAPPING_VAR_0_0"
+          },
+          "image2": {
+            "functionInvocationValue": {
+              "arguments": {
+                "value": {
+                  "constantValue": 10000
+                }
+              },
+              "functionName": "Image.constant"
+            }
+          }
+        },
+        "functionName": "Image.divide"
+      }
+    },
+    "5": {
+      "functionInvocationValue": {
+        "arguments": {
+          "image": {
+            "argumentReference": "_MAPPING_VAR_0_0"
+          },
+          "mask": {
+            "functionInvocationValue": {
+              "arguments": {
+                "image1": {
+                  "functionInvocationValue": {
+                    "arguments": {
+                      "image1": {
+                        "functionInvocationValue": {
+                          "arguments": {
+                            "image1": {
+                              "functionInvocationValue": {
+                                "arguments": {
+                                  "image1": {
+                                    "functionInvocationValue": {
+                                      "arguments": {
+                                        "value": {
+                                          "constantValue": 1
+                                        }
+                                      },
+                                      "functionName": "Image.constant"
+                                    }
+                                  },
+                                  "image2": {
+                                    "functionInvocationValue": {
+                                      "arguments": {
+                                        "image1": {
+                                          "valueReference": "6"
+                                        },
+                                        "image2": {
+                                          "functionInvocationValue": {
+                                            "arguments": {
+                                              "value": {
+                                                "constantValue": 3
+                                              }
+                                            },
+                                            "functionName": "Image.constant"
+                                          }
+                                        }
+                                      },
+                                      "functionName": "Image.neq"
+                                    }
+                                  }
+                                },
+                                "functionName": "Image.and"
+                              }
+                            },
+                            "image2": {
+                              "functionInvocationValue": {
+                                "arguments": {
+                                  "image1": {
+                                    "valueReference": "6"
+                                  },
+                                  "image2": {
+                                    "functionInvocationValue": {
+                                      "arguments": {
+                                        "value": {
+                                          "constantValue": 8
+                                        }
+                                      },
+                                      "functionName": "Image.constant"
+                                    }
+                                  }
+                                },
+                                "functionName": "Image.neq"
+                              }
+                            }
+                          },
+                          "functionName": "Image.and"
+                        }
+                      },
+                      "image2": {
+                        "functionInvocationValue": {
+                          "arguments": {
+                            "image1": {
+                              "valueReference": "6"
+                            },
+                            "image2": {
+                              "functionInvocationValue": {
+                                "arguments": {
+                                  "value": {
+                                    "constantValue": 9
+                                  }
+                                },
+                                "functionName": "Image.constant"
+                              }
+                            }
+                          },
+                          "functionName": "Image.neq"
+                        }
+                      }
+                    },
+                    "functionName": "Image.and"
+                  }
+                },
+                "image2": {
+                  "functionInvocationValue": {
+                    "arguments": {
+                      "image1": {
+                        "valueReference": "6"
+                      },
+                      "image2": {
+                        "functionInvocationValue": {
+                          "arguments": {
+                            "value": {
+                              "constantValue": 10
+                            }
+                          },
+                          "functionName": "Image.constant"
+                        }
+                      }
+                    },
+                    "functionName": "Image.neq"
+                  }
+                }
+              },
+              "functionName": "Image.and"
+            }
+          }
+        },
+        "functionName": "Image.updateMask"
+      }
+    },
+    "6": {
+      "functionInvocationValue": {
+        "arguments": {
+          "bandSelectors": {
+            "constantValue": [
+              "SCL"
+            ]
+          },
+          "input": {
+            "argumentReference": "_MAPPING_VAR_0_0"
+          }
+        },
+        "functionName": "Image.select"
+      }
+    },
+    "7": {
+      "constantValue": [
+        73.79,
+        20.011
+      ]
+    },
+    "8": {
+      "constantValue": "B8"
+    },
+    "9": {
+      "constantValue": "B4"
+    }
+  }
+}

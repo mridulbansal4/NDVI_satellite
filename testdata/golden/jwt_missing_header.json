@@ -1,0 +1,13 @@
+{
+  "auth": null,
+  "body": null,
+  "id": "jwt_missing_header",
+  "method": "GET",
+  "note": "§8.3 {'msg':'Missing Authorization Header'}",
+  "path": "/dashboard",
+  "query": null,
+  "response": {
+    "msg": "Missing Authorization Header"
+  },
+  "status": 401
+}

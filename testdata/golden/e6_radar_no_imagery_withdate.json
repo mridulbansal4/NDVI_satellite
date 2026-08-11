@@ -1,0 +1,42 @@
+{
+  "auth": null,
+  "body": {
+    "date": "2025-02-14",
+    "geometry": {
+      "coordinates": [
+        [
+          [
+            -160.0,
+            0.0
+          ],
+          [
+            -159.9982,
+            0.0
+          ],
+          [
+            -159.9982,
+            0.0018
+          ],
+          [
+            -160.0,
+            0.0018
+          ],
+          [
+            -160.0,
+            0.0
+          ]
+        ]
+      ],
+      "type": "Polygon"
+    }
+  },
+  "id": "e6_radar_no_imagery_withdate",
+  "method": "POST",
+  "note": "§10.6 'for <date>.' wording — the other half of the conditional",
+  "path": "/api/analyze-radar",
+  "query": null,
+  "response": {
+    "error": "No Sentinel-1 imagery found for 2025-02-14."
+  },
+  "status": 200
+}

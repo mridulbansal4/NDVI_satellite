@@ -1,0 +1,17 @@
+{
+  "auth": null,
+  "body": null,
+  "id": "e7_sample_success",
+  "method": "GET",
+  "note": "§10.7 default band NDVI",
+  "path": "/api/sample",
+  "query": {
+    "lat": "20.0116",
+    "lng": "73.7908"
+  },
+  "response": {
+    "band": "NDVI",
+    "value": 0.4014
+  },
+  "status": 200
+}

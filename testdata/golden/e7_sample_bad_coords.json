@@ -1,0 +1,15 @@
+{
+  "auth": null,
+  "body": null,
+  "id": "e7_sample_bad_coords",
+  "method": "GET",
+  "note": "§10.7 coord parse failure",
+  "path": "/api/sample",
+  "query": {
+    "lat": "abc"
+  },
+  "response": {
+    "error": "lat and lng are required numeric parameters."
+  },
+  "status": 400
+}

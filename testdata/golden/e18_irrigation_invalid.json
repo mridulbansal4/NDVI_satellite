@@ -1,0 +1,20 @@
+{
+  "auth": "valid",
+  "body": {
+    "farm_id": "011b1c73-2215-4b4a-83c5-45d35385b054",
+    "irrigation_type": "magic"
+  },
+  "id": "e18_irrigation_invalid",
+  "method": "POST",
+  "note": "",
+  "path": "/irrigation",
+  "query": null,
+  "response": {
+    "errors": {
+      "irrigation_type": [
+        "Must be one of: rainfed, borewell, canal, drip_irrigation, sprinkler."
+      ]
+    }
+  },
+  "status": 400
+}

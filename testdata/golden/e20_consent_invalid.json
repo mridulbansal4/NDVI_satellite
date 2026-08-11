@@ -1,0 +1,17 @@
+{
+  "auth": "valid",
+  "body": {},
+  "id": "e20_consent_invalid",
+  "method": "POST",
+  "note": "",
+  "path": "/consent",
+  "query": null,
+  "response": {
+    "errors": {
+      "satellite_monitoring": [
+        "Missing data for required field."
+      ]
+    }
+  },
+  "status": 400
+}

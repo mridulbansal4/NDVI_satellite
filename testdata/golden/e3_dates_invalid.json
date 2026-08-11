@@ -1,0 +1,21 @@
+{
+  "auth": null,
+  "body": {
+    "geometry": {
+      "coordinates": [
+        0,
+        0
+      ],
+      "type": "Point"
+    }
+  },
+  "id": "e3_dates_invalid",
+  "method": "POST",
+  "note": "",
+  "path": "/api/analyze-dates",
+  "query": null,
+  "response": {
+    "error": "Geometry type must be 'Polygon', got 'Point'."
+  },
+  "status": 400
+}

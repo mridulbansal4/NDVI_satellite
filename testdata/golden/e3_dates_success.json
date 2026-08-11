@@ -1,0 +1,48 @@
+{
+  "auth": null,
+  "body": {
+    "geometry": {
+      "coordinates": [
+        [
+          [
+            73.79,
+            20.011
+          ],
+          [
+            73.7916,
+            20.011
+          ],
+          [
+            73.7916,
+            20.0122
+          ],
+          [
+            73.79,
+            20.0122
+          ],
+          [
+            73.79,
+            20.011
+          ]
+        ]
+      ],
+      "type": "Polygon"
+    }
+  },
+  "id": "e3_dates_success",
+  "method": "POST",
+  "note": "§10.4 ascending distinct YYYY-MM-DD",
+  "path": "/api/analyze-dates",
+  "query": null,
+  "response": {
+    "dates": [
+      "2026-05-13",
+      "2026-05-18",
+      "2026-05-28",
+      "2026-06-02",
+      "2026-06-04",
+      "2026-06-07"
+    ]
+  },
+  "status": 200
+}

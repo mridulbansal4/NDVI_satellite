@@ -1,0 +1,18 @@
+{
+  "auth": null,
+  "body": {
+    "mobile_number": "9000000001",
+    "password": "contract-test-pw"
+  },
+  "id": "e12_login_success",
+  "method": "POST",
+  "note": "mints the JWT used by the auth cases",
+  "path": "/auth/login",
+  "query": null,
+  "response": {
+    "farmer_id": "4f1f5eb6-daf8-4cdd-9b96-26c8feee7cfc",
+    "is_new_user": true,
+    "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJmcmVzaCI6ZmFsc2UsImlhdCI6MTc4NjQ2OTIyNSwianRpIjoiYWIxNjliZmUtZmVjMS00M2U3LWFhMjUtMzc0ZjI3MzE0NjkwIiwidHlwZSI6ImFjY2VzcyIsInN1YiI6IjRmMWY1ZWI2LWRhZjgtNGNkZC05Yjk2LTI2YzhmZWVlN2NmYyIsIm5iZiI6MTc4NjQ2OTIyNSwiY3NyZiI6IjRiOTc5YWNhLTJhYmQtNDBiNS05ZjJiLTBmMzA3YjNmNTE4NiIsImV4cCI6MTc4NzA3NDAyNX0.S-pXti_W-NFPhPrtZNSMTEP6QbLrdxVADQvizW9ZWYY"
+  },
+  "status": 200
+}

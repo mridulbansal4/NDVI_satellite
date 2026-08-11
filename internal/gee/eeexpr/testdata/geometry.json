@@ -1,0 +1,54 @@
+{
+  "result": "0",
+  "values": {
+    "0": {
+      "functionInvocationValue": {
+        "arguments": {
+          "coordinates": {
+            "arrayValue": {
+              "values": [
+                {
+                  "arrayValue": {
+                    "values": [
+                      {
+                        "valueReference": "1"
+                      },
+                      {
+                        "constantValue": [
+                          73.7916,
+                          20.011
+                        ]
+                      },
+                      {
+                        "constantValue": [
+                          73.7916,
+                          20.0122
+                        ]
+                      },
+                      {
+                        "constantValue": [
+                          73.79,
+                          20.0122
+                        ]
+                      },
+                      {
+                        "valueReference": "1"
+                      }
+                    ]
+                  }
+                }
+              ]
+            }
+          }
+        },
+        "functionName": "GeometryConstructors.Polygon"
+      }
+    },
+    "1": {
+      "constantValue": [
+        73.79,
+        20.011
+      ]
+    }
+  }
+}

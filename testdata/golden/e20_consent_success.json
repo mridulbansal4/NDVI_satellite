@@ -1,0 +1,17 @@
+{
+  "auth": "valid",
+  "body": {
+    "satellite_monitoring": true
+  },
+  "id": "e20_consent_success",
+  "method": "POST",
+  "note": "",
+  "path": "/consent",
+  "query": null,
+  "response": {
+    "consent_id": "4286046c-678f-414f-a1c6-99e13d698544",
+    "message": "Onboarding complete",
+    "success": true
+  },
+  "status": 200
+}

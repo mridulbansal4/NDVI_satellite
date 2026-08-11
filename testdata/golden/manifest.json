@@ -1,0 +1,439 @@
+{
+  "captured_from": "http://127.0.0.1:5000",
+  "case_count": 72,
+  "status_mismatches": 3,
+  "cases": [
+    {
+      "id": "e1_health",
+      "expected": 200,
+      "actual": 200,
+      "match": true
+    },
+    {
+      "id": "e7_sample_no_analysis",
+      "expected": 404,
+      "actual": 404,
+      "match": true
+    },
+    {
+      "id": "e2_analyze_no_body",
+      "expected": 400,
+      "actual": 400,
+      "match": true
+    },
+    {
+      "id": "e2_analyze_not_object",
+      "expected": 400,
+      "actual": 400,
+      "match": true
+    },
+    {
+      "id": "e2_analyze_wrong_type",
+      "expected": 400,
+      "actual": 400,
+      "match": true
+    },
+    {
+      "id": "e2_analyze_empty_coords",
+      "expected": 400,
+      "actual": 400,
+      "match": true
+    },
+    {
+      "id": "e2_analyze_short_ring",
+      "expected": 400,
+      "actual": 400,
+      "match": true
+    },
+    {
+      "id": "e2_analyze_bad_point",
+      "expected": 400,
+      "actual": 400,
+      "match": true
+    },
+    {
+      "id": "e2_analyze_bad_lon",
+      "expected": 400,
+      "actual": 400,
+      "match": true
+    },
+    {
+      "id": "e2_analyze_bad_lat",
+      "expected": 400,
+      "actual": 400,
+      "match": true
+    },
+    {
+      "id": "e2_analyze_no_imagery",
+      "expected": 200,
+      "actual": 200,
+      "match": true
+    },
+    {
+      "id": "e2_analyze_success",
+      "expected": 200,
+      "actual": 200,
+      "match": true
+    },
+    {
+      "id": "e2_analyze_tiny",
+      "expected": 200,
+      "actual": 200,
+      "match": true
+    },
+    {
+      "id": "e7_sample_success",
+      "expected": 200,
+      "actual": 200,
+      "match": true
+    },
+    {
+      "id": "e7_sample_band_lowercase",
+      "expected": 200,
+      "actual": 200,
+      "match": true
+    },
+    {
+      "id": "e7_sample_bad_coords",
+      "expected": 400,
+      "actual": 400,
+      "match": true
+    },
+    {
+      "id": "e7_sample_bad_band",
+      "expected": 400,
+      "actual": 400,
+      "match": true
+    },
+    {
+      "id": "e3_dates_no_body",
+      "expected": 400,
+      "actual": 400,
+      "match": true
+    },
+    {
+      "id": "e3_dates_invalid",
+      "expected": 400,
+      "actual": 400,
+      "match": true
+    },
+    {
+      "id": "e3_dates_success",
+      "expected": 200,
+      "actual": 200,
+      "match": true
+    },
+    {
+      "id": "e4_day_missing_date",
+      "expected": 400,
+      "actual": 400,
+      "match": true
+    },
+    {
+      "id": "e4_day_missing_geometry",
+      "expected": 400,
+      "actual": 400,
+      "match": true
+    },
+    {
+      "id": "e4_day_invalid_polygon",
+      "expected": 400,
+      "actual": 400,
+      "match": true
+    },
+    {
+      "id": "e4_day_no_imagery",
+      "expected": 200,
+      "actual": 200,
+      "match": true
+    },
+    {
+      "id": "e5_radar_dates_no_body",
+      "expected": 400,
+      "actual": 400,
+      "match": true
+    },
+    {
+      "id": "e5_radar_dates_invalid",
+      "expected": 400,
+      "actual": 400,
+      "match": true
+    },
+    {
+      "id": "e5_radar_dates_success",
+      "expected": 200,
+      "actual": 200,
+      "match": true
+    },
+    {
+      "id": "e6_radar_no_body",
+      "expected": 400,
+      "actual": 400,
+      "match": true
+    },
+    {
+      "id": "e6_radar_invalid",
+      "expected": 400,
+      "actual": 400,
+      "match": true
+    },
+    {
+      "id": "e6_radar_no_imagery_nodate",
+      "expected": 200,
+      "actual": 200,
+      "match": true
+    },
+    {
+      "id": "e6_radar_no_imagery_withdate",
+      "expected": 200,
+      "actual": 200,
+      "match": true
+    },
+    {
+      "id": "e6_radar_success",
+      "expected": 200,
+      "actual": 200,
+      "match": true
+    },
+    {
+      "id": "e8_verify_token_missing",
+      "expected": 400,
+      "actual": 400,
+      "match": true
+    },
+    {
+      "id": "e8_verify_token_invalid",
+      "expected": 401,
+      "actual": 401,
+      "match": true
+    },
+    {
+      "id": "e9_send_otp_bad_phone",
+      "expected": 400,
+      "actual": 400,
+      "match": true
+    },
+    {
+      "id": "e9_send_otp_nondigit",
+      "expected": 400,
+      "actual": 400,
+      "match": true
+    },
+    {
+      "id": "e10_verify_otp_missing",
+      "expected": 400,
+      "actual": 400,
+      "match": true
+    },
+    {
+      "id": "e10_verify_otp_wrong",
+      "expected": 401,
+      "actual": 401,
+      "match": true
+    },
+    {
+      "id": "e11_signup_bad_mobile",
+      "expected": 422,
+      "actual": 422,
+      "match": true
+    },
+    {
+      "id": "e11_signup_short_password",
+      "expected": 422,
+      "actual": 422,
+      "match": true
+    },
+    {
+      "id": "e11_signup_success",
+      "expected": 201,
+      "actual": 201,
+      "match": true
+    },
+    {
+      "id": "e11_signup_duplicate",
+      "expected": 409,
+      "actual": 409,
+      "match": true
+    },
+    {
+      "id": "e12_login_bad_mobile",
+      "expected": 422,
+      "actual": 422,
+      "match": true
+    },
+    {
+      "id": "e12_login_no_account",
+      "expected": 401,
+      "actual": 401,
+      "match": true
+    },
+    {
+      "id": "e12_login_wrong_password",
+      "expected": 401,
+      "actual": 401,
+      "match": true
+    },
+    {
+      "id": "e12_login_success",
+      "expected": 200,
+      "actual": 200,
+      "match": true
+    },
+    {
+      "id": "jwt_missing_header",
+      "expected": 401,
+      "actual": 401,
+      "match": true
+    },
+    {
+      "id": "jwt_malformed_header",
+      "expected": 422,
+      "actual": 401,
+      "match": false
+    },
+    {
+      "id": "jwt_bad_signature",
+      "expected": 422,
+      "actual": 422,
+      "match": true
+    },
+    {
+      "id": "jwt_expired",
+      "expected": 401,
+      "actual": 401,
+      "match": true
+    },
+    {
+      "id": "e13_basic_details_invalid",
+      "expected": 400,
+      "actual": 400,
+      "match": true
+    },
+    {
+      "id": "e13_basic_details_success",
+      "expected": 200,
+      "actual": 200,
+      "match": true
+    },
+    {
+      "id": "e14_location_bad_pin",
+      "expected": 400,
+      "actual": 400,
+      "match": true
+    },
+    {
+      "id": "e14_location_success",
+      "expected": 201,
+      "actual": 201,
+      "match": true
+    },
+    {
+      "id": "e15_pincode_success",
+      "expected": 200,
+      "actual": 500,
+      "match": false
+    },
+    {
+      "id": "e15_pincode_notfound",
+      "expected": 404,
+      "actual": 500,
+      "match": false
+    },
+    {
+      "id": "e16_farm_invalid",
+      "expected": 400,
+      "actual": 400,
+      "match": true
+    },
+    {
+      "id": "e16_farm_success",
+      "expected": 201,
+      "actual": 201,
+      "match": true
+    },
+    {
+      "id": "e17_crop_invalid",
+      "expected": 400,
+      "actual": 400,
+      "match": true
+    },
+    {
+      "id": "e17_crop_bad_owner",
+      "expected": 403,
+      "actual": 403,
+      "match": true
+    },
+    {
+      "id": "e17_crop_success",
+      "expected": 201,
+      "actual": 201,
+      "match": true
+    },
+    {
+      "id": "e18_irrigation_invalid",
+      "expected": 400,
+      "actual": 400,
+      "match": true
+    },
+    {
+      "id": "e18_irrigation_success",
+      "expected": 201,
+      "actual": 201,
+      "match": true
+    },
+    {
+      "id": "e19_soil_invalid",
+      "expected": 400,
+      "actual": 400,
+      "match": true
+    },
+    {
+      "id": "e19_soil_success",
+      "expected": 201,
+      "actual": 201,
+      "match": true
+    },
+    {
+      "id": "e20_consent_invalid",
+      "expected": 400,
+      "actual": 400,
+      "match": true
+    },
+    {
+      "id": "e20_consent_success",
+      "expected": 200,
+      "actual": 200,
+      "match": true
+    },
+    {
+      "id": "e21_dashboard_success",
+      "expected": 200,
+      "actual": 200,
+      "match": true
+    },
+    {
+      "id": "e22_chat_empty_message",
+      "expected": 400,
+      "actual": 400,
+      "match": true
+    },
+    {
+      "id": "e23_reset_missing_session",
+      "expected": 400,
+      "actual": 400,
+      "match": true
+    },
+    {
+      "id": "e23_reset_success",
+      "expected": 200,
+      "actual": 200,
+      "match": true
+    },
+    {
+      "id": "e24_chatbot_health",
+      "expected": 200,
+      "actual": 200,
+      "match": true
+    }
+  ]
+}

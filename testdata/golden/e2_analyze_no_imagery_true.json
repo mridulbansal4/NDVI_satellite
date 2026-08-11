@@ -1,0 +1,41 @@
+{
+  "auth": null,
+  "body": {
+    "geometry": {
+      "coordinates": [
+        [
+          [
+            0.0,
+            87.0
+          ],
+          [
+            0.002,
+            87.0
+          ],
+          [
+            0.002,
+            87.0018
+          ],
+          [
+            0.0,
+            87.0018
+          ],
+          [
+            0.0,
+            87.0
+          ]
+        ]
+      ],
+      "type": "Polygon"
+    }
+  },
+  "id": "e2_analyze_no_imagery_true",
+  "method": "POST",
+  "note": "S13.2 the real 200-with-error branch: polygon above S2 orbital coverage (~84N)",
+  "path": "/api/analyze",
+  "query": null,
+  "response": {
+    "error": "No cloud-free Sentinel-2 imagery found for this area in the last 3 months."
+  },
+  "status": 200
+}

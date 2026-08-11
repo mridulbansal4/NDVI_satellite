@@ -1,0 +1,13 @@
+{
+  "auth": "badsig",
+  "body": null,
+  "id": "jwt_bad_signature",
+  "method": "GET",
+  "note": "",
+  "path": "/dashboard",
+  "query": null,
+  "response": {
+    "msg": "Signature verification failed"
+  },
+  "status": 422
+}

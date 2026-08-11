@@ -1,0 +1,81 @@
+{
+  "result": "0",
+  "values": {
+    "0": {
+      "functionInvocationValue": {
+        "arguments": {
+          "geometry": {
+            "functionInvocationValue": {
+              "arguments": {
+                "coordinates": {
+                  "arrayValue": {
+                    "values": [
+                      {
+                        "arrayValue": {
+                          "values": [
+                            {
+                              "valueReference": "1"
+                            },
+                            {
+                              "constantValue": [
+                                73.7916,
+                                20.011
+                              ]
+                            },
+                            {
+                              "constantValue": [
+                                73.7916,
+                                20.0122
+                              ]
+                            },
+                            {
+                              "constantValue": [
+                                73.79,
+                                20.0122
+                              ]
+                            },
+                            {
+                              "valueReference": "1"
+                            }
+                          ]
+                        }
+                      }
+                    ]
+                  }
+                }
+              },
+              "functionName": "GeometryConstructors.Polygon"
+            }
+          },
+          "proj": {
+            "functionInvocationValue": {
+              "arguments": {
+                "meters": {
+                  "constantValue": 10
+                },
+                "projection": {
+                  "functionInvocationValue": {
+                    "arguments": {
+                      "crs": {
+                        "constantValue": "EPSG:4326"
+                      }
+                    },
+                    "functionName": "Projection"
+                  }
+                }
+              },
+              "functionName": "Projection.atScale"
+            }
+          }
+        },
+        "functionName": "Geometry.coveringGrid"
+      }
+    },
+    "1": {
+      "constantValue": [
+        73.79,
+        20.011
+      ]
+    }
+  }
+}

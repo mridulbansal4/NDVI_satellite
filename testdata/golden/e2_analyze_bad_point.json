@@ -1,0 +1,36 @@
+{
+  "auth": null,
+  "body": {
+    "geometry": {
+      "coordinates": [
+        [
+          [
+            0,
+            0
+          ],
+          [
+            1
+          ],
+          [
+            1,
+            1
+          ],
+          [
+            0,
+            0
+          ]
+        ]
+      ],
+      "type": "Polygon"
+    }
+  },
+  "id": "e2_analyze_bad_point",
+  "method": "POST",
+  "note": "§6.1 check 5",
+  "path": "/api/analyze",
+  "query": null,
+  "response": {
+    "error": "Coordinate at index 1 is not a valid [lon, lat] pair."
+  },
+  "status": 400
+}

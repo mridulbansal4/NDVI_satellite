@@ -1,0 +1,13 @@
+{
+  "auth": null,
+  "body": {},
+  "id": "e10_verify_otp_missing",
+  "method": "POST",
+  "note": "",
+  "path": "/api/auth/verify-otp",
+  "query": null,
+  "response": {
+    "error": "phone and otp are required."
+  },
+  "status": 400
+}

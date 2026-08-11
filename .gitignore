@@ -21,6 +21,12 @@ venv.bak/
 # Earth Engine Credentials (just in case they end up here)
 serviceAccountKey.json
 
+# Go backend service-account key for Earth Engine (PRD §5.5, §9.2)
+gee-service-account.json
+
+# Go build output
+bin/
+
 # Node modules / NPM (Ignore accidental root installs)
 node_modules/
 package-lock.json

@@ -1,0 +1,18 @@
+{
+  "auth": null,
+  "body": null,
+  "id": "e7_sample_band_lowercase",
+  "method": "GET",
+  "note": "§6.2 band is upper-cased before validation",
+  "path": "/api/sample",
+  "query": {
+    "band": "cvi",
+    "lat": "20.0116",
+    "lng": "73.7908"
+  },
+  "response": {
+    "band": "CVI",
+    "value": 0.3526
+  },
+  "status": 200
+}

@@ -1,0 +1,15 @@
+{
+  "auth": null,
+  "body": {
+    "phone": "12345"
+  },
+  "id": "e9_send_otp_bad_phone",
+  "method": "POST",
+  "note": "",
+  "path": "/api/auth/send-otp",
+  "query": null,
+  "response": {
+    "error": "Provide a valid 10-digit Indian mobile number."
+  },
+  "status": 400
+}

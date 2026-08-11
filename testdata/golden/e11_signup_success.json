@@ -1,0 +1,18 @@
+{
+  "auth": null,
+  "body": {
+    "mobile_number": "9000000001",
+    "password": "contract-test-pw"
+  },
+  "id": "e11_signup_success",
+  "method": "POST",
+  "note": "creates the contract-test farmer; teardown removes it",
+  "path": "/auth/signup",
+  "query": null,
+  "response": {
+    "farmer_id": "4f1f5eb6-daf8-4cdd-9b96-26c8feee7cfc",
+    "is_new_user": true,
+    "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJmcmVzaCI6ZmFsc2UsImlhdCI6MTc4NjQ2OTIyNCwianRpIjoiNGRhYjljMGYtYzAxNy00MzE4LTk2Y2UtNDIyMThlM2FjMDA0IiwidHlwZSI6ImFjY2VzcyIsInN1YiI6IjRmMWY1ZWI2LWRhZjgtNGNkZC05Yjk2LTI2YzhmZWVlN2NmYyIsIm5iZiI6MTc4NjQ2OTIyNCwiY3NyZiI6IjFkNmI3ZjA5LWMwMDQtNGM3NC05MmU5LTRmNTdkODIzNDU1OSIsImV4cCI6MTc4NzA3NDAyNH0.wKHQ-AYGrj08eh7ZrqUCRxu-g1DIMyvdpc9EZjZZYNM"
+  },
+  "status": 201
+}

@@ -1,0 +1,26 @@
+{
+  "auth": "valid",
+  "body": {
+    "crop_name": "Grapes",
+    "season": "monsoon"
+  },
+  "id": "e17_crop_invalid",
+  "method": "POST",
+  "note": "",
+  "path": "/crop",
+  "query": null,
+  "response": {
+    "errors": {
+      "farm_id": [
+        "Missing data for required field."
+      ],
+      "season": [
+        "Must be one of: kharif, rabi, zaid."
+      ],
+      "sowing_date": [
+        "Missing data for required field."
+      ]
+    }
+  },
+  "status": 400
+}

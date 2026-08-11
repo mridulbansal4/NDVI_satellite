@@ -1,0 +1,234 @@
+{
+  "result": "0",
+  "values": {
+    "0": {
+      "functionInvocationValue": {
+        "arguments": {
+          "baseAlgorithm": {
+            "functionDefinitionValue": {
+              "argumentNames": [
+                "_MAPPING_VAR_0_0"
+              ],
+              "body": "1"
+            }
+          },
+          "collection": {
+            "functionInvocationValue": {
+              "arguments": {
+                "collection": {
+                  "functionInvocationValue": {
+                    "arguments": {
+                      "collection": {
+                        "functionInvocationValue": {
+                          "arguments": {
+                            "collection": {
+                              "functionInvocationValue": {
+                                "arguments": {
+                                  "collection": {
+                                    "functionInvocationValue": {
+                                      "arguments": {
+                                        "collection": {
+                                          "functionInvocationValue": {
+                                            "arguments": {
+                                              "collection": {
+                                                "functionInvocationValue": {
+                                                  "arguments": {
+                                                    "id": {
+                                                      "constantValue": "COPERNICUS/S1_GRD"
+                                                    }
+                                                  },
+                                                  "functionName": "ImageCollection.load"
+                                                }
+                                              },
+                                              "filter": {
+                                                "functionInvocationValue": {
+                                                  "arguments": {
+                                                    "leftField": {
+                                                      "constantValue": ".all"
+                                                    },
+                                                    "rightValue": {
+                                                      "functionInvocationValue": {
+                                                        "arguments": {
+                                                          "geometry": {
+                                                            "functionInvocationValue": {
+                                                              "arguments": {
+                                                                "coordinates": {
+                                                                  "arrayValue": {
+                                                                    "values": [
+                                                                      {
+                                                                        "arrayValue": {
+                                                                          "values": [
+                                                                            {
+                                                                              "valueReference": "4"
+                                                                            },
+                                                                            {
+                                                                              "constantValue": [
+                                                                                73.7916,
+                                                                                20.011
+                                                                              ]
+                                                                            },
+                                                                            {
+                                                                              "constantValue": [
+                                                                                73.7916,
+                                                                                20.0122
+                                                                              ]
+                                                                            },
+                                                                            {
+                                                                              "constantValue": [
+                                                                                73.79,
+                                                                                20.0122
+                                                                              ]
+                                                                            },
+                                                                            {
+                                                                              "valueReference": "4"
+                                                                            }
+                                                                          ]
+                                                                        }
+                                                                      }
+                                                                    ]
+                                                                  }
+                                                                }
+                                                              },
+                                                              "functionName": "GeometryConstructors.Polygon"
+                                                            }
+                                                          }
+                                                        },
+                                                        "functionName": "Feature"
+                                                      }
+                                                    }
+                                                  },
+                                                  "functionName": "Filter.intersects"
+                                                }
+                                              }
+                                            },
+                                            "functionName": "Collection.filter"
+                                          }
+                                        },
+                                        "filter": {
+                                          "functionInvocationValue": {
+                                            "arguments": {
+                                              "leftField": {
+                                                "constantValue": "instrumentMode"
+                                              },
+                                              "rightValue": {
+                                                "constantValue": "IW"
+                                              }
+                                            },
+                                            "functionName": "Filter.equals"
+                                          }
+                                        }
+                                      },
+                                      "functionName": "Collection.filter"
+                                    }
+                                  },
+                                  "filter": {
+                                    "functionInvocationValue": {
+                                      "arguments": {
+                                        "leftField": {
+                                          "valueReference": "5"
+                                        },
+                                        "rightValue": {
+                                          "valueReference": "2"
+                                        }
+                                      },
+                                      "functionName": "Filter.listContains"
+                                    }
+                                  }
+                                },
+                                "functionName": "Collection.filter"
+                              }
+                            },
+                            "filter": {
+                              "functionInvocationValue": {
+                                "arguments": {
+                                  "leftField": {
+                                    "valueReference": "5"
+                                  },
+                                  "rightValue": {
+                                    "valueReference": "3"
+                                  }
+                                },
+                                "functionName": "Filter.listContains"
+                              }
+                            }
+                          },
+                          "functionName": "Collection.filter"
+                        }
+                      },
+                      "filter": {
+                        "functionInvocationValue": {
+                          "arguments": {
+                            "leftField": {
+                              "constantValue": "resolution_meters"
+                            },
+                            "rightValue": {
+                              "constantValue": 10
+                            }
+                          },
+                          "functionName": "Filter.equals"
+                        }
+                      }
+                    },
+                    "functionName": "Collection.filter"
+                  }
+                },
+                "filter": {
+                  "functionInvocationValue": {
+                    "arguments": {
+                      "leftField": {
+                        "constantValue": "orbitProperties_pass"
+                      },
+                      "rightValue": {
+                        "constantValue": "DESCENDING"
+                      }
+                    },
+                    "functionName": "Filter.equals"
+                  }
+                }
+              },
+              "functionName": "Collection.filter"
+            }
+          }
+        },
+        "functionName": "Collection.map"
+      }
+    },
+    "1": {
+      "functionInvocationValue": {
+        "arguments": {
+          "bandSelectors": {
+            "arrayValue": {
+              "values": [
+                {
+                  "valueReference": "2"
+                },
+                {
+                  "valueReference": "3"
+                }
+              ]
+            }
+          },
+          "input": {
+            "argumentReference": "_MAPPING_VAR_0_0"
+          }
+        },
+        "functionName": "Image.select"
+      }
+    },
+    "2": {
+      "constantValue": "VV"
+    },
+    "3": {
+      "constantValue": "VH"
+    },
+    "4": {
+      "constantValue": [
+        73.79,
+        20.011
+      ]
+    },
+    "5": {
+      "constantValue": "transmitterReceiverPolarisation"
+    }
+  }
+}

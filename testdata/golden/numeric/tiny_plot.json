@@ -1,0 +1,738 @@
+{
+  "analyze": {
+    "response": {
+      "farm_boundary": {
+        "coordinates": [
+          [
+            [
+              73.8,
+              20.02
+            ],
+            [
+              73.80011,
+              20.02
+            ],
+            [
+              73.80011,
+              20.02011
+            ],
+            [
+              73.8,
+              20.02011
+            ],
+            [
+              73.8,
+              20.02
+            ]
+          ]
+        ],
+        "type": "Polygon"
+      },
+      "farm_summary": {
+        "confidence": 1.0,
+        "indices": {
+          "CVI": {
+            "interpretation": "Poor vegetation, needs attention",
+            "mean": 0.2234
+          },
+          "EVI": {
+            "interpretation": "Sparse vegetation",
+            "mean": 0.1838
+          },
+          "GNDVI": {
+            "interpretation": "Moderate",
+            "mean": 0.32
+          },
+          "NDMI": {
+            "interpretation": "Low moisture",
+            "mean": 0.0625
+          },
+          "NDVI": {
+            "interpretation": "Sparse / stressed vegetation",
+            "mean": 0.2488
+          },
+          "NDWI": {
+            "interpretation": "No significant water",
+            "mean": -0.32
+          },
+          "SAVI": {
+            "interpretation": "Low vegetation",
+            "mean": 0.1716
+          }
+        },
+        "ndvi_histogram": {
+          "0": 0.0,
+          "1": 0.0,
+          "10": 0.0,
+          "11": 0.0,
+          "12": 0.0,
+          "13": 0.0,
+          "14": 0.0,
+          "15": 0.0,
+          "16": 0.0,
+          "17": 0.0,
+          "18": 0.0,
+          "19": 0.0,
+          "2": 0.0,
+          "3": 0.01,
+          "4": 0.0,
+          "5": 0.0,
+          "6": 0.0,
+          "7": 0.0,
+          "8": 0.0,
+          "9": 0.0
+        },
+        "scene_count": 6
+      },
+      "features": [
+        {
+          "geometry": {
+            "coordinates": [
+              [
+                [
+                  73.79992435696994,
+                  20.019944253416067
+                ],
+                [
+                  73.80001418849834,
+                  20.019944253416067
+                ],
+                [
+                  73.80001418849834,
+                  20.02003408494448
+                ],
+                [
+                  73.79992435696994,
+                  20.02003408494448
+                ],
+                [
+                  73.79992435696994,
+                  20.019944253416067
+                ]
+              ]
+            ],
+            "crs": {
+              "properties": {
+                "name": "EPSG:4326"
+              },
+              "type": "name"
+            },
+            "geodesic": false,
+            "type": "Polygon"
+          },
+          "properties": {
+            "cvi": 0.2929,
+            "evi": 0.214,
+            "gndvi": 0.3861,
+            "interpretation": "Moderate vegetation, possible stress",
+            "ndmi": -0.0224,
+            "ndvi": 0.323,
+            "ndwi": -0.3861,
+            "savi": 0.2062
+          },
+          "type": "Feature"
+        },
+        {
+          "geometry": {
+            "coordinates": [
+              [
+                [
+                  73.80001418849834,
+                  20.019944253416067
+                ],
+                [
+                  73.80010402002675,
+                  20.019944253416067
+                ],
+                [
+                  73.80010402002675,
+                  20.02003408494448
+                ],
+                [
+                  73.80001418849834,
+                  20.02003408494448
+                ],
+                [
+                  73.80001418849834,
+                  20.019944253416067
+                ]
+              ]
+            ],
+            "crs": {
+              "properties": {
+                "name": "EPSG:4326"
+              },
+              "type": "name"
+            },
+            "geodesic": false,
+            "type": "Polygon"
+          },
+          "properties": {
+            "cvi": 0.2823,
+            "evi": 0.2186,
+            "gndvi": 0.3868,
+            "interpretation": "Moderate vegetation, possible stress",
+            "ndmi": 0.0298,
+            "ndvi": 0.3215,
+            "ndwi": -0.3868,
+            "savi": 0.2089
+          },
+          "type": "Feature"
+        },
+        {
+          "geometry": {
+            "coordinates": [
+              [
+                [
+                  73.80010402002675,
+                  20.019944253416067
+                ],
+                [
+                  73.80019385155516,
+                  20.019944253416067
+                ],
+                [
+                  73.80019385155516,
+                  20.02003408494448
+                ],
+                [
+                  73.80010402002675,
+                  20.02003408494448
+                ],
+                [
+                  73.80010402002675,
+                  20.019944253416067
+                ]
+              ]
+            ],
+            "crs": {
+              "properties": {
+                "name": "EPSG:4326"
+              },
+              "type": "name"
+            },
+            "geodesic": false,
+            "type": "Polygon"
+          },
+          "properties": {
+            "cvi": 0.359,
+            "evi": 0.2508,
+            "gndvi": 0.4212,
+            "interpretation": "Moderate vegetation, possible stress",
+            "ndmi": 0.03,
+            "ndvi": 0.3859,
+            "ndwi": -0.4212,
+            "savi": 0.2426
+          },
+          "type": "Feature"
+        },
+        {
+          "geometry": {
+            "coordinates": [
+              [
+                [
+                  73.79992435696994,
+                  20.02003408494448
+                ],
+                [
+                  73.80001418849834,
+                  20.02003408494448
+                ],
+                [
+                  73.80001418849834,
+                  20.02012391647289
+                ],
+                [
+                  73.79992435696994,
+                  20.02012391647289
+                ],
+                [
+                  73.79992435696994,
+                  20.02003408494448
+                ]
+              ]
+            ],
+            "crs": {
+              "properties": {
+                "name": "EPSG:4326"
+              },
+              "type": "name"
+            },
+            "geodesic": false,
+            "type": "Polygon"
+          },
+          "properties": {
+            "cvi": 0.2174,
+            "evi": 0.1877,
+            "gndvi": 0.3311,
+            "interpretation": "Poor vegetation, needs attention",
+            "ndmi": 0.0121,
+            "ndvi": 0.2594,
+            "ndwi": -0.3311,
+            "savi": 0.1765
+          },
+          "type": "Feature"
+        },
+        {
+          "geometry": {
+            "coordinates": [
+              [
+                [
+                  73.80001418849834,
+                  20.02003408494448
+                ],
+                [
+                  73.80010402002675,
+                  20.02003408494448
+                ],
+                [
+                  73.80010402002675,
+                  20.02012391647289
+                ],
+                [
+                  73.80001418849834,
+                  20.02012391647289
+                ],
+                [
+                  73.80001418849834,
+                  20.02003408494448
+                ]
+              ]
+            ],
+            "crs": {
+              "properties": {
+                "name": "EPSG:4326"
+              },
+              "type": "name"
+            },
+            "geodesic": false,
+            "type": "Polygon"
+          },
+          "properties": {
+            "cvi": 0.1853,
+            "evi": 0.1866,
+            "gndvi": 0.3215,
+            "interpretation": "Poor vegetation, needs attention",
+            "ndmi": 0.0577,
+            "ndvi": 0.2553,
+            "ndwi": -0.3215,
+            "savi": 0.1747
+          },
+          "type": "Feature"
+        },
+        {
+          "geometry": {
+            "coordinates": [
+              [
+                [
+                  73.80010402002675,
+                  20.02003408494448
+                ],
+                [
+                  73.80019385155516,
+                  20.02003408494448
+                ],
+                [
+                  73.80019385155516,
+                  20.02012391647289
+                ],
+                [
+                  73.80010402002675,
+                  20.02012391647289
+                ],
+                [
+                  73.80010402002675,
+                  20.02003408494448
+                ]
+              ]
+            ],
+            "crs": {
+              "properties": {
+                "name": "EPSG:4326"
+              },
+              "type": "name"
+            },
+            "geodesic": false,
+            "type": "Polygon"
+          },
+          "properties": {
+            "cvi": 0.3063,
+            "evi": 0.2266,
+            "gndvi": 0.3805,
+            "interpretation": "Moderate vegetation, possible stress",
+            "ndmi": 0.0345,
+            "ndvi": 0.3406,
+            "ndwi": -0.3805,
+            "savi": 0.2181
+          },
+          "type": "Feature"
+        }
+      ],
+      "index_tiles": {
+        "cvi_tile_url": "https://earthengine.googleapis.com/v1/projects/mindstrix-2026/maps/a7a0347027d9ec82869565013f1cd5ce-96c1bc1fe8350ba28a1a8a71483cf376/tiles/{z}/{x}/{y}",
+        "evi_tile_url": "https://earthengine.googleapis.com/v1/projects/mindstrix-2026/maps/39a2c3a38d2281bf459a03bfc069fb61-ff41985835e6ed2113e8f164dd6cf647/tiles/{z}/{x}/{y}",
+        "gndvi_tile_url": "https://earthengine.googleapis.com/v1/projects/mindstrix-2026/maps/898f6441f9e7ee64548bcfac91ce91a6-d75adf138d1308cd027bea18a76865fe/tiles/{z}/{x}/{y}",
+        "ndmi_tile_url": "https://earthengine.googleapis.com/v1/projects/mindstrix-2026/maps/ea8a43d0dd49c55f2e0fb978f3844e2d-aa1e3fe66f210cce8cac046f7d2c4db0/tiles/{z}/{x}/{y}",
+        "ndvi_tile_url": "https://earthengine.googleapis.com/v1/projects/mindstrix-2026/maps/985c2d91838fcd0370ea31d1131eb73c-112a0c8830ecbbbc87c568e725309cd7/tiles/{z}/{x}/{y}",
+        "ndwi_tile_url": "https://earthengine.googleapis.com/v1/projects/mindstrix-2026/maps/6da2305200c7823f00db5f3b66ea9047-9f5c7ae8f6c23a222e27553e17cac93f/tiles/{z}/{x}/{y}",
+        "savi_tile_url": "https://earthengine.googleapis.com/v1/projects/mindstrix-2026/maps/52d4524bc0a3927eb8fa43de8aaa2917-8c52c54a940b87aed9bee2be50456906/tiles/{z}/{x}/{y}"
+      },
+      "ndvi_tile_url": "https://earthengine.googleapis.com/v1/projects/mindstrix-2026/maps/985c2d91838fcd0370ea31d1131eb73c-112a0c8830ecbbbc87c568e725309cd7/tiles/{z}/{x}/{y}",
+      "tile_url": "https://earthengine.googleapis.com/v1/projects/mindstrix-2026/maps/a7a0347027d9ec82869565013f1cd5ce-96c1bc1fe8350ba28a1a8a71483cf376/tiles/{z}/{x}/{y}",
+      "type": "FeatureCollection"
+    },
+    "status": 200
+  },
+  "geometry": {
+    "coordinates": [
+      [
+        [
+          73.8,
+          20.02
+        ],
+        [
+          73.80011,
+          20.02
+        ],
+        [
+          73.80011,
+          20.02011
+        ],
+        [
+          73.8,
+          20.02011
+        ],
+        [
+          73.8,
+          20.02
+        ]
+      ]
+    ],
+    "type": "Polygon"
+  },
+  "polygon": "tiny_plot",
+  "radar": {
+    "response": {
+      "date": null,
+      "farm_boundary": {
+        "coordinates": [
+          [
+            [
+              73.8,
+              20.02
+            ],
+            [
+              73.80011,
+              20.02
+            ],
+            [
+              73.80011,
+              20.02011
+            ],
+            [
+              73.8,
+              20.02011
+            ],
+            [
+              73.8,
+              20.02
+            ]
+          ]
+        ],
+        "type": "Polygon"
+      },
+      "features": [
+        {
+          "geometry": {
+            "coordinates": [
+              [
+                [
+                  73.79992435696994,
+                  20.019944253416067
+                ],
+                [
+                  73.80001418849834,
+                  20.019944253416067
+                ],
+                [
+                  73.80001418849834,
+                  20.02003408494448
+                ],
+                [
+                  73.79992435696994,
+                  20.02003408494448
+                ],
+                [
+                  73.79992435696994,
+                  20.019944253416067
+                ]
+              ]
+            ],
+            "crs": {
+              "properties": {
+                "name": "EPSG:4326"
+              },
+              "type": "name"
+            },
+            "geodesic": false,
+            "type": "Polygon"
+          },
+          "properties": {
+            "moisture_classification": "Wet",
+            "ratio": 6.8339,
+            "rvi": 0.6869,
+            "smi": 0.9571,
+            "vh": -15.3492,
+            "vv": -8.5153
+          },
+          "type": "Feature"
+        },
+        {
+          "geometry": {
+            "coordinates": [
+              [
+                [
+                  73.80001418849834,
+                  20.019944253416067
+                ],
+                [
+                  73.80010402002675,
+                  20.019944253416067
+                ],
+                [
+                  73.80010402002675,
+                  20.02003408494448
+                ],
+                [
+                  73.80001418849834,
+                  20.02003408494448
+                ],
+                [
+                  73.80001418849834,
+                  20.019944253416067
+                ]
+              ]
+            ],
+            "crs": {
+              "properties": {
+                "name": "EPSG:4326"
+              },
+              "type": "name"
+            },
+            "geodesic": false,
+            "type": "Polygon"
+          },
+          "properties": {
+            "moisture_classification": "Wet",
+            "ratio": 6.8519,
+            "rvi": 0.6845,
+            "smi": 0.9642,
+            "vh": -15.2821,
+            "vv": -8.4301
+          },
+          "type": "Feature"
+        },
+        {
+          "geometry": {
+            "coordinates": [
+              [
+                [
+                  73.80010402002675,
+                  20.019944253416067
+                ],
+                [
+                  73.80019385155516,
+                  20.019944253416067
+                ],
+                [
+                  73.80019385155516,
+                  20.02003408494448
+                ],
+                [
+                  73.80010402002675,
+                  20.02003408494448
+                ],
+                [
+                  73.80010402002675,
+                  20.019944253416067
+                ]
+              ]
+            ],
+            "crs": {
+              "properties": {
+                "name": "EPSG:4326"
+              },
+              "type": "name"
+            },
+            "geodesic": false,
+            "type": "Polygon"
+          },
+          "properties": {
+            "moisture_classification": "Wet",
+            "ratio": 6.8827,
+            "rvi": 0.6805,
+            "smi": 0.9743,
+            "vh": -15.1907,
+            "vv": -8.308
+          },
+          "type": "Feature"
+        },
+        {
+          "geometry": {
+            "coordinates": [
+              [
+                [
+                  73.79992435696994,
+                  20.02003408494448
+                ],
+                [
+                  73.80001418849834,
+                  20.02003408494448
+                ],
+                [
+                  73.80001418849834,
+                  20.02012391647289
+                ],
+                [
+                  73.79992435696994,
+                  20.02012391647289
+                ],
+                [
+                  73.79992435696994,
+                  20.02003408494448
+                ]
+              ]
+            ],
+            "crs": {
+              "properties": {
+                "name": "EPSG:4326"
+              },
+              "type": "name"
+            },
+            "geodesic": false,
+            "type": "Polygon"
+          },
+          "properties": {
+            "moisture_classification": "Wet",
+            "ratio": 6.7534,
+            "rvi": 0.6975,
+            "smi": 0.9521,
+            "vh": -15.3284,
+            "vv": -8.575
+          },
+          "type": "Feature"
+        },
+        {
+          "geometry": {
+            "coordinates": [
+              [
+                [
+                  73.80001418849834,
+                  20.02003408494448
+                ],
+                [
+                  73.80010402002675,
+                  20.02003408494448
+                ],
+                [
+                  73.80010402002675,
+                  20.02012391647289
+                ],
+                [
+                  73.80001418849834,
+                  20.02012391647289
+                ],
+                [
+                  73.80001418849834,
+                  20.02003408494448
+                ]
+              ]
+            ],
+            "crs": {
+              "properties": {
+                "name": "EPSG:4326"
+              },
+              "type": "name"
+            },
+            "geodesic": false,
+            "type": "Polygon"
+          },
+          "properties": {
+            "moisture_classification": "Wet",
+            "ratio": 6.8085,
+            "rvi": 0.6902,
+            "smi": 0.9627,
+            "vh": -15.2561,
+            "vv": -8.4475
+          },
+          "type": "Feature"
+        },
+        {
+          "geometry": {
+            "coordinates": [
+              [
+                [
+                  73.80010402002675,
+                  20.02003408494448
+                ],
+                [
+                  73.80019385155516,
+                  20.02003408494448
+                ],
+                [
+                  73.80019385155516,
+                  20.02012391647289
+                ],
+                [
+                  73.80010402002675,
+                  20.02012391647289
+                ],
+                [
+                  73.80010402002675,
+                  20.02003408494448
+                ]
+              ]
+            ],
+            "crs": {
+              "properties": {
+                "name": "EPSG:4326"
+              },
+              "type": "name"
+            },
+            "geodesic": false,
+            "type": "Polygon"
+          },
+          "properties": {
+            "moisture_classification": "Wet",
+            "ratio": 6.8083,
+            "rvi": 0.6902,
+            "smi": 0.9676,
+            "vh": -15.1976,
+            "vv": -8.3892
+          },
+          "type": "Feature"
+        }
+      ],
+      "radar_summary": {
+        "moisture_classification": "Wet",
+        "rvi": 0.6887,
+        "scene_count": 2,
+        "smi": 0.9629,
+        "vh_mean": -15.2655,
+        "vv_mean": -8.4453,
+        "vv_vh_ratio": 6.8202
+      },
+      "radar_tiles": {
+        "ratio_tile_url": "https://earthengine.googleapis.com/v1/projects/mindstrix-2026/maps/d35012efa641fd6810e60364c2e58e5a-1ea268021d9be163fe4e6a3087dd5a38/tiles/{z}/{x}/{y}",
+        "rvi_tile_url": "https://earthengine.googleapis.com/v1/projects/mindstrix-2026/maps/e5a1a50c67363a76ebd0c533c3f654ca-20a10084976c016e6eff83c5057a37c0/tiles/{z}/{x}/{y}",
+        "smi_tile_url": "https://earthengine.googleapis.com/v1/projects/mindstrix-2026/maps/2687045cdc160dc03584beabe2f3427a-0ee5d9376e1b9a75a443b7322bafc5ae/tiles/{z}/{x}/{y}",
+        "vh_tile_url": "https://earthengine.googleapis.com/v1/projects/mindstrix-2026/maps/19f7234d0dc4e60e585c588d01ad742c-53f5719eae9d56978b78cb7ac9100705/tiles/{z}/{x}/{y}",
+        "vv_tile_url": "https://earthengine.googleapis.com/v1/projects/mindstrix-2026/maps/a211e4630764e2cd8e0e4e5924c906a4-fe1f2d777341aa7d0897244e3855ed49/tiles/{z}/{x}/{y}"
+      },
+      "scene_count": 2,
+      "tile_url": "https://earthengine.googleapis.com/v1/projects/mindstrix-2026/maps/2687045cdc160dc03584beabe2f3427a-0ee5d9376e1b9a75a443b7322bafc5ae/tiles/{z}/{x}/{y}",
+      "type": "FeatureCollection"
+    },
+    "status": 200
+  }
+}

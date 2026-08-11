@@ -1,0 +1,16 @@
+{
+  "auth": null,
+  "body": {
+    "otp": "000000",
+    "phone": "9000000001"
+  },
+  "id": "e10_verify_otp_wrong",
+  "method": "POST",
+  "note": "",
+  "path": "/api/auth/verify-otp",
+  "query": null,
+  "response": {
+    "error": "Incorrect or expired OTP."
+  },
+  "status": 401
+}

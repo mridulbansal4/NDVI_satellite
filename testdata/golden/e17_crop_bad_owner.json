@@ -1,0 +1,18 @@
+{
+  "auth": "valid",
+  "body": {
+    "crop_name": "Grapes",
+    "farm_id": "00000000-0000-0000-0000-000000000000",
+    "season": "kharif",
+    "sowing_date": "2025-06-15"
+  },
+  "id": "e17_crop_bad_owner",
+  "method": "POST",
+  "note": "§7.10 ownership failure message",
+  "path": "/crop",
+  "query": null,
+  "response": {
+    "error": "Farm 00000000-0000-0000-0000-000000000000 not found or does not belong to this farmer."
+  },
+  "status": 403
+}

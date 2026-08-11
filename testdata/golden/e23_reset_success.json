@@ -1,0 +1,16 @@
+{
+  "auth": null,
+  "body": {
+    "session_id": "contract-test-session"
+  },
+  "id": "e23_reset_success",
+  "method": "POST",
+  "note": "",
+  "path": "/chatbot/reset",
+  "query": null,
+  "response": {
+    "ok": true,
+    "session_id": "contract-test-session"
+  },
+  "status": 200
+}

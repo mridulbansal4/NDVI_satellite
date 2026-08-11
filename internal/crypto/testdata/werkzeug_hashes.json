@@ -1,0 +1,51 @@
+{
+  "werkzeug_version": "3.1.8",
+  "default_method_prefix": "scrypt:32768:8:1",
+  "cases": [
+    {
+      "password": "password123",
+      "method": "scrypt",
+      "hash": "scrypt:32768:8:1$yB8lx5CUi4izGWLd$ac43b249ee20764669f124006ec12cdf1b9fdb10cfe79bd2b982300db50eaaa8fa43030a006a4061dda2a9227bba012c749bf8527e9ef1e75c1426094a5bfc1a"
+    },
+    {
+      "password": "password123",
+      "method": "pbkdf2:sha256",
+      "hash": "pbkdf2:sha256:1000000$liwbluaO6JMOK2yV$08cdc517a1bb9a647153f66d166057b1962924419fbb9342bc93c28b5638f9bc"
+    },
+    {
+      "password": "hunter2",
+      "method": "scrypt",
+      "hash": "scrypt:32768:8:1$zuUxDrrH34iA4WZM$dff4498f77650d4dad4fb5d145326969551ca448f037a3be43e78378bee470c2d09d246005b4cc2f0ffb6afb527651a7d8fe5fd1bda6caba79aea40876e89fa5"
+    },
+    {
+      "password": "hunter2",
+      "method": "pbkdf2:sha256",
+      "hash": "pbkdf2:sha256:1000000$xQnaPd4s2h9AdYfP$45653b615f6bb7dbb431e31098f0ca0245c30c9bafcb2d1cd52d4fcc6dca9633"
+    },
+    {
+      "password": "aA1!£€ 😀",
+      "method": "scrypt",
+      "hash": "scrypt:32768:8:1$fbGOPbM3wp9lRDve$4c59a1bf609508982242e53d478603050f26f1a21b40cae1b71181a9a830a06d32813154ee6a14a39cdd803251711116beea2c9ec38749025d5a1a2e9c31ad7a"
+    },
+    {
+      "password": "aA1!£€ 😀",
+      "method": "pbkdf2:sha256",
+      "hash": "pbkdf2:sha256:1000000$PJVlQDrbqSJdBvng$300ea2ff9d35960ea0e16693c9e8e4f68792b09a623fa208f1c38f84153779a1"
+    },
+    {
+      "password": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+      "method": "scrypt",
+      "hash": "scrypt:32768:8:1$hYKkVmsVNFhIBATb$fce2d4c26bffe55536351fd99b187bc852e2c329d38a275b9917aa576a1b916f80e24bf54ff760cdef15d5e759af1c326acfe9ac1d1b73ea5398895455582041"
+    },
+    {
+      "password": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+      "method": "pbkdf2:sha256",
+      "hash": "pbkdf2:sha256:1000000$66V6zOAqKTRUgMlI$5f90d48d03f38b7688f222b2874100c1e793e2a6d3ba8941e490865f8948557c"
+    },
+    {
+      "password": "password123",
+      "method": "<default>",
+      "hash": "scrypt:32768:8:1$prQHEfS1mYG92dm7$ea4c445b41418b670443ed28e3fc577a0402d5ae922d67b625759788a12c6256818b3845f405ed171938000885d9209fa4e1f23ed39e492004bde8b19ef17016"
+    }
+  ]
+}

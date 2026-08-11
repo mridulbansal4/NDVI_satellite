@@ -1,0 +1,18 @@
+{
+  "auth": null,
+  "body": {
+    "geometry": {
+      "coordinates": [],
+      "type": "Polygon"
+    }
+  },
+  "id": "e2_analyze_empty_coords",
+  "method": "POST",
+  "note": "§6.1 check 3",
+  "path": "/api/analyze",
+  "query": null,
+  "response": {
+    "error": "Geometry 'coordinates' must be a non-empty array."
+  },
+  "status": 400
+}

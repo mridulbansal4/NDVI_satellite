@@ -1,0 +1,16 @@
+{
+  "auth": null,
+  "body": {
+    "mobile_number": "9000000099",
+    "password": "contract-test-pw"
+  },
+  "id": "e12_login_no_account",
+  "method": "POST",
+  "note": "",
+  "path": "/auth/login",
+  "query": null,
+  "response": {
+    "error": "No account found with this mobile number. Please sign up."
+  },
+  "status": 401
+}

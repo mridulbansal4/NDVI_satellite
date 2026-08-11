@@ -1,0 +1,15 @@
+{
+  "auth": null,
+  "body": {
+    "geometry": "not-an-object"
+  },
+  "id": "e2_analyze_not_object",
+  "method": "POST",
+  "note": "§6.1 check 1",
+  "path": "/api/analyze",
+  "query": null,
+  "response": {
+    "error": "Geometry must be a JSON object."
+  },
+  "status": 400
+}

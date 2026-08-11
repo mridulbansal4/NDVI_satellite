@@ -1,0 +1,18 @@
+{
+  "auth": "valid",
+  "body": {
+    "farm_id": "011b1c73-2215-4b4a-83c5-45d35385b054",
+    "soil_type": "black"
+  },
+  "id": "e19_soil_success",
+  "method": "POST",
+  "note": "",
+  "path": "/soil",
+  "query": null,
+  "response": {
+    "farm_id": "011b1c73-2215-4b4a-83c5-45d35385b054",
+    "id": "2f86cc52-7824-481f-aae1-e6f8116e3765",
+    "soil_type": "black"
+  },
+  "status": 201
+}

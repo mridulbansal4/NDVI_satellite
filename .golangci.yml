@@ -1,0 +1,36 @@
+# .golangci.yml — Project Pragya Go backend
+# PRD reference: PRAGYA_GO_MIGRATION_PRD.md §14 Phase 0.
+
+run:
+  timeout: 5m
+  tests: true
+
+linters:
+  enable:
+    - errcheck
+    - govet
+    - ineffassign
+    - staticcheck
+    - unused
+    - bodyclose      # every EE / Ollama / SMS response body must be closed
+    - contextcheck   # §13.3: every EE call must carry the request context
+    - errorlint
+    - misspell
+    - nilerr
+    - unconvert
+    - unparam
+
+linters-settings:
+  errcheck:
+    check-type-assertions: true
+  misspell:
+    locale: UK  # the codebase uses "initialised", "serialised", "colour"
+
+issues:
+  exclude-rules:
+    # Golden-fixture tests deliberately compare large literal structures.
+    - path: _test\.go
+      linters:
+        - unparam
+  max-issues-per-linter: 0
+  max-same-issues: 0

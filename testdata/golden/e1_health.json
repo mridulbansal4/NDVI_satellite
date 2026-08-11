@@ -1,0 +1,16 @@
+{
+  "auth": null,
+  "body": null,
+  "id": "e1_health",
+  "method": "GET",
+  "note": "§10.2 always 200",
+  "path": "/health",
+  "query": null,
+  "response": {
+    "firebase_ready": true,
+    "gee_ready": true,
+    "project": "mindstrix-2026",
+    "status": "ok"
+  },
+  "status": 200
+}

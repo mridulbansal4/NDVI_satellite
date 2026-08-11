@@ -1,0 +1,13 @@
+{
+  "auth": null,
+  "body": {},
+  "id": "e8_verify_token_missing",
+  "method": "POST",
+  "note": "",
+  "path": "/api/auth/verify-token",
+  "query": null,
+  "response": {
+    "error": "Missing 'idToken' field"
+  },
+  "status": 400
+}

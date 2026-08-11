@@ -1,0 +1,37 @@
+{
+  "auth": null,
+  "body": {
+    "geometry": {
+      "coordinates": [
+        [
+          [
+            181.0,
+            0
+          ],
+          [
+            1,
+            0
+          ],
+          [
+            1,
+            1
+          ],
+          [
+            181.0,
+            0
+          ]
+        ]
+      ],
+      "type": "Polygon"
+    }
+  },
+  "id": "e2_analyze_bad_lon",
+  "method": "POST",
+  "note": "§6.1 check 6 — number formatting matters",
+  "path": "/api/analyze",
+  "query": null,
+  "response": {
+    "error": "Longitude 181.0 at index 0 is out of range [-180, 180]."
+  },
+  "status": 400
+}

@@ -1,0 +1,13 @@
+{
+  "auth": null,
+  "body": {},
+  "id": "e23_reset_missing_session",
+  "method": "POST",
+  "note": "",
+  "path": "/chatbot/reset",
+  "query": null,
+  "response": {
+    "error": "session_id is required."
+  },
+  "status": 400
+}

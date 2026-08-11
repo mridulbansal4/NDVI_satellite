@@ -1,0 +1,16 @@
+{
+  "auth": null,
+  "body": {
+    "mobile_number": "9000000001",
+    "password": "contract-test-pw"
+  },
+  "id": "e11_signup_duplicate",
+  "method": "POST",
+  "note": "",
+  "path": "/auth/signup",
+  "query": null,
+  "response": {
+    "error": "Mobile number already registered. Please log in."
+  },
+  "status": 409
+}

@@ -1,0 +1,63 @@
+{
+  "auth": "valid",
+  "body": null,
+  "id": "e21_dashboard_success",
+  "method": "GET",
+  "note": "§10.10 type-coercion minefield: numeric, date, raw json",
+  "path": "/dashboard",
+  "query": null,
+  "response": {
+    "farmer": {
+      "id": "4f1f5eb6-daf8-4cdd-9b96-26c8feee7cfc",
+      "mobile_number": "9000000001",
+      "name": "Contract Test",
+      "preferred_language": "marathi"
+    },
+    "farms": [
+      {
+        "area_unit": "acres",
+        "boundary_geom": {
+          "coordinates": [
+            [
+              [
+                73.79,
+                20.011
+              ],
+              [
+                73.7916,
+                20.011
+              ],
+              [
+                73.7916,
+                20.0122
+              ],
+              [
+                73.79,
+                20.0122
+              ],
+              [
+                73.79,
+                20.011
+              ]
+            ]
+          ],
+          "type": "Polygon"
+        },
+        "crops": [
+          {
+            "crop_name": "Grapes",
+            "season": "kharif",
+            "sowing_date": "2025-06-15"
+          }
+        ],
+        "farm_name": "Contract Farm",
+        "id": "011b1c73-2215-4b4a-83c5-45d35385b054",
+        "latest_vi_report": null,
+        "latitude": 20.0116,
+        "longitude": 73.7908,
+        "total_area": 2.5
+      }
+    ]
+  },
+  "status": 200
+}

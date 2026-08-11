@@ -1,0 +1,15 @@
+{
+  "auth": null,
+  "body": {
+    "date": "2025-02-14"
+  },
+  "id": "e4_day_missing_geometry",
+  "method": "POST",
+  "note": "",
+  "path": "/api/analyze-day",
+  "query": null,
+  "response": {
+    "error": "Missing geometry or date"
+  },
+  "status": 400
+}

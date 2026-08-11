@@ -1,0 +1,20 @@
+{
+  "auth": "valid",
+  "body": {
+    "farm_id": "011b1c73-2215-4b4a-83c5-45d35385b054",
+    "soil_type": "purple"
+  },
+  "id": "e19_soil_invalid",
+  "method": "POST",
+  "note": "",
+  "path": "/soil",
+  "query": null,
+  "response": {
+    "errors": {
+      "soil_type": [
+        "Must be one of: black, red, sandy, mixed, unknown."
+      ]
+    }
+  },
+  "status": 400
+}

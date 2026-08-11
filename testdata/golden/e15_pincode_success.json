@@ -1,0 +1,13 @@
+{
+  "auth": null,
+  "body": null,
+  "id": "e15_pincode_success",
+  "method": "GET",
+  "note": "",
+  "path": "/farmer/pincode/422001",
+  "query": null,
+  "response": {
+    "error": "Failed to resolve PIN code"
+  },
+  "status": 500
+}

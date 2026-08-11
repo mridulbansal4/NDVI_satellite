@@ -1,0 +1,42 @@
+{
+  "auth": null,
+  "body": {
+    "date": "1999-01-01",
+    "geometry": {
+      "coordinates": [
+        [
+          [
+            73.79,
+            20.011
+          ],
+          [
+            73.7916,
+            20.011
+          ],
+          [
+            73.7916,
+            20.0122
+          ],
+          [
+            73.79,
+            20.0122
+          ],
+          [
+            73.79,
+            20.011
+          ]
+        ]
+      ],
+      "type": "Polygon"
+    }
+  },
+  "id": "e4_day_no_imagery",
+  "method": "POST",
+  "note": "§10.5 200-with-error, message embeds the date",
+  "path": "/api/analyze-day",
+  "query": null,
+  "response": {
+    "error": "No imagery found for date 1999-01-01"
+  },
+  "status": 200
+}

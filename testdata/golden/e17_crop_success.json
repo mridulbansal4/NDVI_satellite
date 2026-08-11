@@ -1,0 +1,25 @@
+{
+  "auth": "valid",
+  "body": {
+    "crop_name": "Grapes",
+    "farm_id": "011b1c73-2215-4b4a-83c5-45d35385b054",
+    "season": "kharif",
+    "sowing_date": "2025-06-15"
+  },
+  "id": "e17_crop_success",
+  "method": "POST",
+  "note": "",
+  "path": "/crop",
+  "query": null,
+  "response": {
+    "created_at": "Tue, 11 Aug 2026 17:27:12 GMT",
+    "crop_name": "Grapes",
+    "crop_variety": null,
+    "expected_harvest_month": null,
+    "farm_id": "011b1c73-2215-4b4a-83c5-45d35385b054",
+    "id": "af6f00fe-6b60-45d8-b793-74de94e43281",
+    "season": "kharif",
+    "sowing_date": "Sun, 15 Jun 2025 00:00:00 GMT"
+  },
+  "status": 201
+}

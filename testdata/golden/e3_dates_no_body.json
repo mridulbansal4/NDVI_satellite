@@ -1,0 +1,13 @@
+{
+  "auth": null,
+  "body": {},
+  "id": "e3_dates_no_body",
+  "method": "POST",
+  "note": "§10.4 short 'Missing geometry' wording",
+  "path": "/api/analyze-dates",
+  "query": null,
+  "response": {
+    "error": "Missing geometry"
+  },
+  "status": 400
+}

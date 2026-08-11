@@ -2,6 +2,21 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+> **⚠️ MIGRATION IN PROGRESS — this file is stale below this banner.**
+>
+> The backend is being ported from Python/Flask to Go per
+> `PRAGYA_GO_MIGRATION_PRD.md`. **`backend/` has moved to `legacy-python/`**, so
+> every path in the Commands and Architecture sections below is wrong until the
+> Phase 7 rewrite. The Python backend remains the reference implementation and
+> the source of all golden fixtures until then.
+>
+> Current state, phase log, and the full known-issues register:
+> [`docs/CHANGELOG.md`](docs/CHANGELOG.md) and
+> [`docs/KNOWN_ISSUES.md`](docs/KNOWN_ISSUES.md).
+>
+> Go: `make build`, `make test`, `make verify`. Python reference:
+> `legacy-python/venv/Scripts/python.exe app.py` (run from `legacy-python/`).
+
 ## What this is
 
 A Satellite Agronomy Intelligence Platform ("MindstriX"). Users draw farm-field polygons on a Leaflet map; the backend pulls Sentinel-2 imagery from Google Earth Engine (GEE), computes vegetation indices, and returns a smoothed per-cell heatmap grid plus farm statistics. A LangChain/Ollama chatbot ("Krishi Mitra") answers questions grounded in the current field's stats.

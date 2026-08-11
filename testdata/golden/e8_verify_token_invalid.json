@@ -1,0 +1,15 @@
+{
+  "auth": null,
+  "body": {
+    "idToken": "not-a-real-token"
+  },
+  "id": "e8_verify_token_invalid",
+  "method": "POST",
+  "note": "§8.4 — firebase_ready is false in dev; pins that path too",
+  "path": "/api/auth/verify-token",
+  "query": null,
+  "response": {
+    "error": "Invalid or expired authentication token"
+  },
+  "status": 401
+}

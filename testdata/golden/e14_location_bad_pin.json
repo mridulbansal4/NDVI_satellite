@@ -1,0 +1,20 @@
+{
+  "auth": "valid",
+  "body": {
+    "pin_code": "12",
+    "village_name": "Testville"
+  },
+  "id": "e14_location_bad_pin",
+  "method": "POST",
+  "note": "",
+  "path": "/farmer/location",
+  "query": null,
+  "response": {
+    "errors": {
+      "pin_code": [
+        "pin_code must be exactly 6 digits."
+      ]
+    }
+  },
+  "status": 400
+}

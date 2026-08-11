@@ -1,0 +1,16 @@
+{
+  "auth": null,
+  "body": null,
+  "id": "e7_sample_no_analysis",
+  "method": "GET",
+  "note": "§10.7 no cached image yet — ordering-sensitive, keep first",
+  "path": "/api/sample",
+  "query": {
+    "lat": "20.0116",
+    "lng": "73.7908"
+  },
+  "response": {
+    "error": "No analysis available. Run an analysis first."
+  },
+  "status": 404
+}

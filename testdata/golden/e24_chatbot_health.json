@@ -1,0 +1,15 @@
+{
+  "auth": null,
+  "body": null,
+  "id": "e24_chatbot_health",
+  "method": "GET",
+  "note": "",
+  "path": "/chatbot/health",
+  "query": null,
+  "response": {
+    "base_url": "http://localhost:11434",
+    "model": "llama3.2:3b",
+    "status": "ok"
+  },
+  "status": 200
+}

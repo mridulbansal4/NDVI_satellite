@@ -1,0 +1,13 @@
+{
+  "auth": "malformed",
+  "body": null,
+  "id": "jwt_malformed_header",
+  "method": "GET",
+  "note": "",
+  "path": "/dashboard",
+  "query": null,
+  "response": {
+    "msg": "Missing 'Bearer' type in 'Authorization' header. Expected 'Authorization: Bearer <JWT>'"
+  },
+  "status": 401
+}

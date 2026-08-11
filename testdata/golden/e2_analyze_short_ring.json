@@ -1,0 +1,33 @@
+{
+  "auth": null,
+  "body": {
+    "geometry": {
+      "coordinates": [
+        [
+          [
+            0,
+            0
+          ],
+          [
+            1,
+            0
+          ],
+          [
+            0,
+            0
+          ]
+        ]
+      ],
+      "type": "Polygon"
+    }
+  },
+  "id": "e2_analyze_short_ring",
+  "method": "POST",
+  "note": "§6.1 check 4",
+  "path": "/api/analyze",
+  "query": null,
+  "response": {
+    "error": "Outer ring must have at least 4 coordinate pairs (3 unique + 1 closing)."
+  },
+  "status": 400
+}

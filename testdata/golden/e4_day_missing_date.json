@@ -1,0 +1,41 @@
+{
+  "auth": null,
+  "body": {
+    "geometry": {
+      "coordinates": [
+        [
+          [
+            73.79,
+            20.011
+          ],
+          [
+            73.7916,
+            20.011
+          ],
+          [
+            73.7916,
+            20.0122
+          ],
+          [
+            73.79,
+            20.0122
+          ],
+          [
+            73.79,
+            20.011
+          ]
+        ]
+      ],
+      "type": "Polygon"
+    }
+  },
+  "id": "e4_day_missing_date",
+  "method": "POST",
+  "note": "§10.5 'Missing geometry or date'",
+  "path": "/api/analyze-day",
+  "query": null,
+  "response": {
+    "error": "Missing geometry or date"
+  },
+  "status": 400
+}

@@ -1,0 +1,41 @@
+{
+  "auth": null,
+  "body": {
+    "geometry": {
+      "coordinates": [
+        [
+          [
+            -160.0,
+            0.0
+          ],
+          [
+            -159.9982,
+            0.0
+          ],
+          [
+            -159.9982,
+            0.0018
+          ],
+          [
+            -160.0,
+            0.0018
+          ],
+          [
+            -160.0,
+            0.0
+          ]
+        ]
+      ],
+      "type": "Polygon"
+    }
+  },
+  "id": "e6_radar_no_imagery_nodate",
+  "method": "POST",
+  "note": "§10.6 'for this area.' wording",
+  "path": "/api/analyze-radar",
+  "query": null,
+  "response": {
+    "error": "No Sentinel-1 imagery found for this area."
+  },
+  "status": 200
+}

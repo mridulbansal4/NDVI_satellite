@@ -1,0 +1,22 @@
+{
+  "auth": null,
+  "body": {
+    "date": "2025-02-14",
+    "geometry": {
+      "coordinates": [
+        0,
+        0
+      ],
+      "type": "Point"
+    }
+  },
+  "id": "e4_day_invalid_polygon",
+  "method": "POST",
+  "note": "",
+  "path": "/api/analyze-day",
+  "query": null,
+  "response": {
+    "error": "Geometry type must be 'Polygon', got 'Point'."
+  },
+  "status": 400
+}

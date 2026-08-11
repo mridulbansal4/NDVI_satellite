@@ -1,0 +1,22 @@
+{
+  "auth": "valid",
+  "body": {
+    "pin_code": "422001",
+    "village_name": "Testville"
+  },
+  "id": "e14_location_success",
+  "method": "POST",
+  "note": "",
+  "path": "/farmer/location",
+  "query": null,
+  "response": {
+    "district": "",
+    "farmer_id": "4f1f5eb6-daf8-4cdd-9b96-26c8feee7cfc",
+    "id": "787b9e42-e79c-4ccc-bf0b-3d03d91b3e96",
+    "pin_code": "422001",
+    "state": "",
+    "taluka": "",
+    "village_name": "Testville"
+  },
+  "status": 201
+}
