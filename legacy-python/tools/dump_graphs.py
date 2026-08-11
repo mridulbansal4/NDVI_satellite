@@ -129,6 +129,74 @@ def main() -> int:
     indexed = compute_all_indices(composite)
     dump("g07_indexed", indexed)
 
+    # G7 above uses Image.parseExpression for EVI and SAVI. PRD §7.3 replaces
+    # those with explicit band arithmetic in Go, so g07_indexed can never match
+    # the Go graph. This second fixture is the same stacking order and the same
+    # CVI weights, built with the arithmetic forms, and IS the Go gate — it
+    # keeps addBands ordering and the weighted sum under test.
+    def _arith_indexed(c):
+        n = c.select(b["NIR"])
+        r = c.select(b["RED"])
+        bl = c.select(b["BLUE"])
+        ndvi_ = c.normalizedDifference([b["NIR"], b["RED"]]).rename("NDVI")
+        evi_ = (
+            n.subtract(r).multiply(2.5)
+            .divide(n.add(r.multiply(6.0)).subtract(bl.multiply(7.5)).add(1.0))
+            .rename("EVI")
+        )
+        savi_ = n.subtract(r).divide(n.add(r).add(0.5)).multiply(1.5).rename("SAVI")
+        ndmi_ = c.normalizedDifference([b["NIR"], b["SWIR"]]).rename("NDMI")
+        ndwi_ = c.normalizedDifference([b["GREEN"], b["NIR"]]).rename("NDWI")
+        gndvi_ = c.normalizedDifference([b["NIR"], b["GREEN"]]).rename("GNDVI")
+        stacked = c.addBands([ndvi_, evi_, savi_, ndmi_, ndwi_, gndvi_])
+        w = config.CVI_WEIGHTS
+        cvi_ = (
+            stacked.select("NDVI").multiply(w["NDVI"])
+            .add(stacked.select("EVI").multiply(w["EVI"]))
+            .add(stacked.select("SAVI").multiply(w["SAVI"]))
+            .add(stacked.select("NDMI").multiply(w["NDMI"]))
+            .add(stacked.select("GNDVI").multiply(w["GNDVI"]))
+            .rename("CVI")
+        )
+        return stacked.addBands(cvi_)
+
+    arith_indexed = _arith_indexed(composite)
+    dump("g07_indexed_arith", arith_indexed)
+
+    # Strict-comparison variants of every downstream computation, built from
+    # the arithmetic indexed image so the Go graphs can be asserted exactly
+    # rather than only shape-checked. The non-arith versions above stay as the
+    # record of what the Python backend actually sends today.
+    def _dump_downstream(tag, src):
+        idx_bands = ["NDVI", "EVI", "SAVI", "NDMI", "NDWI", "GNDVI", "CVI"]
+        st_bands = ["CVI", "NDVI", "EVI", "SAVI", "NDMI", "NDWI", "GNDVI"]
+        proj_ = ee.Projection("EPSG:4326").atScale(config.GRID_SCALE_M)
+        grid_ = geom.coveringGrid(proj_)
+        subset = src.select(idx_bands)
+
+        def _rc(cell):
+            return cell.set(subset.reduceRegion(
+                reducer=ee.Reducer.mean(), geometry=cell.geometry(),
+                scale=config.GRID_SCALE_M, maxPixels=1e8))
+
+        dump(f"g09_grid_reduced_{tag}", grid_.map(_rc))
+        dump(f"g10_farm_mean_{tag}", src.select(st_bands).reduceRegion(
+            reducer=ee.Reducer.mean(), geometry=geom, scale=10, maxPixels=1e9))
+        dump(f"g11_cvi_stddev_{tag}", src.select(["CVI"]).reduceRegion(
+            reducer=ee.Reducer.stdDev(), geometry=geom, scale=10, maxPixels=1e9))
+        bkt = src.select("NDVI").max(0.0).min(0.9999).divide(0.05).floor().int()
+        dump(f"g12_ndvi_histogram_{tag}", ee.Image.pixelArea().addBands(bkt).reduceRegion(
+            reducer=ee.Reducer.sum().group(groupField=1, groupName="bucket"),
+            geometry=geom, scale=10, maxPixels=1e9))
+        dump(f"g13_smooth_tile_ndvi_{tag}", src.select("NDVI").clip(geom)
+             .updateMask(src.select("NDVI").gte(0)).resample("bicubic")
+             .reproject(crs="EPSG:4326", scale=10).focal_mean(2, "circle", "pixels"))
+        dump(f"g16_point_sample_{tag}", src.select("NDVI").reduceRegion(
+            reducer=ee.Reducer.first(),
+            geometry=ee.Geometry.Point([73.7908, 20.0116]), scale=10, maxPixels=1))
+
+    _dump_downstream("arith", arith_indexed)
+
     # ── G8: covering grid ────────────────────────────────────────────────────
     proj = ee.Projection("EPSG:4326").atScale(config.GRID_SCALE_M)
     grid = geom.coveringGrid(proj)
