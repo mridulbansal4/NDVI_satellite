@@ -245,6 +245,12 @@ func serviceAccountTokenSource(ctx context.Context, path string) (oauth2.TokenSo
 	if err != nil {
 		return nil, err
 	}
+	// staticcheck flags this as deprecated because it does not validate a
+	// credential configuration that came from an untrusted source. Here the
+	// path is operator-supplied configuration (GEE_SERVICE_ACCOUNT_KEY) on the
+	// server's own filesystem, not attacker-controlled input, so the risk the
+	// deprecation describes does not apply.
+	//lint:ignore SA1019 operator-supplied key path, not untrusted input
 	creds, err := google.CredentialsFromJSON(ctx, data, scopes...)
 	if err != nil {
 		return nil, err

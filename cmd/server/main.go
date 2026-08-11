@@ -19,8 +19,10 @@ import (
 	"time"
 
 	"github.com/SanTiwari07/NDVI_satellite/internal/config"
+	"github.com/SanTiwari07/NDVI_satellite/internal/gee"
 	"github.com/SanTiwari07/NDVI_satellite/internal/httpapi"
 	"github.com/SanTiwari07/NDVI_satellite/internal/logging"
+	"github.com/SanTiwari07/NDVI_satellite/internal/pipeline"
 )
 
 func main() {
@@ -54,24 +56,49 @@ func main() {
 		FirebaseReady: &atomic.Bool{},
 	}
 
+	// The Analyzer is created eagerly so the router holds a stable pointer, but
+	// stays unusable until the probe flips GEEReady. Every analysis route
+	// checks GEEReady first and answers 503, so a nil EE client is never
+	// dereferenced.
+	analyzer := &pipeline.Analyzer{
+		Cfg:   cfg,
+		Cache: pipeline.NewExprCache(cfg.ExprCacheTTL, cfg.ExprCacheMaxEntries),
+		Log:   logging.Named(log, "pipeline"),
+	}
+	deps.Analyzer = analyzer
+
 	// Startup probes run ONCE in a goroutine, not per-request. The Python code
 	// does this in @app.before_request, which is a workaround for Flask's
 	// lifecycle and is deliberately not reproduced (§5.5). Neither probe may
 	// prevent startup: /health, /auth/* and /dashboard must work without GEE.
 	go func() {
-		if cfg.GEEProjectID == "" {
-			initLog.Error("GEE_PROJECT_ID is not set. " +
-				"Create a .env file with:\n    GEE_PROJECT_ID=your-cloud-project-id\n" +
-				"Find your project ID at https://console.cloud.google.com")
+		ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
+		defer cancel()
+
+		sess, err := gee.NewSession(ctx, cfg)
+		if err != nil {
+			initLog.Error("GEE initialisation failed: " + err.Error())
 			return
 		}
-		// Phase 2 replaces this with a real value:compute connectivity probe.
-		initLog.Warn("GEE client not wired yet (Phase 2) — analysis routes will answer 503")
+		initLog.Info("Initialising GEE (project: " + cfg.GEEProjectID +
+			") via " + sess.Source)
+
+		if err := sess.Probe(ctx); err != nil {
+			initLog.Error("GEE connectivity probe failed: " + err.Error() +
+				" | Check that GEE_PROJECT_ID names a project with the Earth Engine" +
+				" API enabled, that the account has access to it, and that the" +
+				" credentials are not stale")
+			return
+		}
+
+		analyzer.EE = sess.NewClient()
+		deps.GEEReady.Store(true)
+		initLog.Info("GEE initialised and connectivity verified.")
 	}()
 
 	go func() {
-		// Phase 5 wires Firebase Admin. firebase_ready=false is the normal dev
-		// state and must not break anything (§13.7).
+		// Firebase Admin is wired in Phase 5. firebase_ready=false is the
+		// normal dev state and must not break anything (§13.7).
 		initLog.Info("Firebase not wired yet (Phase 5) — firebase_ready=false")
 	}()
 

@@ -13,6 +13,7 @@ import (
 
 	"github.com/SanTiwari07/NDVI_satellite/internal/config"
 	"github.com/SanTiwari07/NDVI_satellite/internal/logging"
+	"github.com/SanTiwari07/NDVI_satellite/internal/pipeline"
 )
 
 func newTestServer(t *testing.T) (http.Handler, *atomic.Bool, *atomic.Bool) {
@@ -31,6 +32,14 @@ func newTestServer(t *testing.T) (http.Handler, *atomic.Bool, *atomic.Bool) {
 		Log:           logging.New("ERROR", ""),
 		GEEReady:      gee,
 		FirebaseReady: fb,
+		// An Analyzer with a cache but no EE client: enough for the error
+		// branches and the cache-miss path, and any test that reached a real
+		// Earth Engine call would panic loudly rather than pass silently.
+		Analyzer: &pipeline.Analyzer{
+			Cfg:   cfg,
+			Cache: pipeline.NewExprCache(cfg.ExprCacheTTL, cfg.ExprCacheMaxEntries),
+			Log:   logging.New("ERROR", ""),
+		},
 	})
 	return h, gee, fb
 }

@@ -15,6 +15,7 @@ import (
 	"github.com/SanTiwari07/NDVI_satellite/internal/config"
 	"github.com/SanTiwari07/NDVI_satellite/internal/httpapi/middleware"
 	"github.com/SanTiwari07/NDVI_satellite/internal/logging"
+	"github.com/SanTiwari07/NDVI_satellite/internal/pipeline"
 )
 
 // rawJSON keeps a value exactly as it arrived so it can be echoed back
@@ -31,6 +32,11 @@ type Deps struct {
 	// every analysis request, so it must be atomic rather than a plain bool.
 	GEEReady      *atomic.Bool
 	FirebaseReady *atomic.Bool
+
+	// Analyzer runs the Sentinel-2 and Sentinel-1 pipelines. Nil until the EE
+	// session is established, in which case GEEReady stays false and the
+	// analysis routes answer 503 before ever dereferencing it.
+	Analyzer *pipeline.Analyzer
 }
 
 // Server owns the route table.
