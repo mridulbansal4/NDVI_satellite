@@ -12,6 +12,7 @@ package config
 import (
 	"fmt"
 	"os"
+	"path/filepath"
 	"strconv"
 	"strings"
 	"time"
@@ -129,7 +130,7 @@ type Config struct {
 // missing .env: startup must succeed even with no credentials at all (§5.5).
 func Load(envFiles ...string) (*Config, error) {
 	if len(envFiles) == 0 {
-		envFiles = []string{".env", "backend/.env", "legacy-python/.env"}
+		envFiles = defaultEnvFiles()
 	}
 	for _, f := range envFiles {
 		if _, err := os.Stat(f); err == nil {
@@ -296,6 +297,44 @@ func Load(envFiles ...string) (*Config, error) {
 		return nil, err
 	}
 	return c, nil
+}
+
+// defaultEnvFiles lists the .env candidates, relative to the working directory
+// AND to the repository root.
+//
+// The root walk matters because `go test ./internal/gee/` runs with the working
+// directory set to that package, and because the server binary may be started
+// from anywhere. Without it, a test that needs real credentials fails with a
+// confusing "GEE_PROJECT_ID is not set" rather than finding the .env two
+// directories up.
+func defaultEnvFiles() []string {
+	rel := []string{".env", "backend/.env", "legacy-python/.env"}
+	out := append([]string{}, rel...)
+	if root, ok := repoRoot(); ok {
+		for _, r := range rel {
+			out = append(out, filepath.Join(root, filepath.FromSlash(r)))
+		}
+	}
+	return out
+}
+
+// repoRoot walks up from the working directory looking for go.mod.
+func repoRoot() (string, bool) {
+	dir, err := os.Getwd()
+	if err != nil {
+		return "", false
+	}
+	for i := 0; i < 8; i++ {
+		if _, err := os.Stat(filepath.Join(dir, "go.mod")); err == nil {
+			return dir, true
+		}
+		parent := filepath.Dir(dir)
+		if parent == dir {
+			break
+		}
+		dir = parent
+	}
+	return "", false
 }
 
 // Validate checks the invariants config.py documents but never enforces.

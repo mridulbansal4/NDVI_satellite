@@ -53,13 +53,6 @@ func fixtureGeom() Geometry {
 	}})
 }
 
-// Pinned to match dump_graphs.py. Never today's date: the fixtures must be
-// reproducible.
-const (
-	fixStart = "2025-01-01"
-	fixEnd   = "2025-04-01"
-)
-
 func TestGeometryGraph(t *testing.T) {
 	assertGraphEqualsGolden(t, "geometry", fixtureGeom().N)
 }

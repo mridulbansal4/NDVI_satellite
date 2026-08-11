@@ -14,7 +14,8 @@ var IndexBands = []string{"NDVI", "EVI", "SAVI", "NDMI", "NDWI", "GNDVI", "CVI"}
 // does not change the numbers, but it does change the graph.
 var StatsBands = []string{"CVI", "NDVI", "EVI", "SAVI", "NDMI", "NDWI", "GNDVI"}
 
-// NDVI, NDMI, NDWI and GNDVI are all normalizedDifference pairs (G5).
+// NDVI is (NIR − RED)/(NIR + RED). It, NDMI, NDWI and GNDVI are all
+// normalizedDifference pairs (G5).
 func NDVI(cfg *config.Config, img eeexpr.Image) eeexpr.Image {
 	return img.NormalizedDifference(cfg.Bands["NIR"], cfg.Bands["RED"]).Rename("NDVI")
 }

@@ -70,8 +70,9 @@ func (i Image) Max(o Image) Image      { return i.binary("Image.max", o) }
 func (i Image) Min(o Image) Image      { return i.binary("Image.min", o) }
 func (i Image) Pow(o Image) Image      { return i.binary("Image.pow", o) }
 
-// Scalar-operand convenience forms. Each promotes through Image.constant, which
-// is exactly what the Python client does.
+// AddNum and the other *Num forms take a scalar operand, promoting it through
+// Image.constant — exactly what the Python client does, since Earth Engine has
+// no scalar arithmetic overloads.
 func (i Image) AddNum(v float64) Image      { return i.Add(ImageConstant(v)) }
 func (i Image) SubtractNum(v float64) Image { return i.Subtract(ImageConstant(v)) }
 func (i Image) MultiplyNum(v float64) Image { return i.Multiply(ImageConstant(v)) }
