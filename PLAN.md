@@ -81,23 +81,25 @@ computes `s2_scene_count` and matches the Python number exactly.
 - [x] `pipeline/radar_grid.go` — 5-band reduction, smooth all five, moisture class — §7.9
 - [x] Wire E5, E6
 
-## Phase 5 — Data layer, auth, onboarding  INCOMPLETE
+## Phase 5 — Data layer, auth, onboarding  DONE
 
 **Acceptance:** a Python-created user with a Python-issued JWT logs in and loads
-`/dashboard` against the Go server. **NOT met** — see REPORT.md section 4.
+`/dashboard` against the Go server. **MET**, and in both directions — a
+Go-created user logs into Python and Python accepts Go-issued JWTs.
 
 - [x] `internal/crypto/werkzeug.go` — scrypt + pbkdf2 verify/generate — §8.2
       Verified bidirectionally against the real Python environment.
 - [x] JWT **verification** path (`httpapi/middleware/jwt.go`, landed in Phase 1) — §8.3
-- [ ] JWT **issue** path (`internal/jwtutil`) — §8.3
-- [ ] `internal/db/pool.go` — pgxpool, min 2 / max 20 — §13.5
-- [ ] `internal/repo/*` — seven repositories, hand-written SQL — §2.3
-- [ ] `internal/service/*` — onboarding business logic + Firestore mirroring — §7.10
-- [ ] `internal/service/pincode.go` — India Post client (K11 fix accepted)
-- [ ] `internal/service/sms.go` — OTP store, janitor, gateway — §8.5
-- [ ] `internal/firebase/admin.go` + `internal/firestore/*` — §8.4, §13.7
-- [ ] Wire E8–E21 — validation layers are live and verified; the service tails
-      still answer 501
+- [x] JWT **issue** path (`internal/jwtutil`) — §8.3, incl. the `csrf` claim the
+      PRD omits
+- [x] `internal/db/pool.go` — pgxpool, min 2 / max 20 — §13.5
+- [x] `internal/repo/*` — seven tables, hand-written SQL incl. PostGIS,
+      DISTINCT ON, ON CONFLICT, = ANY($1::uuid[]) — §2.3
+- [x] `internal/service/onboarding.go` + `dashboard.go` — §7.10
+- [x] `internal/service/pincode.go` — India Post client (K11 fix accepted)
+- [x] `internal/service/sms.go` — OTP store, janitor, gateway — §8.5
+- [x] `internal/firebase/admin.go` + `internal/firestore/*` — §8.4, §13.7
+- [x] Wire E8–E21
 
 ## Phase 6 — Chatbot  DONE
 
@@ -111,15 +113,17 @@ computes `s2_scene_count` and matches the Python number exactly.
 ## Phase 7 — Cutover & cleanup  PARTIAL
 
 - [x] Endpoint-by-endpoint verification, actual status + body recorded
-      -> docs/ENDPOINT_VERIFICATION.md, 61/61 pass
+      -> docs/ENDPOINT_VERIFICATION.md, 64/64 pass
 - [x] Live Go-vs-Python numeric parity on the analysis endpoints
+- [x] Full 9-step onboarding walked on BOTH backends and diffed, 0 failing
+      -> legacy-python/tools/verify_onboarding.py
 - [x] `REPORT.md`
-- [ ] Full contract suite green — blocked on Phase 5
 - [ ] Docs rewritten (`CLAUDE.md`, `README.md`) — §16; a stale-state banner plus
       docs/CHANGELOG.md and docs/KNOWN_ISSUES.md are in place instead
 - [ ] Delete `legacy-python/` — **deliberately NOT done.** §0.7 keeps it until
-      Phase 7 sign-off, Phase 5 is incomplete, and it is still the only working
-      implementation of E11-E21.
+      Phase 7 sign-off, and it is still the source of every golden fixture and
+      the reference for the live comparison harnesses. Deleting it is a
+      one-line change once you have signed off.
 
 ---
 
@@ -136,20 +140,20 @@ Verification columns: H = happy path · I = missing/invalid input · A = auth/un
 | E5 | POST | `/api/analyze-radar-dates` | none | [x] | [x] | n/a | [x] |
 | E6 | POST | `/api/analyze-radar` | none | [x] | [x] | n/a | [x] |
 | E7 | GET | `/api/sample` | none | [x] | [x] | n/a | [x] |
-| E8 | POST | `/api/auth/verify-token` | none | [ ] | [x] | [ ] | [ ] |
+| E8 | POST | `/api/auth/verify-token` | none | [~] | [x] | [x] | [x] |
 | E9 | POST | `/api/auth/send-otp` | none | [~] | [x] | n/a | [~] |
-| E10 | POST | `/api/auth/verify-otp` | none | [ ] | [x] | n/a | [x] |
-| E11 | POST | `/auth/signup` | none | [ ] | [x] | n/a | [ ] |
-| E12 | POST | `/auth/login` | none | [ ] | [x] | n/a | [ ] |
-| E13 | POST | `/farmer/basic-details` | JWT | [ ] | [x] | [x] | [ ] |
-| E14 | POST | `/farmer/location` | JWT | [ ] | [x] | [x] | [ ] |
-| E15 | GET | `/farmer/pincode/:pin` | none | [ ] | [ ] | n/a | [ ] |
-| E16 | POST | `/farm` | JWT | [ ] | [x] | [x] | [ ] |
-| E17 | POST | `/crop` | JWT | [ ] | [x] | [x] | [ ] |
-| E18 | POST | `/irrigation` | JWT | [ ] | [x] | [x] | [ ] |
-| E19 | POST | `/soil` | JWT | [ ] | [x] | [x] | [ ] |
-| E20 | POST | `/consent` | JWT | [ ] | [x] | [x] | [ ] |
-| E21 | GET | `/dashboard` | JWT | [ ] | n/a | [x] | [ ] |
+| E10 | POST | `/api/auth/verify-otp` | none | [x] | [x] | n/a | [x] |
+| E11 | POST | `/auth/signup` | none | [x] | [x] | n/a | [x] |
+| E12 | POST | `/auth/login` | none | [x] | [x] | n/a | [x] |
+| E13 | POST | `/farmer/basic-details` | JWT | [x] | [x] | [x] | [x] |
+| E14 | POST | `/farmer/location` | JWT | [x] | [x] | [x] | [x] |
+| E15 | GET | `/farmer/pincode/:pin` | none | [x] | [x] | n/a | [x] |
+| E16 | POST | `/farm` | JWT | [x] | [x] | [x] | [x] |
+| E17 | POST | `/crop` | JWT | [x] | [x] | [x] | [x] |
+| E18 | POST | `/irrigation` | JWT | [x] | [x] | [x] | [x] |
+| E19 | POST | `/soil` | JWT | [x] | [x] | [x] | [x] |
+| E20 | POST | `/consent` | JWT | [x] | [x] | [x] | [x] |
+| E21 | GET | `/dashboard` | JWT | [x] | n/a | [x] | [x] |
 | E22 | POST | `/chatbot/chat` | none | [~] | [x] | n/a | [x] |
 | E23 | POST | `/chatbot/reset` | none | [x] | [x] | n/a | [x] |
 | E24 | GET | `/chatbot/health` | none | [x] | n/a | n/a | [x] |
@@ -160,8 +164,9 @@ real validation and then answers 501 - `[~]` implemented but not exercisable
 here.
 
 `[~]` reasons: E9's happy path would send a real, billed SMS through the
-nationalbulksms gateway; E22's happy path needs a running Ollama server.
+nationalbulksms gateway; E22's happy path needs a running Ollama server;
+E8's happy path needs a genuine Firebase ID token from the phone-auth client.
 
-The I (invalid input) and A (auth) columns are ticked for E13-E21 because
-validation and the JWT middleware ARE fully implemented and verified - it is
-only the service/database tail behind them that is outstanding.
+E11-E21 happy paths are verified by
+`legacy-python/tools/verify_onboarding.py`, which walks all nine onboarding
+steps against BOTH backends and diffs every response (0 failing).

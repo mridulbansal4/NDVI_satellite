@@ -19,10 +19,16 @@ import (
 	"time"
 
 	"github.com/SanTiwari07/NDVI_satellite/internal/config"
+	"github.com/SanTiwari07/NDVI_satellite/internal/db"
+	"github.com/SanTiwari07/NDVI_satellite/internal/firebase"
+	"github.com/SanTiwari07/NDVI_satellite/internal/firestore"
 	"github.com/SanTiwari07/NDVI_satellite/internal/gee"
 	"github.com/SanTiwari07/NDVI_satellite/internal/httpapi"
+	"github.com/SanTiwari07/NDVI_satellite/internal/jwtutil"
 	"github.com/SanTiwari07/NDVI_satellite/internal/logging"
 	"github.com/SanTiwari07/NDVI_satellite/internal/pipeline"
+	"github.com/SanTiwari07/NDVI_satellite/internal/repo"
+	"github.com/SanTiwari07/NDVI_satellite/internal/service"
 )
 
 func main() {
@@ -96,10 +102,45 @@ func main() {
 		initLog.Info("GEE initialised and connectivity verified.")
 	}()
 
+	// PostgreSQL. A missing or unreachable database must NOT prevent startup:
+	// /health and every analysis route work without it, which is what the
+	// Python's "[DB] pool init skipped … (GEE-only mode)" preserves.
+	fsClient := firestore.New(cfg, logging.Named(log, "Firestore"))
+	pinAPI := service.NewPinCodeClient()
+	smsSvc := service.NewSMSService(cfg, logging.Named(log, "app.sms"))
+	fbAdmin := firebase.NewAdmin(cfg.ServiceAccountKey, cfg.FirebaseProjectID,
+		logging.Named(log, "app.auth"))
+
+	deps.Firebase = fbAdmin
+	deps.SMS = smsSvc
+	deps.PinAPI = pinAPI
+
+	dbLog := logging.Named(log, "DB")
+	if pool, err := db.New(context.Background(), cfg); err != nil {
+		dbLog.Warn("[DB] PostgreSQL pool init skipped: " + err.Error() + " (GEE-only mode)")
+	} else {
+		dbLog.Info("[DB] PostgreSQL connection pool ready.")
+		deps.Onboarding = &service.Onboarding{
+			Cfg:    cfg,
+			Store:  repo.New(pool),
+			FS:     fsClient,
+			JWT:    jwtutil.NewIssuer(cfg.JWTSecret, cfg.JWTExpiry),
+			PinAPI: pinAPI,
+			Log:    logging.Named(log, "service"),
+		}
+		defer pool.Close()
+	}
+
 	go func() {
-		// Firebase Admin is wired in Phase 5. firebase_ready=false is the
-		// normal dev state and must not break anything (§13.7).
-		initLog.Info("Firebase not wired yet (Phase 5) — firebase_ready=false")
+		// firebase_ready=false is the normal dev state — serviceAccountKey.json
+		// is gitignored — and must not break anything (§13.7).
+		ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+		defer cancel()
+		if fbAdmin.Available(ctx) {
+			deps.FirebaseReady.Store(true)
+		} else {
+			initLog.Info("[Firebase] Not configured — firebase_ready=false")
+		}
 	}()
 
 	srv := &http.Server{

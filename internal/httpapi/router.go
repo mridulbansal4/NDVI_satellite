@@ -14,10 +14,12 @@ import (
 
 	"github.com/SanTiwari07/NDVI_satellite/internal/chatbot"
 	"github.com/SanTiwari07/NDVI_satellite/internal/config"
+	"github.com/SanTiwari07/NDVI_satellite/internal/firebase"
 	"github.com/SanTiwari07/NDVI_satellite/internal/httpapi/middleware"
 	"github.com/SanTiwari07/NDVI_satellite/internal/logging"
 	"github.com/SanTiwari07/NDVI_satellite/internal/ollama"
 	"github.com/SanTiwari07/NDVI_satellite/internal/pipeline"
+	"github.com/SanTiwari07/NDVI_satellite/internal/service"
 )
 
 // rawJSON keeps a value exactly as it arrived so it can be echoed back
@@ -44,6 +46,18 @@ type Deps struct {
 	// unreachable Ollama surfaces as the 502 the Python emits, not a panic.
 	Memory *chatbot.Memory
 	Ollama *ollama.Client
+
+	// Onboarding is nil when DATABASE_URL is unset, in which case every route
+	// that needs it answers 500 with an actionable message rather than
+	// panicking. That mirrors the Python, which logs "[DB] pool init skipped"
+	// at startup and then fails per request.
+	Onboarding *service.Onboarding
+
+	// Firebase and SMS are always non-nil. Firebase being unconfigured is the
+	// normal dev state and surfaces as firebase_ready=false (§13.7).
+	Firebase *firebase.Admin
+	SMS      *service.SMSService
+	PinAPI   *service.PinCodeClient
 }
 
 // Server owns the route table.
@@ -66,6 +80,16 @@ func New(d Deps) *gin.Engine {
 	if d.Ollama == nil {
 		d.Ollama = ollama.New(d.Cfg.OllamaBaseURL, d.Cfg.OllamaModel,
 			d.Cfg.OllamaTemperature, d.Cfg.OllamaMaxTokens)
+	}
+	if d.PinAPI == nil {
+		d.PinAPI = service.NewPinCodeClient()
+	}
+	if d.SMS == nil {
+		d.SMS = service.NewSMSService(d.Cfg, logging.Named(d.Log, "app.sms"))
+	}
+	if d.Firebase == nil {
+		d.Firebase = firebase.NewAdmin(d.Cfg.ServiceAccountKey,
+			d.Cfg.FirebaseProjectID, logging.Named(d.Log, "app.auth"))
 	}
 	s := &Server{deps: d, log: logging.Named(d.Log, "app")}
 
@@ -166,13 +190,5 @@ func (s *Server) health(c *gin.Context) {
 		"gee_ready":      s.deps.GEEReady.Load(),
 		"firebase_ready": s.deps.FirebaseReady.Load(),
 		"project":        project,
-	})
-}
-
-// notImplemented is the Phase 1 placeholder. It is deliberately 501 so the
-// contract runner can distinguish "not built yet" from "built and wrong".
-func (s *Server) notImplemented(c *gin.Context, what string) {
-	c.JSON(http.StatusNotImplemented, gin.H{
-		"error": "not implemented in this migration phase: " + what,
 	})
 }

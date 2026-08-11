@@ -30,6 +30,14 @@ Python one because of an issue below, the Go response is wrong.
 | K11 | `GET /farmer/pincode/<pin>` **always returns 500**. `api.postalpincode.in` rejects the default `python-requests/x.y.z` User-Agent with a TCP reset; any other UA works. Consequence: `POST /farmer/location` always stores empty `state`/`district`/`taluka` via the §7.10 "on any failure, continue" path. | `utils/pincode.py` (no UA header set) | **RESOLVED — fix accepted as the new baseline** (owner decision, Phase 0). Go sets an explicit non-blocked User-Agent and returns the real 200 / 404 / 500 branches per §10.10. This is the one sanctioned deviation from §0.8. The `e15_pincode_success` and `e15_pincode_notfound` goldens capture the *broken* 500 and are therefore superseded: the contract runner asserts them against the §10.10 spec instead of the golden, and they are excluded from the byte-parity gate. `POST /farmer/location` will now store real state/district/taluka, which is a data-shape change the frontend already tolerates (the fields were simply empty before). |
 | K12 | `services/auth.py` mints tokens whose `sub` is the farmer UUID as a string, and `flask_jwt_extended` returns **401** (not 422) with `Missing 'Bearer' type in 'Authorization' header. Expected 'Authorization: Bearer <JWT>'` for a non-Bearer header. PRD §8.3's table claims 422 with different wording. | `middlewares/auth.py` via flask-jwt-extended 4.7.4 | Verified against the running app; goldens `jwt_*.json` are authoritative. The Go middleware must emit 401 here. |
 
+## Found during Phase 5
+
+| ID | Issue | Where | Notes |
+|---|---|---|---|
+| K13 | The confidence score's **cloud term is dead**. The two `.map()` calls strip image properties, so `aggregate_mean("CLOUDY_PIXEL_PERCENTAGE")` returns null; Python's `avg_cloud or 0` turns that into `0`, not the `MAX_CLOUD_COVER_PCT` fallback, so `cloud_score` is a constant `1.0` and contributes a fixed `0.30`. | `stats_service.extract_farm_statistics` | Verified against the running backend and reproduced exactly (§0.8). Only visible by diffing Go against Python live — invisible from the code. |
+| K14 | `POST /farm` returns `total_area` as the **string** `"2.50"`, while `GET /dashboard` returns the same column as the **number** `2.5`. psycopg2 maps NUMERIC to `Decimal`, which Flask serialises as a string; `services/dashboard.py` explicitly calls `float()`. | `repositories/farm.py` vs `services/dashboard.py` | Both reproduced. PRD §10.10's "emit 2.5, not '2.50'" applies to the dashboard ONLY; applying it everywhere breaks `POST /farm`. |
+| K15 | `POST /crop` returns `sowing_date` as **RFC 1123** (`"Sun, 15 Jun 2025 00:00:00 GMT"`), while `GET /dashboard` returns `"2025-06-15"`. Flask renders a raw `date` the first way; the dashboard calls `str()`. | `repositories/crop.py` vs `services/dashboard.py` | Both reproduced, same asymmetry as K14. |
+
 ## Verified PRD corrections
 
 Captured empirically in Phase 0; the fixtures under `internal/gee/eeexpr/testdata/`
@@ -49,3 +57,5 @@ are authoritative over the PRD prose.
 | §5.8 | `Collection.map` arg key unverified | confirmed `baseAlgorithm`, with `functionDefinitionValue{argumentNames:["_MAPPING_VAR_0_0"], body:"<ref string>"}` |
 | §12.3 | `cloudy_region.json` yields zero clean scenes | mid-Pacific **has** S2 coverage and returns a success body. The real empty-collection case needs a polygon above ~84°N (`no_imagery.json`). |
 | §12.3 | `tiny_plot.json` gives fewer than 2 grid cells | it gives 6. `coveringGrid` snaps to a grid, so the `n < 2` smoothing early-return is covered by a Go unit test instead. |
+| §8.3 | the issued claim set is `sub, type, fresh, iat, nbf, exp, jti` | flask-jwt-extended also emits **`csrf`**. §8.3 says "if `csrf` or other claims appear, add them to the issue path" — it does, and they are. |
+| §5.6 | `maps` request needs `visualizationOptions` | no such field; vis params are folded into the expression as `Image.visualize`, palette `#` retained. |

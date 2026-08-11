@@ -5,11 +5,11 @@ backend. Every row is a real HTTP request; the status and body columns
 record what actually came back.
 
 - Base URL: `http://127.0.0.1:5001`
-- Cases: 61  |  passing: 61  |  failing: 0
+- Cases: 64  |  passing: 64  |  failing: 0
 
 | Endpoint | Case | Method | Expected | Actual | Result | Response (abridged) |
 |---|---|---|---:|---:|---|---|
-| `E1  /health` | happy | GET | 200 | 200 | PASS | `{"firebase_ready": false, "gee_ready": true, "project": "mindstrix-2026", "status": "ok"}` |
+| `E1  /health` | happy | GET | 200 | 200 | PASS | `{"firebase_ready": true, "gee_ready": true, "project": "mindstrix-2026", "status": "ok"}` |
 | `E7  /api/sample` | no analysis yet (cold cache) | GET | 404 | 404 | PASS | `{"error": "No analysis available. Run an analysis first."}` |
 | `E2  /api/analyze` | happy | POST | 200 | 200 | PASS | `{266 features; confidence=0.887; scene_count=5; keys=farm_boundary,farm_summary,features,index_tiles,ndvi_tile_url,tile_url,type}` |
 | `E2  /api/analyze` | missing geometry | POST | 400 | 400 | PASS | `{"error": "Request body must contain a 'geometry' key with a GeoJSON Polygon."}` |
@@ -43,11 +43,12 @@ record what actually came back.
 | `E6  /api/analyze-radar` | no imagery, no date | POST | 200 | 200 | PASS | `{"error": "No Sentinel-1 imagery found for this area."}` |
 | `E6  /api/analyze-radar` | no imagery, with date | POST | 200 | 200 | PASS | `{"error": "No Sentinel-1 imagery found for 2025-02-14."}` |
 | `E8  /api/auth/verify-token` | missing idToken | POST | 400 | 400 | PASS | `{"error": "Missing 'idToken' field"}` |
-| `E8  /api/auth/verify-token` | invalid token | POST | 501 | 501 | PASS | `{"error": "not implemented in this migration phase: Firebase ID token verification (Phase 5)"}` |
+| `E8  /api/auth/verify-token` | invalid token | POST | 401 | 401 | PASS | `{"error": "Invalid or expired authentication token"}` |
 | `E9  /api/auth/send-otp` | too short | POST | 400 | 400 | PASS | `{"error": "Provide a valid 10-digit Indian mobile number."}` |
 | `E9  /api/auth/send-otp` | non-digit | POST | 400 | 400 | PASS | `{"error": "Provide a valid 10-digit Indian mobile number."}` |
 | `E10 /api/auth/verify-otp` | missing fields | POST | 400 | 400 | PASS | `{"error": "phone and otp are required."}` |
 | `E10 /api/auth/verify-otp` | wrong otp | POST | 401 | 401 | PASS | `{"error": "Incorrect or expired OTP."}` |
+| `E12 /auth/login` | unknown mobile (401) | POST | 401 | 401 | PASS | `{"error": "No account found with this mobile number. Please sign up."}` |
 | `E11 /auth/signup` | bad mobile (422) | POST | 422 | 422 | PASS | `{"errors": {"mobile_number": ["Mobile number must be exactly 10 digits."]}}` |
 | `E11 /auth/signup` | short password (422) | POST | 422 | 422 | PASS | `{"errors": {"password": ["Password must be at least 6 characters."]}}` |
 | `E12 /auth/login` | bad mobile (422) | POST | 422 | 422 | PASS | `{"errors": {"mobile_number": ["Mobile number must be exactly 10 digits."]}}` |
@@ -59,13 +60,15 @@ record what actually came back.
 | `E13 /farmer/basic-details` | invalid body | POST | 400 | 400 | PASS | `{"errors": {"name": ["Length must be between 1 and 255."], "preferred_language": ["Must be one of: english, hindi, marathi, others."]}}` |
 | `E13 /farmer/basic-details` | unauthorized | POST | 401 | 401 | PASS | `{"msg": "Missing Authorization Header"}` |
 | `E14 /farmer/location` | bad pin | POST | 400 | 400 | PASS | `{"errors": {"pin_code": ["pin_code must be exactly 6 digits."]}}` |
-| `E15 /farmer/pincode` | lookup | GET | 501 | 501 | PASS | `{"error": "not implemented in this migration phase: India Post PIN lookup (Phase 5)"}` |
+| `E15 /farmer/pincode` | happy | GET | 200 | 200 | PASS | `{"state": "Maharashtra", "district": "Nashik", "taluka": "Nashik"}` |
+| `E15 /farmer/pincode` | unknown pin (404) | GET | 404 | 404 | PASS | `{"error": "PIN code 000000 not found or invalid."}` |
+| `E15 /farmer/pincode` | malformed pin (404) | GET | 404 | 404 | PASS | `{"error": "Invalid PIN code format: '12'. Must be exactly 6 digits."}` |
 | `E16 /farm` | invalid body | POST | 400 | 400 | PASS | `{"errors": {"area_unit": ["Must be one of: acres, hectares."], "farm_name": ["Length must be between 1 and 255."], "land_ownership": ["Must be one of: own_land, leased_land, contra…` |
 | `E17 /crop` | missing required | POST | 400 | 400 | PASS | `{"errors": {"farm_id": ["Missing data for required field."], "season": ["Must be one of: kharif, rabi, zaid."], "sowing_date": ["Missing data for required field."]}}` |
 | `E18 /irrigation` | bad enum | POST | 400 | 400 | PASS | `{"errors": {"irrigation_type": ["Must be one of: rainfed, borewell, canal, drip_irrigation, sprinkler."]}}` |
 | `E19 /soil` | bad enum | POST | 400 | 400 | PASS | `{"errors": {"soil_type": ["Must be one of: black, red, sandy, mixed, unknown."]}}` |
 | `E20 /consent` | missing field | POST | 400 | 400 | PASS | `{"errors": {"satellite_monitoring": ["Missing data for required field."]}}` |
-| `E21 /dashboard` | authorized | GET | 501 | 501 | PASS | `{"error": "not implemented in this migration phase: dashboard (Phase 5)"}` |
+| `E21 /dashboard` | authorized, unknown farmer (404) | GET | 404 | 404 | PASS | `{"error": "Farmer 00000000-0000-0000-0000-0000000000c1 not found."}` |
 | `E22 /chatbot/chat` | empty message | POST | 400 | 400 | PASS | `{"error": "message field is required and must not be empty."}` |
 | `E23 /chatbot/reset` | missing session_id | POST | 400 | 400 | PASS | `{"error": "session_id is required."}` |
 | `E23 /chatbot/reset` | happy | POST | 200 | 200 | PASS | `{"ok": true, "session_id": "verify-session"}` |
@@ -77,3 +80,5 @@ record what actually came back.
 |---|---|---|
 | `E9  /api/auth/send-otp` | happy path | would send a real, billed SMS through the nationalbulksms gateway |
 | `E22 /chatbot/chat` | happy path | needs a running Ollama server with the model pulled |
+| `E8  /api/auth/verify-token` | happy path | needs a genuine Firebase ID token minted by the phone-auth client |
+| `E11-E21` | full 9-step onboarding happy path | covered by tools/verify_onboarding.py, which walks all nine steps on BOTH backends and diffs them (0 failing) |

@@ -124,6 +124,29 @@ unreachable over HTTP while GEE is unwired. They are therefore covered by
 User-Agent on the India Post call and returns the real 200/404 branches. The two
 `e15_*` goldens captured the broken 500 and are skipped by the contract runner.
 
-### Phase 2 — Earth Engine core
+### Phases 2-6 ✅
 
-_next_
+See `REPORT.md` for the full narrative. Summary:
+
+- **Phase 2** — `internal/gee/eeexpr` builds Earth Engine expression graphs by
+  hand; all 24 computations of §5.7 gated by strict equality against fixtures
+  captured from the real Python client. REST client with paging and the §13.4
+  retry policy. Live gate: `s2_scene_count = 17`, grid cells `= 266`, both
+  matching Python exactly.
+- **Phase 3/4** — Sentinel-2 and Sentinel-1 pipelines. Verified live against
+  Python on the same day: 266 cells × 7 bands at **delta 0.0**.
+- **Phase 5** — pgxpool, seven tables of hand-written SQL, Werkzeug hash
+  compatibility, JWT issuance, Firebase, Firestore, SMS OTP, PIN lookup, and
+  the nine onboarding steps. A Python-created user with a Python-issued JWT
+  logs into Go, and vice versa.
+- **Phase 6** — chatbot prompt (generated from the Python source, not retyped),
+  session memory, and a direct Ollama client. LangChain dropped.
+
+**Verification harnesses**, all under `legacy-python/tools/`:
+
+| Tool | What it proves |
+|---|---|
+| `exercise_endpoints.py` | every endpoint × happy/invalid/auth/edge, real requests → `docs/ENDPOINT_VERIFICATION.md` (64/64) |
+| `verify_endpoints.py` | Go vs Python analysis endpoints, same day, structural + numeric diff (10/10) |
+| `verify_onboarding.py` | the 9-step flow on both backends, plus cross-runtime credential/token interchange (0 failing) |
+| `dump_*.py` | regenerate every golden fixture from the reference implementation |

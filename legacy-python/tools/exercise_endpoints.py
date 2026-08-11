@@ -152,7 +152,7 @@ CASES = [
     ("E8  /api/auth/verify-token", "missing idToken", "POST",
      "/api/auth/verify-token", {}, None, None, 400),
     ("E8  /api/auth/verify-token", "invalid token", "POST",
-     "/api/auth/verify-token", {"idToken": "not-a-real-token"}, None, None, 501),
+     "/api/auth/verify-token", {"idToken": "not-a-real-token"}, None, None, 401),
 
     ("E9  /api/auth/send-otp", "too short", "POST", "/api/auth/send-otp",
      {"phone": "12345"}, None, None, 400),
@@ -164,6 +164,8 @@ CASES = [
     ("E10 /api/auth/verify-otp", "wrong otp", "POST", "/api/auth/verify-otp",
      {"phone": "9000000001", "otp": "000000"}, None, None, 401),
 
+    ("E12 /auth/login", "unknown mobile (401)", "POST", "/auth/login",
+     {"mobile_number": "9000000099", "password": "whatever"}, None, None, 401),
     ("E11 /auth/signup", "bad mobile (422)", "POST", "/auth/signup",
      {"mobile_number": "123", "password": "secret1"}, None, None, 422),
     ("E11 /auth/signup", "short password (422)", "POST", "/auth/signup",
@@ -188,8 +190,12 @@ CASES = [
      {"name": "X", "preferred_language": "hindi"}, None, None, 401),
     ("E14 /farmer/location", "bad pin", "POST", "/farmer/location",
      {"pin_code": "12", "village_name": "Testville"}, None, "valid", 400),
-    ("E15 /farmer/pincode", "lookup", "GET", "/farmer/pincode/422001", None, None,
-     None, 501),
+    ("E15 /farmer/pincode", "happy", "GET", "/farmer/pincode/422001", None, None,
+     None, 200),
+    ("E15 /farmer/pincode", "unknown pin (404)", "GET", "/farmer/pincode/000000",
+     None, None, None, 404),
+    ("E15 /farmer/pincode", "malformed pin (404)", "GET", "/farmer/pincode/12",
+     None, None, None, 404),
     ("E16 /farm", "invalid body", "POST", "/farm",
      {"farm_name": "", "total_area": 0, "area_unit": "bushels",
       "land_ownership": "nope", "latitude": 200, "longitude": 400},
@@ -203,7 +209,8 @@ CASES = [
      {"farm_id": "00000000-0000-0000-0000-000000000001", "soil_type": "purple"},
      None, "valid", 400),
     ("E20 /consent", "missing field", "POST", "/consent", {}, None, "valid", 400),
-    ("E21 /dashboard", "authorized", "GET", "/dashboard", None, None, "valid", 501),
+    ("E21 /dashboard", "authorized, unknown farmer (404)", "GET", "/dashboard",
+     None, None, "valid", 404),
 
     ("E22 /chatbot/chat", "empty message", "POST", "/chatbot/chat",
      {"message": "   "}, None, None, 400),
@@ -219,6 +226,11 @@ NOT_EXERCISED = [
      "would send a real, billed SMS through the nationalbulksms gateway"),
     ("E22 /chatbot/chat", "happy path",
      "needs a running Ollama server with the model pulled"),
+    ("E8  /api/auth/verify-token", "happy path",
+     "needs a genuine Firebase ID token minted by the phone-auth client"),
+    ("E11-E21", "full 9-step onboarding happy path",
+     "covered by tools/verify_onboarding.py, which walks all nine steps on "
+     "BOTH backends and diffs them (0 failing)"),
 ]
 
 
@@ -292,7 +304,7 @@ def main() -> int:
 
     OUT.parent.mkdir(parents=True, exist_ok=True)
     OUT.write_text("\n".join(lines), encoding="utf-8")
-    print(f"\n{len(rows)} cases, {failures} failing → {OUT}")
+    print(f"\n{len(rows)} cases, {failures} failing -> {OUT}")
     return 0
 
 

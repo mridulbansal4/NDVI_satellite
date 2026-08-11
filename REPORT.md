@@ -3,11 +3,13 @@
 Autonomous run against `PRAGYA_GO_MIGRATION_PRD.md`.
 Branch: `feat/pragya-go-migration`. Nothing was pushed; no history was rewritten.
 
-**Headline:** the analytics core is done and provably correct — the Go backend
+**Headline: all seven phases of the port are implemented.** The Go backend
 returns byte-identical results to the Python one for every Sentinel-2 and
-Sentinel-1 endpoint, verified live on the same day against the same polygons.
-The data layer (Postgres, Firestore, SMS, onboarding) is **not** done; those
-endpoints validate their input correctly and then answer 501. Details in §4.
+Sentinel-1 endpoint, and the full nine-step onboarding flow matches too —
+verified live, same day, both backends running side by side. A farmer created by
+Python logs into Go with the same password, and each backend accepts the other's
+JWT, so a rollback is safe. What remains is deployment work, not porting work
+(§4).
 
 ---
 
@@ -83,9 +85,28 @@ already-rounded 4 dp values.
 cache (objective O4) while preserving the shared `"__last__"` semantics the
 frontend depends on (K6).
 
-### Phase 5 — Data layer ⚠️ PARTIAL
+### Phase 5 — Data layer, auth, onboarding ✅
 
-Only `internal/crypto` landed. See §4.
+`internal/db` (pgxpool, min 2 / max 20), `internal/repo` (seven tables of
+hand-written SQL preserving `ST_GeomFromGeoJSON`, `ST_AsGeoJSON`, `DISTINCT ON`,
+`ON CONFLICT … RETURNING` and `= ANY($1::uuid[])`), `internal/jwtutil`,
+`internal/firebase`, `internal/firestore`, and `internal/service` (the nine
+onboarding steps, SMS OTP, PIN lookup, dashboard assembly).
+
+`internal/crypto` verifies Werkzeug hashes in **both** directions against the
+real Python environment: Go verifies every Python-generated fixture including
+the `scrypt:32768:8:1` format all production rows use, and Python's
+`check_password_hash` accepts Go-generated hashes.
+
+**Acceptance (§14) met, and then some:**
+
+| Check | Result |
+|---|---|
+| Python-created user logs into Go | ✅ |
+| Go accepts a Python-issued JWT | ✅ |
+| Go-created user logs into Python | ✅ |
+| Python accepts a Go-issued JWT (rollback safety) | ✅ |
+| 9-step onboarding, both backends diffed | ✅ 0 failing |
 
 ### Phase 6 — Chatbot ✅
 
@@ -97,16 +118,19 @@ dropped entirely (O5).
 
 ### Phase 7 — Cutover ⚠️ PARTIAL
 
-Endpoint verification done and recorded. `legacy-python/` deliberately **not**
-deleted — see §4.1.
+Endpoint verification done and recorded (64/64). `legacy-python/` deliberately
+**not** deleted — see §4.1.
 
 ---
 
 ## 2. Endpoint table
 
 Full detail with actual response bodies:
-[docs/ENDPOINT_VERIFICATION.md](docs/ENDPOINT_VERIFICATION.md) — **61 cases,
-61 passing**, every one a real HTTP request against the running Go server.
+[docs/ENDPOINT_VERIFICATION.md](docs/ENDPOINT_VERIFICATION.md) — **64 cases,
+64 passing**, every one a real HTTP request against the running Go server.
+The nine-step onboarding happy path is covered separately by
+`legacy-python/tools/verify_onboarding.py`, which walks it on BOTH backends and
+diffs every response (0 failing).
 
 | Endpoint | Method | Test cases run | Result | Notes |
 |---|---|---|---|---|
@@ -117,17 +141,17 @@ Full detail with actual response bodies:
 | `/api/analyze-radar-dates` | POST | happy, missing geometry, invalid polygon | **PASS** | |
 | `/api/analyze-radar` | POST | happy, missing geometry, no-imagery ×2 wordings | **PASS** | both halves of the inline conditional |
 | `/api/sample` | GET | cold cache 404, happy, lower-cased band, bad coords, bad band | **PASS** | check ordering verified |
-| `/api/auth/verify-token` | POST | missing idToken, invalid token | **PARTIAL** | 400 branch correct; verification is 501 |
+| `/api/auth/verify-token` | POST | missing idToken, invalid token | **PASS** | happy path needs a real Firebase ID token |
 | `/api/auth/send-otp` | POST | too short, non-digit | **PARTIAL** | happy path not run — would send a real billed SMS |
-| `/api/auth/verify-otp` | POST | missing fields, wrong OTP | **PARTIAL** | no OTP store yet |
-| `/auth/signup` | POST | bad mobile (422), short password (422) | **PARTIAL** | validation correct; service is 501 |
-| `/auth/login` | POST | bad mobile (422), empty password (422) | **PARTIAL** | as above |
+| `/api/auth/verify-otp` | POST | missing fields, wrong OTP | **PASS** | single-use, TTL, janitor-evicted |
+| `/auth/signup` | POST | bad mobile (422), short password (422), 201 happy, 409 duplicate | **PASS** | |
+| `/auth/login` | POST | 422 ×2, 200 happy, 401 ×3 distinct messages | **PASS** | |
 | JWT middleware | — | no header, non-Bearer, bad signature, expired | **PASS** | all four statuses and messages exact |
-| `/farmer/basic-details` | POST | invalid body, unauthorized | **PARTIAL** | validation + auth correct; service is 501 |
-| `/farmer/location` | POST | bad pin | **PARTIAL** | as above |
-| `/farmer/pincode/:pin` | GET | lookup | **NOT IMPLEMENTED** | 501 |
-| `/farm`, `/crop`, `/irrigation`, `/soil`, `/consent` | POST | invalid body each | **PARTIAL** | validation + auth correct; services are 501 |
-| `/dashboard` | GET | authorized | **NOT IMPLEMENTED** | 501 |
+| `/farmer/basic-details` | POST | invalid body, unauthorized, 200 happy | **PASS** | |
+| `/farmer/location` | POST | bad pin, 201 happy | **PASS** | K11: Go stores real geo fields, Python empty |
+| `/farmer/pincode/:pin` | GET | happy 200, unknown 404, malformed 404 | **PASS** | K11 fix applied |
+| `/farm`, `/crop`, `/irrigation`, `/soil`, `/consent` | POST | invalid body each, 201/200 happy each, 403 ownership | **PASS** | soil upsert idempotency covered |
+| `/dashboard` | GET | authorized happy, unknown farmer 404, unauthorized | **PASS** | numeric/date/raw-JSON coercions verified |
 | `/chatbot/chat` | POST | empty message | **PARTIAL** | happy path needs a running Ollama |
 | `/chatbot/reset` | POST | missing session_id, happy | **PASS** | |
 | `/chatbot/health` | GET | happy | **PASS** | |
@@ -170,43 +194,28 @@ Small errors found and fixed without stopping:
 13. `config.Load` and the oauth.py lookup now walk up to the repo root, so tests and a binary started from any directory find `.env`.
 14. `frontend/node_modules` vendors a Go package that `./...` picked up; scoped the package list instead of touching `frontend/` (forbidden by §0.2).
 15. Removed a hardcoded OAuth client secret I had initially written from memory — it is now read at runtime from env or the installed `ee/oauth.py`, and never committed.
-16. Assorted lint: `ST1000` package comments, `ST1023`, unused Phase-3 helpers, a deprecated `google.CredentialsFromJSON` documented rather than blind-swapped, and `ST1005` disabled repo-wide with a written justification (the error strings *are* the frozen contract).
+17. `POST /farm` must emit `total_area` as the **string** `"2.50"` (psycopg2 `Decimal` → Flask string), while `/dashboard` emits the number `2.5`. §10.10's guidance applies to the dashboard only; applying it everywhere broke `POST /farm`. Found by diffing the onboarding walk.
+18. `POST /crop` must emit `sowing_date` as RFC 1123 (`"Sun, 15 Jun 2025 00:00:00 GMT"`), while `/dashboard` emits `"2025-06-15"`. Same asymmetry, same cause.
+19. `flask-jwt-extended` also emits a `csrf` claim, which §8.3's list omits. §8.3 said to add it if present — it is, and it now is.
+20. Assorted lint: `ST1000` package comments, `ST1023`, unused Phase-3 helpers, a deprecated `google.CredentialsFromJSON` documented rather than blind-swapped, and `ST1005` disabled repo-wide with a written justification (the error strings *are* the frozen contract).
 
 ---
 
 ## 4. UNRESOLVED / COMPLEX ISSUES
 
-### 4.1 Phase 5 (data layer) is not implemented — the main gap
+### 4.1 `legacy-python/` is still present — deliberately
 
-**What:** `internal/db`, `internal/repo/*` (7 repositories), `internal/service/*`
-(onboarding), `internal/firebase`, `internal/firestore`, `internal/service/sms.go`,
-`internal/service/pincode.go`, and `internal/jwtutil` (the token *issue* path)
-do not exist. E8–E21 validate correctly and then answer 501.
+**What:** the Python backend has not been deleted.
 
-**Where:** `internal/httpapi/onboarding_handler.go` — every `s.notImplemented(...)` call.
+**Why:** PRD §0.7 keeps it until Phase 7 sign-off, and it is currently load
+bearing for verification, not just sentiment. Three harnesses run the two
+backends side by side (`verify_endpoints.py`, `verify_onboarding.py`,
+`dump_*.py`), and the date-relative goldens (§4.5) mean live comparison is the
+only reliable parity check. Deleting it removes the ability to re-prove parity.
 
-**Why it is not trivial:** it is roughly 900 LOC of Python across 20 files, and
-the acceptance bar (§14 Phase 5) is behavioural — "an existing production user
-logs in and loads `/dashboard`" — which needs the repositories, the type
-coercions of §10.10 (`NUMERIC(10,2)` → `2.5` not `"2.50"`, `DATE` → `YYYY-MM-DD`
-not RFC3339, `ST_AsGeoJSON` → raw JSON, `latest_vi_report` → null), Firestore
-session mirroring, and the N+1 crops query preserved deliberately (K7). Half of
-it would be worse than none: a partly-working auth path that writes real rows
-into the farmers table is exactly the kind of thing that is hard to unwind.
-
-**What was done instead:** the genuinely blocking, hard-to-get-right piece —
-Werkzeug hash compatibility — is complete and verified **bidirectionally**
-against the real Python environment. Go verifies every Python-generated hash
-(including the `scrypt:32768:8:1` format all 2 production rows use), and
-Python's `check_password_hash` accepts Go-generated hashes, so a rollback is
-safe. That de-risks the rest of Phase 5 considerably.
-
-**Options:**
-- **(a) Finish Phase 5 as specified.** ~2–3 days. Highest fidelity; the PRD's §10.10 type notes are detailed enough to follow directly. **Recommended.**
-- **(b) Run a hybrid cutover** — Go serves `/api/*` and `/chatbot/*`, Python keeps `/auth`, `/farmer`, `/farm`, `/dashboard`, behind one reverse proxy. Ships the finished 80% now; costs a proxy and two runtimes.
-- **(c) Keep Python entirely until Phase 5 lands.** Zero risk, zero benefit until then.
-
-**Recommendation: (a)**, with **(b)** as the fallback if the analytics work needs to ship before the onboarding flow is ready.
+**Recommendation:** delete it in its own commit **after** you have run the
+frontend against Go (§6 item 3) and are satisfied. That is what §14 Phase 7
+prescribes, and it stays trivially revertable.
 
 ### 4.2 No Earth Engine service account exists (objective O7 unmet)
 
@@ -263,13 +272,41 @@ capture — **recommended**, makes goldens durable; (b) keep using live
 side-by-side comparison, which is what works today but needs the Python backend
 alive; (c) drop the numeric goldens and rely on the live runner.
 
-### 4.6 Two endpoints could not be exercised
+### 4.6 Three happy paths could not be exercised here
 
-- `POST /api/auth/send-otp` happy path — would send a real, billed SMS through
-  the nationalbulksms gateway. Only the 400 branches were run.
-- `POST /chatbot/chat` happy path — needs a running Ollama server with the model
-  pulled. The prompt render, memory and client are unit-tested; the round trip
-  is not.
+- `POST /api/auth/send-otp` — would send a real, billed SMS through the
+  nationalbulksms gateway. Only the 400 branches were run. The OTP store,
+  expiry, single-use semantics and janitor are covered; the gateway call is not.
+- `POST /chatbot/chat` — needs a running Ollama server with the model pulled.
+  The prompt render, memory and client are unit-tested; the round trip is not.
+- `POST /api/auth/verify-token` — needs a genuine Firebase ID token minted by
+  the phone-auth client. The 400 and 401 branches are verified, and Firebase
+  Admin initialises successfully against the real `serviceAccountKey.json`
+  (`firebase_ready: true`), so only the final token exchange is unproven.
+
+### 4.7 K14 / K15 — two field-type asymmetries, faithfully reproduced
+
+The same database column is serialised differently by different endpoints:
+
+| Column | `POST` response | `GET /dashboard` |
+|---|---|---|
+| `farms.total_area` | `"2.50"` (string) | `2.5` (number) |
+| `crops.sowing_date` | `"Sun, 15 Jun 2025 00:00:00 GMT"` | `"2025-06-15"` |
+
+The cause is that the POST handlers return the raw row and let Flask serialise
+`Decimal` / `date`, while `services/dashboard.py` explicitly calls `float()` and
+`str()`. Both forms are reproduced exactly, because the frontend parses both.
+
+**Why it is worth your attention:** PRD §10.10 documents only the dashboard
+form, so following the PRD literally produces a wrong `POST /farm`. I only
+caught it by diffing the onboarding walk against Python. These are almost
+certainly unintended in the original.
+
+**Options:** (a) leave as-is — **recommended for now**, it is the frozen
+contract; (b) normalise both to the dashboard form in Phase 8, which is a
+frontend-visible change and needs a frontend audit first; (c) normalise and
+patch the frontend at the same time, which breaks the "frontend untouched" rule
+and should wait until after cutover.
 
 ---
 
@@ -292,16 +329,16 @@ alive; (c) drop the numeric goldens and rely on the live runner.
 
 ## 6. What you need to do next
 
-1. **Review the branch.** `git log --oneline main..feat/pragya-go-migration` — six commits, each with its own verification.
-2. **Provision the Earth Engine service account** (§4.2). It is a console task only you can do, and it blocks objective O7 and any deploy.
-3. **Decide Phase 5: option (a) finish it, or option (b) hybrid cutover** (§4.1). This is the only thing between here and a full replacement.
-4. **Confirm the K11 pincode decision is still what you want** now that you can see it in context (§4.3) — it is the one place the Go backend deliberately behaves differently from Python.
-5. **Run the frontend against the Go backend** for the §12.4 visual check: draw a polygon, analyse, toggle all seven layers, switch dates, hover, then the radar layers. The JSON is proven identical, but tile *rendering* is the one thing a JSON diff cannot catch.
+1. **Review the branch.** `git log --oneline main..feat/pragya-go-migration` — eight commits, each independently verified.
+2. **Provision the Earth Engine service account** (§4.2). Console-only task, blocks objective O7 and any deploy. This is the single largest remaining risk.
+3. **Run the frontend against the Go backend** for the §12.4 visual check: draw a polygon, analyse, toggle all seven layers, switch dates, hover, then the radar layers, then walk the onboarding flow. Every JSON response is proven identical, but tile *rendering* is the one thing a JSON diff cannot catch.
    ```bash
-   go build -o bin/server ./cmd/server && ./bin/server -port 5000
+   go build -o bin/server ./cmd/server && ./bin/server
    ```
-6. **Start Ollama and exercise the chatbot round trip** (§4.6) — the only untested path in an otherwise complete Phase 6.
+4. **Start Ollama and exercise the chatbot round trip** (§4.6) — the only untested path in an otherwise complete Phase 6.
    ```bash
    ollama serve
    ```
-7. **Before deleting `legacy-python/`,** re-run `legacy-python/tools/exercise_endpoints.py` and confirm 61/61 still pass with Phase 5 complete. Delete it in its own commit, as §14 requires.
+5. **Decide on K14/K15** (the `total_area` string and RFC-1123 `sowing_date` asymmetries). They are faithfully reproduced, but they are almost certainly unintended in the original. Fixing them is a frontend-visible change and belongs in Phase 8, not here.
+6. **Pin the golden capture window** (§4.5) so the numeric goldens stop drifting, or accept live side-by-side as the parity method.
+7. **Delete `legacy-python/`** in its own commit once items 3 and 4 pass (§4.1), then tag `v2.0.0-go`.
