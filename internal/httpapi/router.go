@@ -12,9 +12,11 @@ import (
 
 	"github.com/gin-gonic/gin"
 
+	"github.com/SanTiwari07/NDVI_satellite/internal/chatbot"
 	"github.com/SanTiwari07/NDVI_satellite/internal/config"
 	"github.com/SanTiwari07/NDVI_satellite/internal/httpapi/middleware"
 	"github.com/SanTiwari07/NDVI_satellite/internal/logging"
+	"github.com/SanTiwari07/NDVI_satellite/internal/ollama"
 	"github.com/SanTiwari07/NDVI_satellite/internal/pipeline"
 )
 
@@ -37,6 +39,11 @@ type Deps struct {
 	// session is established, in which case GEEReady stays false and the
 	// analysis routes answer 503 before ever dereferencing it.
 	Analyzer *pipeline.Analyzer
+
+	// Memory and Ollama back the chatbot. Both are always non-nil; an
+	// unreachable Ollama surfaces as the 502 the Python emits, not a panic.
+	Memory *chatbot.Memory
+	Ollama *ollama.Client
 }
 
 // Server owns the route table.
@@ -52,6 +59,13 @@ func New(d Deps) *gin.Engine {
 	}
 	if d.FirebaseReady == nil {
 		d.FirebaseReady = &atomic.Bool{}
+	}
+	if d.Memory == nil {
+		d.Memory = chatbot.NewMemory(d.Cfg.ChatbotMaxHistory)
+	}
+	if d.Ollama == nil {
+		d.Ollama = ollama.New(d.Cfg.OllamaBaseURL, d.Cfg.OllamaModel,
+			d.Cfg.OllamaTemperature, d.Cfg.OllamaMaxTokens)
 	}
 	s := &Server{deps: d, log: logging.Named(d.Log, "app")}
 
