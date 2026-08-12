@@ -115,11 +115,7 @@ type ConsentRequest struct {
 
 // ── analysis endpoints ──────────────────────────────────────────────────────
 //
-// These are hand-validated rather than schema-validated: app.py checks for the
-// presence of "geometry" itself and then calls validate_polygon, producing the
-// {"error": …} envelope, not the marshmallow one.
-
-type AnalyzeRequest struct {
-	Geometry rawJSON `json:"geometry"`
-	Date     *string `json:"date"`
-}
+// There is deliberately no schema type here. The analysis routes are
+// hand-validated: app.py checks for the presence of "geometry" itself and then
+// calls validate_polygon, producing the {"error": …} envelope rather than the
+// marshmallow one. See requireGeometry in analyze_handler.go.

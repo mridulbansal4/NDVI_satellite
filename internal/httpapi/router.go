@@ -5,12 +5,14 @@
 package httpapi
 
 import (
-	"encoding/json"
 	"log/slog"
 	"net/http"
+	"strings"
 	"sync/atomic"
+	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 
 	"github.com/SanTiwari07/NDVI_satellite/internal/chatbot"
 	"github.com/SanTiwari07/NDVI_satellite/internal/config"
@@ -22,10 +24,6 @@ import (
 	"github.com/SanTiwari07/NDVI_satellite/internal/pipeline"
 	"github.com/SanTiwari07/NDVI_satellite/internal/service"
 )
-
-// rawJSON keeps a value exactly as it arrived so it can be echoed back
-// byte-identically (farm_boundary must round-trip the client's own polygon).
-type rawJSON = json.RawMessage
 
 // Deps is everything the HTTP layer needs. Dependencies not yet built in this
 // phase are nil, and the handlers that need them answer 501.
@@ -81,7 +79,8 @@ func New(d Deps) *gin.Engine {
 		d.FirebaseReady = &atomic.Bool{}
 	}
 	if d.Memory == nil {
-		d.Memory = chatbot.NewMemory(d.Cfg.ChatbotMaxHistory)
+		d.Memory = chatbot.NewMemoryWithLimits(d.Cfg.ChatbotMaxHistory,
+			d.Cfg.ChatSessionTTL, d.Cfg.ChatMaxSessions)
 	}
 	if d.Ollama == nil {
 		d.Ollama = ollama.New(d.Cfg.OllamaBaseURL, d.Cfg.OllamaModel,
@@ -109,20 +108,34 @@ func New(d Deps) *gin.Engine {
 	r.Use(gin.Recovery())
 	r.Use(s.requestLogger())
 	r.Use(middleware.CORS(d.Cfg.CORSOrigins))
+	r.Use(middleware.BodyLimit(d.Cfg.MaxRequestBytes))
 
 	jwtAuth := middleware.JWT([]byte(d.Cfg.JWTSecret))
+
+	// Rate limiting covers the routes that cost money per call and take no
+	// credentials: the analysis endpoints (Earth Engine quota), the chatbot
+	// (Gemini tokens), and /auth + /api/auth (an SMS message, or a 32 MB scrypt
+	// on every signup). /health and /dashboard are left alone — /health is what
+	// a load balancer polls, and /dashboard already requires a JWT.
+	throttle := func(c *gin.Context) { c.Next() }
+	if d.Cfg.RateLimitEnabled {
+		throttle = middleware.NewRateLimiter(d.Cfg.RateLimitPerMin, d.Cfg.RateLimitBurst).Middleware()
+	}
+	// Separate from the rate limit: this bounds how many analyses run AT ONCE,
+	// which is what actually protects the Earth Engine quota.
+	analyzeGate := middleware.InFlight(d.Cfg.AnalyzeMaxInFlight)
 
 	// ── E1 ──────────────────────────────────────────────────────────────
 	r.GET("/health", s.health)
 
 	// ── E2-E10: /api/* ──────────────────────────────────────────────────
-	api := r.Group("/api")
+	api := r.Group("/api", throttle)
 	{
-		api.POST("/analyze", s.analyze)
-		api.POST("/analyze-dates", s.analyzeDates)
-		api.POST("/analyze-day", s.analyzeDay)
-		api.POST("/analyze-radar-dates", s.analyzeRadarDates)
-		api.POST("/analyze-radar", s.analyzeRadar)
+		api.POST("/analyze", analyzeGate, s.analyze)
+		api.POST("/analyze-dates", analyzeGate, s.analyzeDates)
+		api.POST("/analyze-day", analyzeGate, s.analyzeDay)
+		api.POST("/analyze-radar-dates", analyzeGate, s.analyzeRadarDates)
+		api.POST("/analyze-radar", analyzeGate, s.analyzeRadar)
 		api.GET("/sample", s.sample)
 		api.POST("/auth/verify-token", s.verifyToken)
 		api.POST("/auth/send-otp", s.sendOTP)
@@ -130,7 +143,7 @@ func New(d Deps) *gin.Engine {
 	}
 
 	// ── E11-E12: /auth/* ────────────────────────────────────────────────
-	auth := r.Group("/auth")
+	auth := r.Group("/auth", throttle)
 	{
 		auth.POST("/signup", s.signup)
 		auth.POST("/login", s.login)
@@ -164,7 +177,7 @@ func New(d Deps) *gin.Engine {
 	r.GET("/dashboard/", jwtAuth, s.dashboard)
 
 	// ── E22-E24: /chatbot/* ─────────────────────────────────────────────
-	chat := r.Group("/chatbot")
+	chat := r.Group("/chatbot", throttle)
 	{
 		chat.POST("/chat", s.chat)
 		chat.POST("/reset", s.chatReset)
@@ -176,15 +189,60 @@ func New(d Deps) *gin.Engine {
 
 // requestLogger logs one line per request in the Python format, and records the
 // wall-clock duration so slow pipeline stages stay attributable (§13.3).
+//
+// The request id ties this line to the pipeline-stage lines a slow analysis
+// emits; without it, concurrent analyses interleave in the log and there is no
+// way to tell which stage timing belonged to which request.
 func (s *Server) requestLogger() gin.HandlerFunc {
 	return func(c *gin.Context) {
+		started := time.Now()
+		rid := requestID(c)
+		c.Set(requestIDKey, rid)
+		c.Header("X-Request-Id", rid)
+
 		c.Next()
+
 		s.log.Info("request",
+			"id", rid,
 			"method", c.Request.Method,
 			"path", c.Request.URL.Path,
 			"status", c.Writer.Status(),
+			"ms", time.Since(started).Milliseconds(),
 		)
 	}
+}
+
+// requestIDKey is the Gin-context key holding the per-request correlation id.
+const requestIDKey = "__request_id__"
+
+// requestID honours an inbound X-Request-Id so a trace started at the proxy
+// survives into these logs, and mints one otherwise.
+func requestID(c *gin.Context) string {
+	if v := strings.TrimSpace(c.GetHeader("X-Request-Id")); v != "" {
+		// Bound it: the value is echoed into a response header and the log, and
+		// an unbounded caller-supplied string is a log-injection vector.
+		if len(v) > 64 {
+			v = v[:64]
+		}
+		return sanitiseID(v)
+	}
+	return uuid.NewString()
+}
+
+// sanitiseID strips anything that could forge a log line or a header.
+func sanitiseID(s string) string {
+	out := make([]rune, 0, len(s))
+	for _, r := range s {
+		switch {
+		case r >= 'a' && r <= 'z', r >= 'A' && r <= 'Z', r >= '0' && r <= '9',
+			r == '-', r == '_', r == '.':
+			out = append(out, r)
+		}
+	}
+	if len(out) == 0 {
+		return uuid.NewString()
+	}
+	return string(out)
 }
 
 // ── E1 — GET /health (§10.2) ────────────────────────────────────────────────

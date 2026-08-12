@@ -54,6 +54,13 @@ const bodyCacheKey = "__decoded_body__"
 
 // readBody returns the decoded top-level object, or nil when the body is
 // absent or unparseable — matching Flask's request.get_json(silent=True).
+//
+// The read is bounded by middleware.BodyLimit, which wraps Request.Body in a
+// MaxBytesReader. Without that, this ReadAll is unbounded on routes that take
+// no credentials: ReadTimeout caps how LONG a client may send, not how much,
+// so a few concurrent large POSTs are an out-of-memory kill. An over-limit body
+// surfaces here as a read error and is treated as an absent body, which is the
+// same path an unparseable body already took.
 func readBody(c *gin.Context) map[string]json.RawMessage {
 	if cached, ok := c.Get(bodyCacheKey); ok {
 		m, _ := cached.(map[string]json.RawMessage)
@@ -71,11 +78,6 @@ func readBody(c *gin.Context) map[string]json.RawMessage {
 	}
 	c.Set(bodyCacheKey, m)
 	return m
-}
-
-// lastBody returns the already-decoded body without re-reading the stream.
-func (s *Server) lastBody(c *gin.Context) map[string]json.RawMessage {
-	return readBody(c)
 }
 
 // requireGeometry runs the shared prologue: GEE readiness, presence of the
@@ -215,7 +217,7 @@ func (s *Server) analyzeRadar(c *gin.Context) {
 		return
 	}
 	var date *string
-	if raw, present := s.lastBody(c)["date"]; present {
+	if raw, present := readBody(c)["date"]; present {
 		var d string
 		if err := json.Unmarshal(raw, &d); err == nil {
 			date = &d

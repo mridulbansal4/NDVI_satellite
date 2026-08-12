@@ -155,16 +155,33 @@ func pbkdf2Params(method string) (func() hash.Hash, int, error) {
 	return nil, 0, fmt.Errorf("%w: pbkdf2 hash %q", ErrUnsupportedMethod, name)
 }
 
-// randomSalt matches Werkzeug's gen_salt: `length` characters drawn from
-// [A-Za-z0-9] using a CSPRNG.
+// randomSalt matches Werkzeug's gen_salt: `length` characters drawn UNIFORMLY
+// from [A-Za-z0-9] using a CSPRNG.
+//
+// Rejection sampling, not `b % 62`: 256 is not a multiple of 62, so the modulo
+// would make the first eight letters ~25% likelier than the rest. Werkzeug uses
+// secrets.choice, which is unbiased, and matching that keeps the full 16×log2(62)
+// ≈ 95 bits of salt entropy.
 func randomSalt(length int) (string, error) {
-	out := make([]byte, length)
+	// The largest multiple of the alphabet size that fits in a byte; draws at
+	// or above it are discarded rather than folded, which is what removes the bias.
+	limit := byte(256 - (256 % len(saltAlphabet)))
+
+	out := make([]byte, 0, length)
 	buf := make([]byte, length)
-	if _, err := rand.Read(buf); err != nil {
-		return "", err
-	}
-	for i, b := range buf {
-		out[i] = saltAlphabet[int(b)%len(saltAlphabet)]
+	for len(out) < length {
+		if _, err := rand.Read(buf); err != nil {
+			return "", err
+		}
+		for _, b := range buf {
+			if b >= limit {
+				continue
+			}
+			out = append(out, saltAlphabet[int(b)%len(saltAlphabet)])
+			if len(out) == length {
+				break
+			}
+		}
 	}
 	return string(out), nil
 }

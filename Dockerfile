@@ -4,7 +4,10 @@
 # Secrets (gee-service-account.json, serviceAccountKey.json, .env) are MOUNTED
 # at runtime, never baked into the image.
 
-FROM golang:1.23-alpine AS build
+# The tag must satisfy the `go` directive in go.mod (currently 1.25.0).
+# A lower tag either fails outright under GOTOOLCHAIN=local or silently
+# downloads a different toolchain at build time, which defeats the pin.
+FROM golang:1.25-alpine AS build
 WORKDIR /src
 COPY go.mod go.sum ./
 RUN go mod download

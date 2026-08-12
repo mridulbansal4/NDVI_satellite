@@ -146,14 +146,14 @@ CREATE TABLE vi_reports (
     cvi_median       FLOAT   NOT NULL,
     cvi_std_dev      FLOAT   NOT NULL,
     -- Individual spectral indices
-    ndvi             FLOAT   NOT NULL,  -- weight 0.35 — primary vegetation signal
-    evi              FLOAT   NOT NULL,  -- weight 0.25 — enhanced vegetation (canopy)
-    savi             FLOAT   NOT NULL,  -- weight 0.15 — soil-adjusted vegetation
-    ndmi             FLOAT   NOT NULL,  -- weight 0.15 — moisture / drought stress
+    ndvi             FLOAT   NOT NULL,  -- weight 0.70 — primary vegetation signal
+    evi              FLOAT   NOT NULL,  -- weight 0.10 — enhanced vegetation (canopy)
+    savi             FLOAT   NOT NULL,  -- weight 0.05 — soil-adjusted vegetation
+    ndmi             FLOAT   NOT NULL,  -- weight 0.10 — moisture / drought stress
     ndwi             FLOAT   NOT NULL,  -- water body detection (unweighted)
-    gndvi            FLOAT   NOT NULL,  -- weight 0.10 — chlorophyll / nutrient proxy
+    gndvi            FLOAT   NOT NULL,  -- weight 0.05 — chlorophyll / nutrient proxy
     -- Quality metadata
-    confidence_score FLOAT   NOT NULL,  -- 0–100 scale
+    confidence_score FLOAT   NOT NULL,  -- 0–1 scale (the API emits 0–1; the frontend formats it as a %)
     scenes_used      INTEGER NOT NULL,
     period_start     DATE    NOT NULL,
     period_end       DATE    NOT NULL,

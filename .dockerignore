@@ -1,0 +1,36 @@
+# Keep secrets out of the build context.
+#
+# The Dockerfile does `COPY . .` into the build stage. The final distroless
+# image copies only the binary, so nothing here reaches production — but an
+# intermediate layer that holds a private key is still a leaked private key the
+# moment that layer is cached, pushed or exported.
+.env
+.env.*
+!.env.example
+serviceAccountKey.json
+gee-service-account.json
+*.pem
+*.key
+
+# Not needed to build the Go binary, and node_modules alone is a large context.
+frontend/
+public/
+node_modules/
+
+# Build output and local state.
+bin/
+*.exe
+*.log
+
+# VCS and tooling.
+.git/
+.github/
+.claude/
+.gitignore
+.dockerignore
+
+# Docs and fixtures — the binary does not read them.
+docs/
+*.md
+*.pdf
+*.sql

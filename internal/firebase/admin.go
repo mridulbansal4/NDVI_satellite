@@ -46,8 +46,26 @@ func NewAdmin(keyPath, projectID string, log *slog.Logger) *Admin {
 	return &Admin{keyPath: keyPath, projectID: projectID, log: log}
 }
 
+// clientContext is the context the Firebase SDK uses for the LIFETIME of the
+// client, which is deliberately NOT the caller's.
+//
+// firebase.NewApp and app.Auth capture the context they are given and reuse it
+// for every subsequent OAuth token refresh. Because construction happens inside
+// sync.Once, the FIRST caller's context is the one that sticks — and that first
+// caller is the startup probe in cmd/server, whose 30-second context is
+// cancelled the moment the probe goroutine returns. The cached auth.Client
+// would then hold a dead context and every refresh after the initial token
+// expired (~1h) would fail with "context canceled", 401-ing every user until
+// the process restarted.
+//
+// This is the same bug, and the same fix, as internal/gee/session.go's
+// clientContext — see the commentary there.
+func clientContext() context.Context { return context.Background() }
+
 func (a *Admin) client(ctx context.Context) (*auth.Client, error) {
+	_ = ctx // see clientContext: the refresh loop must outlive the caller
 	a.once.Do(func() {
+		ctx := clientContext()
 		conf := &firebase.Config{ProjectID: a.projectID}
 		var app *firebase.App
 		var err error

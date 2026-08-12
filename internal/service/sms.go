@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 	"crypto/rand"
+	"crypto/subtle"
 	"fmt"
 	"io"
 	"log/slog"
@@ -23,6 +24,20 @@ const SMSAPIURL = "https://sms.nationalbulksms.com/fe/api/v1/send"
 type otpRecord struct {
 	otp       string
 	expiresAt time.Time
+	// attempts counts WRONG guesses. Without it a six-digit code is only
+	// single-use on the success path: a failed guess left the record intact, so
+	// the 10-minute TTL was an unlimited guessing budget over a 900,000-value
+	// space — exhaustible in minutes at a modest request rate.
+	attempts int
+}
+
+// maskPhone renders a number for logs as 91XXXXXX8899: enough to correlate a
+// support report, not enough to be a phone list if the log leaks.
+func maskPhone(e164 string) string {
+	if len(e164) <= 6 {
+		return strings.Repeat("X", len(e164))
+	}
+	return e164[:2] + strings.Repeat("X", len(e164)-6) + e164[len(e164)-4:]
 }
 
 // SMSService generates, sends and verifies OTPs (§8.5).
@@ -155,7 +170,8 @@ func (s *SMSService) SendOTP(ctx context.Context, phone string) error {
 	s.store[e164] = otpRecord{otp: otp, expiresAt: time.Now().Add(s.cfg.OTPExpiry)}
 	s.mu.Unlock()
 
-	s.log.Info(fmt.Sprintf("OTP stored for %s (expires in %ds)", e164, int(s.cfg.OTPExpiry.Seconds())))
+	s.log.Info(fmt.Sprintf("OTP stored for %s (expires in %ds)",
+		maskPhone(e164), int(s.cfg.OTPExpiry.Seconds())))
 	return nil
 }
 
@@ -163,6 +179,11 @@ func (s *SMSService) SendOTP(ctx context.Context, phone string) error {
 //
 // Single-use: a successful match deletes the record, and so does an expired
 // one. Both behaviours are preserved from the Python.
+//
+// A wrong guess now counts against OTP_MAX_ATTEMPTS and discards the code once
+// the budget is spent, so the code cannot be brute-forced inside its TTL. The
+// RESPONSE is unchanged either way — false is false — so the frozen contract
+// still holds; the caller simply has to request a new code after five misses.
 func (s *SMSService) VerifyOTP(phone, otp string) bool {
 	e164 := E164(phone)
 
@@ -177,9 +198,26 @@ func (s *SMSService) VerifyOTP(phone, otp string) bool {
 		delete(s.store, e164)
 		return false
 	}
-	if rec.otp != strings.TrimSpace(otp) {
+	// Constant-time: the codes are short and single-use, so a timing oracle is
+	// not the practical attack here, but there is no reason to leak the prefix.
+	if subtle.ConstantTimeCompare([]byte(rec.otp), []byte(strings.TrimSpace(otp))) != 1 {
+		rec.attempts++
+		if rec.attempts >= s.maxAttempts() {
+			delete(s.store, e164)
+			s.log.Warn(fmt.Sprintf(
+				"OTP for %s discarded after %d failed attempts", maskPhone(e164), rec.attempts))
+		} else {
+			s.store[e164] = rec
+		}
 		return false
 	}
 	delete(s.store, e164)
 	return true
+}
+
+func (s *SMSService) maxAttempts() int {
+	if s.cfg != nil && s.cfg.OTPMaxAttempts > 0 {
+		return s.cfg.OTPMaxAttempts
+	}
+	return 5
 }

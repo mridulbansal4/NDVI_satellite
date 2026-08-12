@@ -55,6 +55,15 @@ func main() {
 	log := logging.New(cfg.LogLevel, cfg.LogFile)
 	initLog := logging.Named(log, "Init")
 
+	// Validate() rejects the built-in signing key outright when
+	// FLASK_ENV=production. Outside production it stays usable — the offline
+	// suite needs no environment — but it must be loud, because a token signed
+	// with it can be forged by anyone who has read the source.
+	if cfg.UsingDevJWTSecret() {
+		initLog.Warn("JWT_SECRET_KEY is unset — using the built-in development key. " +
+			"Tokens are forgeable. Set JWT_SECRET_KEY before exposing this server.")
+	}
+
 	deps := httpapi.Deps{
 		Cfg:           cfg,
 		Log:           log,
@@ -114,6 +123,7 @@ func main() {
 	deps.Firebase = fbAdmin
 	deps.SMS = smsSvc
 	deps.PinAPI = pinAPI
+	defer smsSvc.Close() // stops the OTP janitor goroutine on shutdown
 
 	dbLog := logging.Named(log, "DB")
 	if pool, err := db.New(context.Background(), cfg); err != nil {

@@ -459,7 +459,7 @@ cd NDVI_satellite-1
 ### 2. Backend Setup
 
 ```powershell
-# Build the backend (Go 1.23+)
+# Build the backend (Go 1.25+)
 go build -o bin/server ./cmd/server
 
 # Configure environment variables

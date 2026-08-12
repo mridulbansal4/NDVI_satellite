@@ -52,8 +52,23 @@ func New(cfg *config.Config, log *slog.Logger) *Client {
 //  1. serviceAccountKey.json in the repo root
 //  2. GOOGLE_APPLICATION_CREDENTIALS → Application Default Credentials
 //  3. neither → disabled
+// clientContext is the context the Firestore SDK uses for the LIFETIME of the
+// client, which is deliberately NOT the caller's.
+//
+// firebase.NewApp and app.Firestore capture the context they are given and
+// reuse it for every later OAuth token refresh. Construction happens inside
+// sync.Once, so the FIRST caller's context is the one that sticks — and here
+// that is a request context, cancelled as soon as the response is written. The
+// cached client would hold a dead context and every write after the initial
+// token expired would fail with "context canceled".
+//
+// Same bug and same fix as internal/gee/session.go's clientContext.
+func clientContext() context.Context { return context.Background() }
+
 func (c *Client) DB(ctx context.Context) (*fs.Client, error) {
+	_ = ctx // see clientContext: the refresh loop must outlive the caller
 	c.once.Do(func() {
+		ctx := clientContext()
 		keyPath := c.cfg.ServiceAccountKey
 		conf := &firebase.Config{ProjectID: c.cfg.FirebaseProjectID}
 

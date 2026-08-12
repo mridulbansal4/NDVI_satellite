@@ -20,6 +20,19 @@ import (
 	"github.com/joho/godotenv"
 )
 
+// DevJWTSecret is the signing key used when JWT_SECRET_KEY is unset.
+//
+// It is a DEVELOPMENT-ONLY value and is rejected by Validate when
+// FLASK_ENV=production, because the verification path is deliberately liberal:
+// any HS256 token with a non-empty string `sub` is accepted and that `sub` IS
+// the farmer id. A deployment running on this constant can have tokens forged
+// for any account by anyone who has read this file.
+const DevJWTSecret = "dev-secret-change-me"
+
+// minProdJWTSecretLen is the shortest key Validate accepts in production. HS256
+// keys shorter than the 32-byte hash output add no security over 32 bytes.
+const minProdJWTSecretLen = 32
+
 // Threshold is one (minimum, label) pair in an interpretation table.
 //
 // config.py stores these as dicts and sorts the keys descending at every call
@@ -136,6 +149,20 @@ type Config struct {
 	// ── Logging (§9.4) ──────────────────────────────────────────────────
 	LogLevel string
 	LogFile  string
+
+	// ── Abuse limits (post-migration hardening) ─────────────────────────
+	//
+	// The analysis, auth and chatbot routes are unauthenticated and each call
+	// spends real money — Earth Engine quota, Gemini tokens, SMS messages, or
+	// 32 MB of scrypt. These bound what one client can spend.
+	RateLimitEnabled  bool
+	RateLimitPerMin   int           // sustained requests/minute per client IP
+	RateLimitBurst    int           // burst allowance above the sustained rate
+	AnalyzeMaxInFlight int          // concurrent Earth Engine analyses, process-wide
+	MaxRequestBytes   int64         // hard cap on any request body
+	OTPMaxAttempts    int           // wrong guesses before the code is discarded
+	ChatSessionTTL    time.Duration // idle lifetime of a chatbot session
+	ChatMaxSessions   int           // resident sessions before LRU eviction
 }
 
 // Load reads .env (if present) and builds the Config. Missing optional values
@@ -156,13 +183,16 @@ func Load(envFiles ...string) (*Config, error) {
 	c := &Config{
 		Port: envInt("FLASK_PORT", 5000),
 		Env:  envStr("FLASK_ENV", ""),
-		CORSOrigins: []string{
+		// The localhost list is the default, not the whole story: a deployed
+		// frontend lives on a real origin and the browser will not send it
+		// credentials unless that origin is named here. CORS_ORIGINS overrides.
+		CORSOrigins: envList("CORS_ORIGINS", []string{
 			"http://localhost:5173", // Vite dev server
 			"http://localhost:5174", // Vite dev server (fallback port)
 			"http://localhost:5175", // Vite dev server (fallback port)
 			"http://localhost:4173", // Vite preview
 			"http://localhost:3000", // fallback
-		},
+		}),
 
 		GEEProjectID:         envStr("GEE_PROJECT_ID", ""),
 		GEEServiceAccountKey: envStr("GEE_SERVICE_ACCOUNT_KEY", "./gee-service-account.json"),
@@ -282,7 +312,7 @@ func Load(envFiles ...string) (*Config, error) {
 		DatabaseURL:       envStr("DATABASE_URL", ""),
 		FirebaseProjectID: envStr("FIREBASE_PROJECT_ID", ""),
 		ServiceAccountKey: envStr("SERVICE_ACCOUNT_KEY", "serviceAccountKey.json"),
-		JWTSecret:         envStr("JWT_SECRET_KEY", "dev-secret-change-me"),
+		JWTSecret:         envStr("JWT_SECRET_KEY", DevJWTSecret),
 		JWTExpiry:         7 * 24 * time.Hour,
 		OllamaBaseURL:     envStr("OLLAMA_BASE_URL", ""),
 		OllamaModel:       envStr("OLLAMA_MODEL", ""),
@@ -312,6 +342,18 @@ func Load(envFiles ...string) (*Config, error) {
 
 		LogLevel: envStr("LOG_LEVEL", "INFO"),
 		LogFile:  "cvi_engine.log",
+
+		// Defaults are generous: the contract suite replays 74 cases back to
+		// back from one address and must not trip them. They exist to stop
+		// automated abuse, not to shape normal traffic.
+		RateLimitEnabled:   envBool("RATE_LIMIT_ENABLED", true),
+		RateLimitPerMin:    envInt("RATE_LIMIT_PER_MIN", 120),
+		RateLimitBurst:     envInt("RATE_LIMIT_BURST", 60),
+		AnalyzeMaxInFlight: envInt("ANALYZE_MAX_IN_FLIGHT", 4),
+		MaxRequestBytes:    int64(envInt("MAX_REQUEST_BYTES", 8<<20)), // 8 MiB
+		OTPMaxAttempts:     envInt("OTP_MAX_ATTEMPTS", 5),
+		ChatSessionTTL:     2 * time.Hour,
+		ChatMaxSessions:    envInt("CHAT_MAX_SESSIONS", 1000),
 	}
 
 	if err := c.Validate(); err != nil {
@@ -362,8 +404,35 @@ func repoRoot() (string, bool) {
 	return "", false
 }
 
+// IsProduction reports whether this process is running as a real deployment.
+func (c *Config) IsProduction() bool {
+	return strings.EqualFold(strings.TrimSpace(c.Env), "production")
+}
+
+// UsingDevJWTSecret reports whether the signing key is still the built-in
+// development constant. main logs a warning for this outside production.
+func (c *Config) UsingDevJWTSecret() bool { return c.JWTSecret == DevJWTSecret }
+
 // Validate checks the invariants config.py documents but never enforces.
 func (c *Config) Validate() error {
+	// A forgeable signing key is not a degraded mode the way a missing GEE or
+	// Firebase credential is — it is an open door — so production refuses to
+	// start rather than serving with it. Dev and test keep the default so the
+	// offline suite needs no environment at all.
+	if c.IsProduction() {
+		switch {
+		case strings.TrimSpace(c.JWTSecret) == "":
+			return fmt.Errorf("JWT_SECRET_KEY must be set when FLASK_ENV=production")
+		case c.UsingDevJWTSecret():
+			return fmt.Errorf(
+				"JWT_SECRET_KEY is still the built-in development value; set a real secret when FLASK_ENV=production")
+		case len(c.JWTSecret) < minProdJWTSecretLen:
+			return fmt.Errorf(
+				"JWT_SECRET_KEY must be at least %d characters when FLASK_ENV=production, got %d",
+				minProdJWTSecretLen, len(c.JWTSecret))
+		}
+	}
+
 	var sum float64
 	for _, w := range c.CVIWeights {
 		sum += w
@@ -415,6 +484,39 @@ func envInt(key string, def int) int {
 		}
 	}
 	return def
+}
+
+// envBool accepts the spellings python-dotenv users actually write.
+func envBool(key string, def bool) bool {
+	if v, ok := os.LookupEnv(key); ok {
+		switch strings.ToLower(strings.TrimSpace(v)) {
+		case "1", "true", "yes", "on":
+			return true
+		case "0", "false", "no", "off":
+			return false
+		}
+	}
+	return def
+}
+
+// envList splits a comma-separated variable, dropping blanks. An unset or
+// all-blank value falls back to def rather than yielding an empty allow-list,
+// because an empty CORS origin list would silently break every browser client.
+func envList(key string, def []string) []string {
+	v, ok := os.LookupEnv(key)
+	if !ok {
+		return def
+	}
+	out := []string{}
+	for _, part := range strings.Split(v, ",") {
+		if s := strings.TrimSpace(part); s != "" {
+			out = append(out, s)
+		}
+	}
+	if len(out) == 0 {
+		return def
+	}
+	return out
 }
 
 func envFloat(key string, def float64) float64 {
