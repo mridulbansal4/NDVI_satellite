@@ -215,7 +215,7 @@ func NewSession(ctx context.Context, cfg *config.Config) (*Session, error) {
 
 	if ts, err := serviceAccountTokenSource(ctx, cfg.GEEServiceAccountKey); err == nil {
 		return &Session{
-			HTTP:      oauth2.NewClient(ctx, ts),
+			HTTP:      oauth2.NewClient(clientContext(), ts),
 			ProjectID: cfg.GEEProjectID,
 			Source:    "service-account",
 		}, nil
@@ -233,13 +233,42 @@ func NewSession(ctx context.Context, cfg *config.Config) (*Session, error) {
 				"`earthengine authenticate` once: %w", err)
 	}
 	return &Session{
-		HTTP:      oauth2.NewClient(ctx, ts),
+		HTTP:      oauth2.NewClient(clientContext(), ts),
 		ProjectID: cfg.GEEProjectID,
 		Source:    "user-credentials",
 	}, nil
 }
 
+// clientContext returns the context the OAuth machinery uses for the LIFETIME
+// of the session, which is deliberately NOT the caller's context.
+//
+// THREE places capture a context and reuse it for every future token refresh:
+// oauth2.NewClient, google.CredentialsFromJSON's TokenSource, and
+// oauth2.Config.TokenSource. All three must get a long-lived context; fixing
+// only NewClient is not enough, because the token source refreshes first. The caller here is a startup probe running under a
+// 60-second timeout with `defer cancel()`, so passing that context through
+// means the client's context is cancelled the moment startup finishes. The
+// initial access token keeps working for about an hour, and then every refresh
+// fails with
+//
+//	Post "https://oauth2.googleapis.com/token": context canceled
+//
+// and Earth Engine access is lost until the process restarts. That is exactly
+// what happened in testing: the server was fine for two hours of manual use and
+// then started answering 500 on /api/analyze.
+//
+// The caller's context still bounds credential DISCOVERY (reading the key file,
+// ADC lookup) and every individual API call — Client.post derives its request
+// from the request context, so a client disconnect still cancels in-flight work
+// per §13.3. Only the refresh loop is detached.
+func clientContext() context.Context { return context.Background() }
+
+// serviceAccountTokenSource loads a service-account key.
+//
+// ctx is accepted for symmetry and future use but deliberately NOT handed to
+// the TokenSource — see clientContext for why that would break refreshes.
 func serviceAccountTokenSource(ctx context.Context, path string) (oauth2.TokenSource, error) {
+	_ = ctx
 	if path == "" {
 		return nil, os.ErrNotExist
 	}
@@ -252,8 +281,10 @@ func serviceAccountTokenSource(ctx context.Context, path string) (oauth2.TokenSo
 	// path is operator-supplied configuration (GEE_SERVICE_ACCOUNT_KEY) on the
 	// server's own filesystem, not attacker-controlled input, so the risk the
 	// deprecation describes does not apply.
+	// clientContext(), not ctx: the TokenSource this returns captures the
+	// context and reuses it for every refresh. See clientContext.
 	//lint:ignore SA1019 operator-supplied key path, not untrusted input
-	creds, err := google.CredentialsFromJSON(ctx, data, scopes...)
+	creds, err := google.CredentialsFromJSON(clientContext(), data, scopes...)
 	if err != nil {
 		return nil, err
 	}
@@ -264,6 +295,7 @@ func serviceAccountTokenSource(ctx context.Context, path string) (oauth2.TokenSo
 // `earthengine authenticate`. Developer convenience only — production must use
 // a service account.
 func userCredentialsTokenSource(ctx context.Context, override string) (oauth2.TokenSource, error) {
+	_ = ctx // see clientContext: the refresh loop must outlive the caller
 	path := override
 	if path == "" {
 		home, err := os.UserHomeDir()
@@ -296,7 +328,9 @@ func userCredentialsTokenSource(ctx context.Context, override string) (oauth2.To
 		Endpoint:     google.Endpoint,
 		Scopes:       scopes,
 	}
-	return oauthCfg.TokenSource(ctx, &oauth2.Token{RefreshToken: c.RefreshToken}), nil
+	// clientContext(), not ctx: TokenSource captures the context and reuses it
+	// for every refresh. See clientContext.
+	return oauthCfg.TokenSource(clientContext(), &oauth2.Token{RefreshToken: c.RefreshToken}), nil
 }
 
 func expandHome(p string) string {

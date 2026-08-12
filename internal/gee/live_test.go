@@ -205,3 +205,52 @@ func itoa(n int) string {
 	}
 	return string(buf[i:])
 }
+
+// TestLiveSessionSurvivesCallerContextCancellation is a regression test for a
+// bug that only showed up after the server had been running for about an hour.
+//
+// oauth2.NewClient stores the context it is given and reuses it for every token
+// refresh. cmd/server builds its session inside a startup probe bounded by a
+// 60-second timeout with `defer cancel()`, so passing that context through left
+// the client permanently cancelled once startup finished. The initial access
+// token kept working, and then every refresh failed with
+//
+//	Post "https://oauth2.googleapis.com/token": context canceled
+//
+// losing Earth Engine access until the process restarted. It was invisible to
+// every test that ran within the first hour of a fresh server, and was only
+// caught by leaving the backend up and driving it from the frontend.
+//
+// Here the caller's context is cancelled immediately after the session is
+// built, then a real API call is made with a fresh context. Before the fix this
+// fails; after it, the refresh loop is detached and the call succeeds.
+func TestLiveSessionSurvivesCallerContextCancellation(t *testing.T) {
+	if os.Getenv("GEE_LIVE_TEST") != "1" {
+		t.Skip("set GEE_LIVE_TEST=1 to run live Earth Engine tests")
+	}
+	cfg, err := config.Load()
+	if err != nil {
+		t.Fatalf("config: %v", err)
+	}
+
+	// Mirror cmd/server: a short-lived, cancellable startup context.
+	startupCtx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
+	sess, err := gee.NewSession(startupCtx, cfg)
+	if err != nil {
+		t.Fatalf("session: %v", err)
+	}
+	cancel() // startup finishes — this must NOT disable the session
+
+	client := sess.NewClient()
+	callCtx, callCancel := context.WithTimeout(context.Background(), 60*time.Second)
+	defer callCancel()
+
+	var got float64
+	if err := client.ComputeValueNode(callCtx, eeexpr.Const(1), &got); err != nil {
+		t.Fatalf("call after the caller's context was cancelled: %v\n"+
+			"the session must not capture a cancellable caller context", err)
+	}
+	if got != 1 {
+		t.Errorf("probe returned %v, want 1", got)
+	}
+}
