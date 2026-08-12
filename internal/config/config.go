@@ -105,12 +105,25 @@ type Config struct {
 	OllamaTemperature float64
 	OllamaMaxTokens   int
 	ChatbotMaxHistory int
-	SMSUsername       string
-	SMSPassword       string
-	SMSFrom           string
-	SMSDLTContentID   string
-	SMSDLTPEID        string
-	OTPExpiry         time.Duration
+
+	// ── Gemini (chatbot backend) ────────────────────────────────────────
+	// GeminiAPIKey selects the backend: when it is set the chatbot talks to
+	// Gemini, otherwise it falls back to the local Ollama server. That keeps a
+	// developer without a key working, and makes the switch a config change
+	// rather than a rebuild.
+	GeminiAPIKey  string
+	GeminiModel   string
+	GeminiBaseURL string
+	// GeminiThinkingBudget caps the tokens the 2.5 "thinking" models may spend
+	// reasoning before answering. 0 disables thinking entirely — see
+	// internal/gemini for why that default matters.
+	GeminiThinkingBudget int
+	SMSUsername          string
+	SMSPassword          string
+	SMSFrom              string
+	SMSDLTContentID      string
+	SMSDLTPEID           string
+	OTPExpiry            time.Duration
 
 	// ── Expression cache (new, §7.7) ────────────────────────────────────
 	ExprCacheTTL        time.Duration
@@ -276,12 +289,20 @@ func Load(envFiles ...string) (*Config, error) {
 		OllamaTemperature: envFloat("OLLAMA_TEMPERATURE", 0.7),
 		OllamaMaxTokens:   envInt("OLLAMA_MAX_TOKENS", 512),
 		ChatbotMaxHistory: envInt("CHATBOT_MAX_HISTORY", 20),
-		SMSUsername:       envStr("SMS_USERNAME", ""),
-		SMSPassword:       envStr("SMS_PASSWORD", ""),
-		SMSFrom:           envStr("SMS_FROM", ""),
-		SMSDLTContentID:   envStr("SMS_DLT_CONTENT_ID", ""),
-		SMSDLTPEID:        envStr("SMS_DLT_PE_ID", ""),
-		OTPExpiry:         600 * time.Second,
+
+		GeminiAPIKey:  envStr("GEMINI_API_KEY", ""),
+		GeminiModel:   envStr("GEMINI_MODEL", "gemini-2.5-flash"),
+		GeminiBaseURL: envStr("GEMINI_BASE_URL", "https://generativelanguage.googleapis.com/v1beta"),
+		// Thinking off by default: the token budget is shared between reasoning
+		// and the reply, and 512 tokens of budget can be consumed entirely by
+		// thinking, returning an empty answer.
+		GeminiThinkingBudget: envInt("GEMINI_THINKING_BUDGET", 0),
+		SMSUsername:          envStr("SMS_USERNAME", ""),
+		SMSPassword:          envStr("SMS_PASSWORD", ""),
+		SMSFrom:              envStr("SMS_FROM", ""),
+		SMSDLTContentID:      envStr("SMS_DLT_CONTENT_ID", ""),
+		SMSDLTPEID:           envStr("SMS_DLT_PE_ID", ""),
+		OTPExpiry:            600 * time.Second,
 
 		ExprCacheTTL:        30 * time.Minute,
 		ExprCacheMaxEntries: 256,

@@ -19,6 +19,7 @@ import (
 
 	"github.com/SanTiwari07/NDVI_satellite/internal/chatbot"
 	"github.com/SanTiwari07/NDVI_satellite/internal/firebase"
+	"github.com/SanTiwari07/NDVI_satellite/internal/gemini"
 	"github.com/SanTiwari07/NDVI_satellite/internal/httpapi/middleware"
 	"github.com/SanTiwari07/NDVI_satellite/internal/ollama"
 	"github.com/SanTiwari07/NDVI_satellite/internal/service"
@@ -384,15 +385,10 @@ func (s *Server) chat(c *gin.Context) {
 	// History is fetched BEFORE the new user message is appended (§10.11).
 	history := s.deps.Memory.History(sessionID)
 
-	reply, err := s.deps.Ollama.Chat(c.Request.Context(), systemPrompt,
-		toOllamaMessages(history), message)
+	reply, err := s.generateReply(c, systemPrompt, history, message)
 	if err != nil {
-		msg := ollama.UnreachableMessage
-		if !errors.Is(err, ollama.ErrUnreachable) {
-			msg = err.Error()
-		}
 		s.log.Warn("[session=" + short(sessionID) + "] Chain error: " + err.Error())
-		c.JSON(http.StatusBadGateway, gin.H{"error": msg, "session_id": sessionID})
+		c.JSON(http.StatusBadGateway, gin.H{"error": unreachableMessage(s, err), "session_id": sessionID})
 		return
 	}
 
@@ -416,15 +412,65 @@ func (s *Server) chatReset(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"ok": true, "session_id": sessionID})
 }
 
+// chatHealth reports the model backend actually in use.
+//
+// The response KEEPS its three keys — status, model, base_url — because the
+// frontend reads them; only the values change when Gemini is configured.
 func (s *Server) chatHealth(c *gin.Context) {
+	model, baseURL := s.deps.Cfg.OllamaModel, s.deps.Cfg.OllamaBaseURL
+	if s.deps.Gemini.Enabled() {
+		model, baseURL = s.deps.Cfg.GeminiModel, s.deps.Cfg.GeminiBaseURL
+	}
 	c.JSON(http.StatusOK, gin.H{
 		"status":   "ok",
-		"model":    s.deps.Cfg.OllamaModel,
-		"base_url": s.deps.Cfg.OllamaBaseURL,
+		"model":    model,
+		"base_url": baseURL,
 	})
 }
 
 // ── helpers ─────────────────────────────────────────────────────────────────
+
+// generateReply dispatches to whichever model backend is configured.
+//
+// Gemini wins when GEMINI_API_KEY is set; otherwise the local Ollama server is
+// used. Both take the same arguments and return a trimmed reply, so the calling
+// handler — and the response contract — is unchanged either way.
+func (s *Server) generateReply(
+	c *gin.Context, systemPrompt string, history []chatbot.Message, message string,
+) (string, error) {
+	if s.deps.Gemini.Enabled() {
+		return s.deps.Gemini.Chat(c.Request.Context(), systemPrompt,
+			toGeminiMessages(history), message)
+	}
+	return s.deps.Ollama.Chat(c.Request.Context(), systemPrompt,
+		toOllamaMessages(history), message)
+}
+
+// unreachableMessage maps a backend failure onto the user-facing text.
+//
+// A transport failure becomes the generic "could not reach" wording; anything
+// else (an empty generation, a safety refusal) is already user-facing and is
+// passed through as-is.
+func unreachableMessage(s *Server, err error) string {
+	if s.deps.Gemini.Enabled() {
+		if errors.Is(err, gemini.ErrUnreachable) {
+			return gemini.UnreachableMessage
+		}
+		return err.Error()
+	}
+	if errors.Is(err, ollama.ErrUnreachable) {
+		return ollama.UnreachableMessage
+	}
+	return err.Error()
+}
+
+func toGeminiMessages(in []chatbot.Message) []gemini.Message {
+	out := make([]gemini.Message, len(in))
+	for i, m := range in {
+		out[i] = gemini.Message{Role: m.Role, Content: m.Content}
+	}
+	return out
+}
 
 // decodeWithNumbers unmarshals preserving numeric literals.
 func decodeWithNumbers(raw json.RawMessage, dst any) error {

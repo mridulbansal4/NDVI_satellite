@@ -96,6 +96,15 @@ var environmentDependent = map[string]string{
 	"e15_pincode_success":  "K11 — golden captured a UA-blocked 500",
 	"e15_pincode_notfound": "K11 — golden captured a UA-blocked 500",
 	"e14_location_success": "K11 — Python stores empty state/district/taluka, Go resolves them",
+
+	// The chatbot backend was deliberately moved from a local Ollama runtime to
+	// Google Gemini after the migration. /chatbot/health reports whichever
+	// backend is configured, so its model and base_url no longer match a golden
+	// captured against Ollama. The response SHAPE — status, model, base_url —
+	// is unchanged, which is what the frontend reads, and is asserted by
+	// internal/httpapi.TestChatHealthReportsConfiguredBackend.
+	"e24_chatbot_health": "chatbot backend moved from Ollama to Gemini; " +
+		"model/base_url now name the configured backend",
 }
 
 // coldStartOnly cases depend on the server having just booted. They cannot be

@@ -13,7 +13,7 @@
 <img src="https://img.shields.io/badge/Google_Earth_Engine-API-4285F4?style=flat-square&logo=google&logoColor=white"/>
 <img src="https://img.shields.io/badge/Firebase-Auth_%26_Firestore-FFCA28?style=flat-square&logo=firebase&logoColor=black"/>
 <img src="https://img.shields.io/badge/PostgreSQL_%2B_PostGIS-16-4169E1?style=flat-square&logo=postgresql&logoColor=white"/>
-<img src="https://img.shields.io/badge/Ollama-llama3.2-00A67E?style=flat-square"/>
+<img src="https://img.shields.io/badge/Gemini-2.5_Flash-4285F4?style=flat-square&logo=google&logoColor=white"/>
 
 <br/><br/>
 
@@ -55,7 +55,7 @@ Small and medium-scale farmers lack access to affordable, real-time satellite cr
 | REST API | Go + Gin, Earth Engine REST API | Satellite imagery processing pipeline |
 | Optical Pipeline | Sentinel-2 SR (COPERNICUS/S2_SR_HARMONIZED) | Cloud-free vegetation index heatmaps at 10m |
 | Radar Pipeline | Sentinel-1 GRD (COPERNICUS/S1_GRD) | Cloud-penetrating soil moisture and vegetation maps |
-| AI Assistant | Ollama (llama3.2), called directly over HTTP | Grounded agronomy Q&A on live farm data |
+| AI Assistant | Google Gemini (Ollama fallback), called directly over HTTP | Grounded agronomy Q&A on live farm data |
 | Authentication | Firebase Phone OTP + JWT | Secure, mobile-first farmer login |
 | Database | PostgreSQL + PostGIS | Persistent farmer, farm, and crop data |
 
@@ -195,15 +195,17 @@ All features listed are implemented and verified in the current codebase.
 
 <div align="center">
 
-![Ollama](https://img.shields.io/badge/Ollama_llama3.2-Local_LLM-00A67E?style=flat-square)
+![Gemini](https://img.shields.io/badge/Gemini_2.5_Flash-Hosted_LLM-4285F4?style=flat-square&logo=google&logoColor=white)
+![Ollama](https://img.shields.io/badge/Ollama_llama3.2-Local_fallback-00A67E?style=flat-square)
 ![Go](https://img.shields.io/badge/net%2Fhttp-Direct_Ollama_API-00ADD8?style=flat-square&logo=go&logoColor=white)
 
 </div>
 
 | Technology | Role |
 |---|---|
-| Ollama (llama3.2) | Local LLM runtime — no external API dependency |
-| `internal/ollama` | Direct HTTP client for `/api/chat`. LangChain was dropped in the Go port: the chain was a system prompt plus history plus one user turn, which is a short HTTP client. |
+| Google Gemini (`gemini-2.5-flash`) | Hosted LLM, selected by setting `GEMINI_API_KEY` |
+| Ollama (llama3.2) | Local LLM runtime, used when no Gemini key is configured — no external API dependency |
+| `internal/gemini`, `internal/ollama` | Direct HTTP clients, interchangeable behind one interface. LangChain was dropped in the Go port: the chain was a system prompt plus history plus one user turn, which is a short HTTP client. |
 | `internal/chatbot` | Per-session conversation memory and the system-prompt template, rebuilt per request from the current field's live statistics |
 
 ---

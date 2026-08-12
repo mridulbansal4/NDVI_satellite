@@ -38,6 +38,12 @@ Python one because of an issue below, the Go response is wrong.
 | K14 | `POST /farm` returns `total_area` as the **string** `"2.50"`, while `GET /dashboard` returns the same column as the **number** `2.5`. psycopg2 maps NUMERIC to `Decimal`, which Flask serialises as a string; `services/dashboard.py` explicitly calls `float()`. | `repositories/farm.py` vs `services/dashboard.py` | Both reproduced. PRD §10.10's "emit 2.5, not '2.50'" applies to the dashboard ONLY; applying it everywhere breaks `POST /farm`. |
 | K15 | `POST /crop` returns `sowing_date` as **RFC 1123** (`"Sun, 15 Jun 2025 00:00:00 GMT"`), while `GET /dashboard` returns `"2025-06-15"`. Flask renders a raw `date` the first way; the dashboard calls `str()`. | `repositories/crop.py` vs `services/dashboard.py` | Both reproduced, same asymmetry as K14. |
 
+## Post-migration changes (deliberate, not parity issues)
+
+| Change | Detail |
+|---|---|
+| Chatbot backend: Ollama → **Google Gemini** | `GEMINI_API_KEY` selects the backend; with it unset the local Ollama path still works, so a developer without a key is unaffected. `/chatbot/health` keeps its three keys (`status`, `model`, `base_url`) and only the values change, which is why `e24_chatbot_health` is skipped by the contract runner and covered by `TestChatHealthReportsConfiguredBackend` instead. Two API-shape differences worth knowing: Gemini has no `system` role (the prompt goes in `system_instruction`, or the model would treat the farm statistics as user speech), and the assistant role is called `model`. On the 2.5 models `thinkingBudget` is set to 0 by default because reasoning tokens share the `maxOutputTokens` allowance — leaving it on can consume the whole 512-token budget and return an empty reply. |
+
 ## Verified PRD corrections
 
 Captured empirically in Phase 0; the fixtures under `internal/gee/eeexpr/testdata/`

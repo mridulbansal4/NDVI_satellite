@@ -324,3 +324,66 @@ func TestRouteTableIsComplete(t *testing.T) {
 }
 
 var _ = slog.LevelInfo
+
+// TestChatHealthReportsConfiguredBackend pins §10.11's /chatbot/health shape
+// across the Ollama → Gemini switch.
+//
+// The three keys are what the frontend reads, so they must not change; only
+// their VALUES track whichever backend is configured. The contract golden was
+// captured against Ollama and is skipped for this case, which is why the shape
+// is asserted here instead.
+func TestChatHealthReportsConfiguredBackend(t *testing.T) {
+	t.Run("ollama when no Gemini key", func(t *testing.T) {
+		h, _, _ := newTestServer(t)
+		code, body := do(t, h, "GET", "/chatbot/health", "")
+		if code != http.StatusOK {
+			t.Fatalf("status %d, want 200", code)
+		}
+		assertHealthShape(t, body)
+		if body["model"] != "llama3" || body["base_url"] != "http://127.0.0.1:11434" {
+			t.Errorf("expected the Ollama values, got %v / %v", body["model"], body["base_url"])
+		}
+	})
+
+	t.Run("gemini when a key is set", func(t *testing.T) {
+		cfg, err := config.Load("\x00nonexistent")
+		if err != nil {
+			t.Fatal(err)
+		}
+		cfg.GeminiAPIKey = "test-key"
+		cfg.GeminiModel = "gemini-2.5-flash"
+		cfg.GeminiBaseURL = "https://generativelanguage.googleapis.com/v1beta"
+		h := New(Deps{Cfg: cfg, Log: logging.New("ERROR", "")})
+
+		req := httptest.NewRequest("GET", "/chatbot/health", nil)
+		w := httptest.NewRecorder()
+		h.ServeHTTP(w, req)
+
+		var body map[string]any
+		if err := json.Unmarshal(w.Body.Bytes(), &body); err != nil {
+			t.Fatal(err)
+		}
+		assertHealthShape(t, body)
+		if body["model"] != "gemini-2.5-flash" {
+			t.Errorf("model = %v, want gemini-2.5-flash", body["model"])
+		}
+		if body["base_url"] != "https://generativelanguage.googleapis.com/v1beta" {
+			t.Errorf("base_url = %v", body["base_url"])
+		}
+	})
+}
+
+func assertHealthShape(t *testing.T, body map[string]any) {
+	t.Helper()
+	keys := make([]string, 0, len(body))
+	for k := range body {
+		keys = append(keys, k)
+	}
+	sort.Strings(keys)
+	if strings.Join(keys, ",") != "base_url,model,status" {
+		t.Errorf("keys = %v, want [base_url model status]", keys)
+	}
+	if body["status"] != "ok" {
+		t.Errorf("status = %v, want ok", body["status"])
+	}
+}

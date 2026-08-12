@@ -15,6 +15,7 @@ import (
 	"github.com/SanTiwari07/NDVI_satellite/internal/chatbot"
 	"github.com/SanTiwari07/NDVI_satellite/internal/config"
 	"github.com/SanTiwari07/NDVI_satellite/internal/firebase"
+	"github.com/SanTiwari07/NDVI_satellite/internal/gemini"
 	"github.com/SanTiwari07/NDVI_satellite/internal/httpapi/middleware"
 	"github.com/SanTiwari07/NDVI_satellite/internal/logging"
 	"github.com/SanTiwari07/NDVI_satellite/internal/ollama"
@@ -42,9 +43,14 @@ type Deps struct {
 	// analysis routes answer 503 before ever dereferencing it.
 	Analyzer *pipeline.Analyzer
 
-	// Memory and Ollama back the chatbot. Both are always non-nil; an
-	// unreachable Ollama surfaces as the 502 the Python emits, not a panic.
+	// Memory, Gemini and Ollama back the chatbot. All are non-nil; an
+	// unreachable model surfaces as a 502, not a panic.
+	//
+	// Gemini is preferred when GEMINI_API_KEY is set, otherwise the local
+	// Ollama server is used. Keeping both means a developer without a key still
+	// has a working chatbot, and switching back is a config change.
 	Memory *chatbot.Memory
+	Gemini *gemini.Client
 	Ollama *ollama.Client
 
 	// Onboarding is nil when DATABASE_URL is unset, in which case every route
@@ -80,6 +86,11 @@ func New(d Deps) *gin.Engine {
 	if d.Ollama == nil {
 		d.Ollama = ollama.New(d.Cfg.OllamaBaseURL, d.Cfg.OllamaModel,
 			d.Cfg.OllamaTemperature, d.Cfg.OllamaMaxTokens)
+	}
+	if d.Gemini == nil {
+		d.Gemini = gemini.New(d.Cfg.GeminiAPIKey, d.Cfg.GeminiModel,
+			d.Cfg.GeminiBaseURL, d.Cfg.OllamaTemperature, d.Cfg.OllamaMaxTokens,
+			d.Cfg.GeminiThinkingBudget)
 	}
 	if d.PinAPI == nil {
 		d.PinAPI = service.NewPinCodeClient()
