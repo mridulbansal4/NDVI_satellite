@@ -4,6 +4,39 @@ All notable changes to the MindstriX Satellite Agronomy Intelligence Platform do
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## Unreleased — after the cutover
+
+### Chatbot backend: Ollama → Google Gemini
+
+`internal/gemini` is a direct client for the `generateContent` API, interchangeable
+with `internal/ollama` behind a single call site. `GEMINI_API_KEY` selects the
+backend; with it unset the local Ollama path still works, so switching back is a
+config change rather than a rebuild. `/chatbot/health` keeps its three keys and
+only reports whichever backend is configured. Details and the Gemini-specific
+API gotchas are in [KNOWN_ISSUES.md](KNOWN_ISSUES.md).
+
+### Earth Engine session lifetime
+
+The OAuth token source captured the 60 s startup context and reused it for every
+later refresh, so Earth Engine calls began failing with `context canceled` about
+an hour after startup. Three separate call sites captured a context; all three
+now use `context.Background()`. Covered by a live regression test that cancels
+the caller context and then makes a real call.
+
+### Two frontend strings (the only sanctioned edit to `frontend/`)
+
+The freeze in `CLAUDE.md` still stands — these were changed on an explicit owner
+decision, and neither touches the HTTP contract, component structure or CSS:
+
+- The Krishi Mitra badge showed **"Connecting"** when no field was selected,
+  which is indistinguishable from a failing backend. With no field there is
+  nothing to connect *for*, so that state now reads **"No field selected"**.
+  The status values and their CSS classes are unchanged.
+- The connection-failure message told the user to "make sure the **local AI
+  service** is running" — stale wording once the backend became hosted Gemini.
+  It now names the backend server and the AI service without assuming either is
+  local.
+
 ## v2.0.0-go — Project Pragya: Python → Go backend migration
 
 **Released.** `legacy-python/` deleted; the Go backend is the implementation.

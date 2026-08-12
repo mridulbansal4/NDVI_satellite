@@ -211,7 +211,7 @@ export default function KrishiMitraPanel({ analysisData, activeField }) {
         setMessages([{
           id:        Date.now(),
           role:      'assistant',
-          content:   'Could not connect to the farm analysis engine. Please make sure the local AI service is running.',
+          content:   'Could not reach the farm analysis engine. Please check that the backend server is running and that the AI service is configured.',
           timestamp: new Date(),
         }]);
       } finally {
@@ -282,8 +282,11 @@ export default function KrishiMitraPanel({ analysisData, activeField }) {
         <div className={`km-status-badge km-status-badge--${ollamaStatus}`}>
           <span className="km-status-dot" />
           <span className="km-status-label">
-            {ollamaStatus === 'connecting' ? 'Connecting'
-              : ollamaStatus === 'live'    ? 'Live'
+            {/* With no field there is nothing to connect *for* — saying
+                "Connecting" here reads as a failing backend. */}
+            {!activeContext                  ? 'No field selected'
+              : ollamaStatus === 'connecting' ? 'Connecting'
+              : ollamaStatus === 'live'       ? 'Live'
               : 'Offline'}
           </span>
         </div>
