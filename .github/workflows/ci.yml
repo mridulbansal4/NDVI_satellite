@@ -53,7 +53,7 @@ jobs:
 
       - name: staticcheck
         run: |
-          go install honnef.co/go/tools/cmd/staticcheck@latest
+          GOTOOLCHAIN=auto go install honnef.co/go/tools/cmd/staticcheck@latest
           staticcheck $GO_PKGS
 
       - name: go test -race
@@ -74,7 +74,7 @@ jobs:
           cache-dependency-path: go.sum
       - name: govulncheck
         run: |
-          go install golang.org/x/vuln/cmd/govulncheck@latest
+          GOTOOLCHAIN=auto go install golang.org/x/vuln/cmd/govulncheck@latest
           govulncheck $GO_PKGS
 
   frontend:
@@ -104,7 +104,7 @@ jobs:
         run: npm run build
 
       - name: Upload build
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: frontend-dist
           path: frontend/dist
