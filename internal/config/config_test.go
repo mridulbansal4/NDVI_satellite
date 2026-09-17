@@ -70,8 +70,10 @@ func TestCVIWeights(t *testing.T) {
 		}
 		sum += c.CVIWeights[k]
 	}
-	if sum != 1.0 {
-		t.Errorf("CVI weights sum to %v, want exactly 1.0", sum)
+	// Map iteration order is random and float addition is not associative, so
+	// the sum can land on 0.9999999999999999. Same tolerance as Validate().
+	if diff := sum - 1.0; diff > 1e-9 || diff < -1e-9 {
+		t.Errorf("CVI weights sum to %v, want 1.0", sum)
 	}
 	if _, ok := c.CVIWeights["NDWI"]; ok {
 		t.Error("NDWI must not carry a CVI weight")
