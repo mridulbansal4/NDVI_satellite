@@ -1,9 +1,9 @@
 # CI — runs on every pull request and every push to main.
 #
-# Blocking: go vet, staticcheck, go test -race, backend build, frontend build,
-# Docker image build.
-# Informational (never fails the run): govulncheck, frontend eslint. Both have
-# known findings on main today; flip `continue-on-error` off once they are clean.
+# Blocking: go mod tidy, go vet, staticcheck, go test -race, govulncheck,
+# backend build, frontend build, Docker image build.
+# Informational: frontend eslint (21 known errors in the legacy frontend, which
+# is due to be replaced; see docs/TEAM_WORK_DIVISION.md).
 #
 # Not run here: `make contract` and the live Earth Engine tests. Both need a
 # running server with real GEE credentials, which CI does not have.
@@ -36,9 +36,9 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
-      - uses: actions/setup-go@v5
+      - uses: actions/setup-go@v6
         with:
           go-version: ${{ env.GO_VERSION }}
           cache-dependency-path: go.sum
@@ -66,10 +66,9 @@ jobs:
     name: Go vulnerability scan
     runs-on: ubuntu-latest
     timeout-minutes: 15
-    continue-on-error: true
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-go@v5
+      - uses: actions/checkout@v5
+      - uses: actions/setup-go@v6
         with:
           go-version: ${{ env.GO_VERSION }}
           cache-dependency-path: go.sum
@@ -86,9 +85,9 @@ jobs:
       run:
         working-directory: frontend
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v5
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: npm
@@ -105,7 +104,7 @@ jobs:
         run: npm run build
 
       - name: Upload build
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: frontend-dist
           path: frontend/dist
@@ -117,7 +116,7 @@ jobs:
     timeout-minutes: 20
     needs: backend
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - uses: docker/setup-buildx-action@v3
       - name: Build image (no push)
         uses: docker/build-push-action@v6
